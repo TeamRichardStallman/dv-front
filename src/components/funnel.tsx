@@ -1,58 +1,54 @@
 "use client";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, {
+  Children,
+  isValidElement,
+  ReactElement,
+  ReactNode,
+  useEffect,
+} from "react";
 
-interface FunnelProps {
-  initialStep: number;
+export type NonEmptyArray<T> = [T, ...T[]];
+export type StepsType = Readonly<NonEmptyArray<string>>;
+
+export interface FunnelProps<Steps extends StepsType> {
+  steps: Steps;
+  step: Steps[number];
+  children:
+    | Array<ReactElement<StepProps<Steps>>>
+    | ReactElement<StepProps<Steps>>;
 }
 
-const Funnel = ({ initialStep }: FunnelProps) => {
-  // const router = useRouter();
-  const searchParams = useSearchParams();
-  const [currentStep, setCurrentStep] = useState(initialStep);
+export const Funnel = <Steps extends StepsType>({
+  steps,
+  step,
+  children,
+}: FunnelProps<Steps>) => {
+  const validChildren = Children.toArray(children)
+    .filter(isValidElement)
+    .filter((i) =>
+      steps.includes((i.props as Partial<StepProps<Steps>>).name ?? "")
+    ) as Array<ReactElement<StepProps<Steps>>>;
 
-  useEffect(() => {
-    const step = searchParams.get("step");
-    if (step) {
-      setCurrentStep(parseInt(step, 10) || initialStep);
-    }
-  }, [searchParams, initialStep]);
+  const targetStep = validChildren.find((child) => child.props.name === step);
 
-  // const handleNextStep = () => {
-  //   const nextStep = currentStep + 1;
-  //   router.push(`/interview?step=${nextStep}`);
-  // };
-
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <StepOne />;
-      case 2:
-        return <StepTwo />;
-      case 3:
-        return <StepThree />;
-      case 4:
-        return <StepFour />;
-      case 5:
-        return <StepFive />;
-      default:
-        return <StepOne />;
-    }
-  };
-
-  return (
-    <div>
-      <h1>Funnel Step {currentStep}</h1>
-      {renderStep()}
-      {/* <button onClick={handleNextStep}>다음 단계</button> */}
-    </div>
-  );
+  return <>{targetStep}</>;
 };
 
-const StepOne = () => <div>Step 1: 면접 유형</div>;
-const StepTwo = () => <div>Step 2: 면접 방식</div>;
-const StepThree = () => <div>Step 3: 직무 선택</div>;
-const StepFour = () => <div>Step 4: 자기소개서 입력</div>;
-const StepFive = () => <div>Step 5: 입력 정보 확인</div>;
+export interface StepProps<Steps extends StepsType> {
+  name: Steps[number];
+  onEnter?: () => void;
+  children: ReactNode;
+}
 
-export default Funnel;
+export const Step = <Steps extends StepsType>({
+  onEnter,
+  children,
+}: StepProps<Steps>) => {
+  useEffect(() => {
+    onEnter?.();
+  }, [onEnter]);
+
+  return <>{children}</>;
+};
+
+Funnel.Step = Step;

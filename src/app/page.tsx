@@ -14,7 +14,7 @@ export default function Home() {
         <Header />
         <main className="relative flex-1 flex flex-col items-center justify-center">
           <Link
-            href={"/interview/select"}
+            href={"/interview"}
             className="absolute bottom-14 px-6 py-3 bg-primary text-white rounded text-xl"
           >
             시작하기
