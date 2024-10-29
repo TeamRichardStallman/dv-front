@@ -48,7 +48,7 @@ export default function Header() {
           <li>
             <Link
               href="/login"
-              className="font-bold hover:text-secondary hover:underline"
+              className="font-bold hover:text-primary hover:underline"
             >
               로그인
             </Link>
