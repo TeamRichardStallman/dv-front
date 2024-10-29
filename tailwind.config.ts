@@ -1,3 +1,4 @@
+// tailwind.config.ts
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -13,8 +14,12 @@ const config: Config = {
         foreground: "var(--foreground)",
         primary: "var(--primary)",
       },
+      fontFamily: {
+        sans: ["Pretendard", "sans-serif"],
+      },
     },
   },
   plugins: [],
 };
+
 export default config;
