@@ -29,7 +29,7 @@ export default function SetupProgressBar({
               <div
                 className={`w-8 h-8 flex items-center justify-center rounded-full ${
                   index <= currentStepIndex
-                    ? "bg-primary text-white"
+                    ? "bg-secondary text-white"
                     : "bg-gray-300"
                 }`}
               >
@@ -43,7 +43,7 @@ export default function SetupProgressBar({
             {index < steps.length - 1 && (
               <div
                 className={`h-1 w-20 ${
-                  index < currentStepIndex ? "bg-primary" : "bg-gray-300"
+                  index < currentStepIndex ? "bg-secondary" : "bg-gray-300"
                 }`}
               ></div>
             )}

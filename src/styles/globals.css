@@ -5,14 +5,17 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --primary: #8deab3;
+  --primary: #154caf;
+  --secondary: #fabe41;
 }
 
+/* 다크버전 색상 */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
     --primary: #3b82f6;
+    --secondary: #ffaa05;
   }
 }
 
