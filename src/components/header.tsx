@@ -1,10 +1,19 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Header() {
   return (
     <header className="flex h-16 justify-between items-center px-8 border-b">
       <div>
-        <Link href="/">로고</Link>
+        <Link href="/">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={72.2}
+            height={40}
+            unoptimized
+          />
+        </Link>
       </div>
       <div>
         <ul className="flex gap-4">
