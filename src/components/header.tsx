@@ -16,24 +16,42 @@ export default function Header() {
         </Link>
       </div>
       <div>
-        <ul className="flex gap-4">
+        <ul className="flex gap-8">
           <li>
-            <Link href="/practice">면접연습</Link>
+            <Link
+              href="/practice"
+              className="font-bold hover:text-primary hover:underline"
+            >
+              면접연습
+            </Link>
           </li>
           <li>
-            <Link href="/community">커뮤니티</Link>
+            <Link
+              href="/community"
+              className="font-bold hover:text-primary hover:underline"
+            >
+              커뮤니티
+            </Link>
           </li>
           <li>
-            <Link href="/guide">가이드</Link>
+            <Link
+              href="/guide"
+              className="font-bold hover:text-primary hover:underline"
+            >
+              가이드
+            </Link>
           </li>
         </ul>
       </div>
       <div>
         <ul className="flex gap-4">
-          {/* <li>Point: 31,270</li> */}
           <li>
-            <Link href="/login">로그인</Link>
-            {/* <Link href="/user">내 정보</Link> */}
+            <Link
+              href="/login"
+              className="font-bold hover:text-secondary hover:underline"
+            >
+              로그인
+            </Link>
           </li>
         </ul>
       </div>
