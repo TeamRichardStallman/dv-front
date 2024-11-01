@@ -7,19 +7,24 @@ import CoverLetterStep from "./step/cover-letter-step";
 import CheckInfoStep from "./step/check-info-step";
 import { Funnel } from "../funnel";
 
+type StepType = "type" | "method" | "job" | "cover-letter" | "check-info";
+
 interface SetupFunnelProps {
   step: StepType;
   setStep: (step: StepType) => void;
+  interviewMode: "mock" | "real";
 }
 
-const SetupFunnel = ({ step, setStep }: SetupFunnelProps) => {
+const SetupFunnel = ({ step, setStep, interviewMode }: SetupFunnelProps) => {
   const router = useRouter();
 
+  const steps =
+    interviewMode === "mock"
+      ? (["type", "method", "job", "check-info"] as const)
+      : (["type", "method", "job", "cover-letter", "check-info"] as const);
+
   return (
-    <Funnel
-      steps={["type", "method", "job", "cover-letter", "check-info"]}
-      step={step}
-    >
+    <Funnel steps={steps} step={step}>
       <Funnel.Step name="type">
         <TypeStep
           onPrev={() => {
@@ -47,24 +52,26 @@ const SetupFunnel = ({ step, setStep }: SetupFunnelProps) => {
             setStep("method");
           }}
           onNext={() => {
-            setStep("cover-letter");
+            setStep(interviewMode === "mock" ? "check-info" : "cover-letter");
           }}
         />
       </Funnel.Step>
       <Funnel.Step name="cover-letter">
-        <CoverLetterStep
-          onPrev={() => {
-            setStep("job");
-          }}
-          onNext={() => {
-            setStep("check-info");
-          }}
-        />
+        {interviewMode === "real" && (
+          <CoverLetterStep
+            onPrev={() => {
+              setStep("job");
+            }}
+            onNext={() => {
+              setStep("check-info");
+            }}
+          />
+        )}
       </Funnel.Step>
       <Funnel.Step name="check-info">
         <CheckInfoStep
           onPrev={() => {
-            setStep("cover-letter");
+            setStep(interviewMode === "mock" ? "job" : "cover-letter");
           }}
           onNext={() => {
             setStep("check-info");
