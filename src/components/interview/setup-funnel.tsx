@@ -57,16 +57,14 @@ const SetupFunnel = ({ step, setStep, interviewMode }: SetupFunnelProps) => {
         />
       </Funnel.Step>
       <Funnel.Step name="cover-letter">
-        {interviewMode === "real" && (
-          <CoverLetterStep
-            onPrev={() => {
-              setStep("job");
-            }}
-            onNext={() => {
-              setStep("check-info");
-            }}
-          />
-        )}
+        <CoverLetterStep
+          onPrev={() => {
+            setStep("job");
+          }}
+          onNext={() => {
+            setStep("check-info");
+          }}
+        />
       </Funnel.Step>
       <Funnel.Step name="check-info">
         <CheckInfoStep
