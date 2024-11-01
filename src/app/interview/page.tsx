@@ -5,10 +5,10 @@ const InterviewPage = () => {
   return (
     <div>
       <div className="flex gap-4">
-        <Link href={"/interview/setup"} className="border px-4 py-2">
+        <Link href={"/interview/setup?type=mock"} className="border px-4 py-2">
           모의면접
         </Link>
-        <Link href={"/interview/setup"} className="border px-4 py-2">
+        <Link href={"/interview/setup?type=real"} className="border px-4 py-2">
           실전면접
         </Link>
       </div>

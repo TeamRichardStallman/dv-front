@@ -11,7 +11,7 @@ const TypeStep = ({ onPrev, onNext }: StepProps) => {
       <NavButtons
         onPrev={onPrev}
         onNext={onNext}
-        prevButtonText="홈으로"
+        prevButtonText="이전"
         nextButtonText="다음"
       />
     </>
