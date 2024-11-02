@@ -6,6 +6,17 @@ import SetupProgressBar from "@/components/interview/setup-progress-bar";
 
 type StepType = "type" | "method" | "job" | "cover-letter" | "check-info";
 
+const getStepLabel = (step: StepType) => {
+  const labels: Record<StepType, string> = {
+    type: "면접 유형 선택",
+    method: "면접 방식 선택",
+    job: "직무 선택",
+    "cover-letter": "자기소개서 입력",
+    "check-info": "입력 정보 확인",
+  };
+  return labels[step];
+};
+
 const InterviewSetupPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -33,6 +44,9 @@ const InterviewSetupPage = () => {
 
   return (
     <>
+      <div className="text-center text-lg font-semibold mb-4">
+        {getStepLabel(currentStep)}
+      </div>
       <div className="pb-10 px-8">
         <SetupProgressBar steps={steps} currentStep={currentStep} />
       </div>

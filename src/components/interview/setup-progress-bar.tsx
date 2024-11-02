@@ -15,8 +15,8 @@ export default function SetupProgressBar({
     const labels = {
       type: "면접 유형",
       method: "면접 방식",
-      job: "직무 선택",
-      "cover-letter": "자기소개서 입력",
+      job: "직무",
+      "cover-letter": "자기소개서",
       "check-info": "입력 정보 확인",
     };
     return labels[step];
