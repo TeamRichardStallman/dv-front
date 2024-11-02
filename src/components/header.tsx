@@ -4,17 +4,18 @@ import Image from "next/image";
 export default function Header() {
   return (
     <header className="flex h-16 justify-between items-center px-8 border-b">
-      <div>
-        <Link href="/">
+      <Link href="/">
+        <div className="relative w-[72.2px] h-[40px]">
           <Image
             src="/logo.png"
             alt="Logo"
-            width={72.2}
-            height={40}
+            fill
+            className="object-contain"
             unoptimized
+            priority
           />
-        </Link>
-      </div>
+        </div>
+      </Link>
       <div>
         <ul className="flex gap-8">
           <li>
