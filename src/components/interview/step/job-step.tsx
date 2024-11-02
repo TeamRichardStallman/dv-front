@@ -6,10 +6,10 @@ const JobStep = ({ onPrev, onNext }: StepProps) => {
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
 
   const jobs = [
-    { label: "프론트엔드", imageSrc: "/images/frontend.png" },
-    { label: "백엔드", imageSrc: "/images/backend.png" },
-    { label: "클라우드", imageSrc: "/images/cloud.png" },
-    { label: "인공지능", imageSrc: "/images/ai.png" },
+    { label: "프론트엔드", imageSrc: "/frontend.png" },
+    { label: "백엔드", imageSrc: "/backend.png" },
+    { label: "클라우드", imageSrc: "/cloud.png" },
+    { label: "인공지능", imageSrc: "/ai.png" },
   ];
 
   return (

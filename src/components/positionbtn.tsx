@@ -25,7 +25,6 @@ const PositionBtn = ({
       }`}
       style={{ width: "200px", height: "240px" }}
     >
-      {/* 직무 이미지 */}
       <div className="flex justify-center mb-6">
         <Image
           src={imageSrc}
@@ -35,7 +34,7 @@ const PositionBtn = ({
           className="rounded-full object-cover"
         />
       </div>
-      <div className="font-semibold text-lg mt-auto">{label}</div>{" "}
+      <div className="font-bold text-xl mt-auto">{label}</div>{" "}
     </div>
   );
 };
