@@ -10,6 +10,7 @@ type ButtonProps = {
 
 const SettingBtn = ({ label, description, selected, onClick }: ButtonProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const descriptionWords = description.split(" ");
 
   return (
     <div
@@ -28,15 +29,18 @@ const SettingBtn = ({ label, description, selected, onClick }: ButtonProps) => {
         {label}
       </div>
 
-      {/* 설명 영역 */}
-      {isHovered && (
-        <div
-          className="absolute bottom-4 text-sm text-black bg-white p-3 rounded-md shadow-md transition-opacity duration-300 opacity-100"
-          style={{ width: "90%" }}
-        >
-          {description}
-        </div>
-      )}
+      <div
+        className={`absolute bottom-6 text-base font-medium text-black bg-white bg-opacity-90 p-5 rounded-lg shadow-lg transition-all duration-500 transform ${
+          isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+        style={{ width: "90%", minHeight: "4rem" }}
+      >
+        {descriptionWords.map((word, index) => (
+          <span key={index} className="inline-block mr-1">
+            {word}
+          </span>
+        ))}
+      </div>
     </div>
   );
 };
