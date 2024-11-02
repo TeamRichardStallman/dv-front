@@ -9,7 +9,7 @@ const NavButtons = ({
   nextButtonText,
 }: NavButtonsProps) => {
   return (
-    <div className="flex justify-between items-center absolute bottom-0 left-0 right-0">
+    <div className="flex justify-between items-center w-full mt-8">
       <button onClick={onPrev}>{prevButtonText}</button>
       <div className="flex gap-3">
         <button onClick={onNext}>{nextButtonText}</button>
