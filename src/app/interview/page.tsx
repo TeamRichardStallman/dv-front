@@ -8,7 +8,7 @@ const InterviewPage = () => {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="flex gap-4">
+      <div className="flex gap-16">
         <SettingBtn
           label="모의면접"
           description="선택한 관심 직무를 기반으로 가상면접을 진행합니다."
@@ -24,12 +24,12 @@ const InterviewPage = () => {
       </div>
       <div className="flex gap-4 mt-8 font-semibold">
         <Link href="/">
-          <button className="bg-secondary text-white py-2 px-6 rounded-md">
+          <button className="bg-secondary w-24 text-white py-2 px-6 rounded-md">
             홈으로
           </button>
         </Link>
         <Link href={`/interview/setup?type=${mode}`}>
-          <button className="bg-secondary text-white py-2 px-6 rounded-md">
+          <button className="bg-secondary w-24 text-white py-2 px-6 rounded-md">
             다음
           </button>
         </Link>
