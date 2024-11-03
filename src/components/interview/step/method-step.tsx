@@ -16,15 +16,17 @@ const MethodStep = ({ onPrev, onNext }: StepProps) => {
         />
         <SettingBtn
           label="음성"
-          description="COMMING SOON!"
+          description="COMING SOON!"
           selected={selectedMethod === "음성"}
           onClick={() => setSelectedMethod("음성")}
+          disabled={true}
         />
         <SettingBtn
           label="영상"
-          description="COMMING SOON!"
+          description="COMING SOON!"
           selected={selectedMethod === "영상"}
           onClick={() => setSelectedMethod("영상")}
+          disabled={true}
         />
       </div>
 
