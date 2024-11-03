@@ -8,6 +8,10 @@ const InterviewPage = () => {
 
   return (
     <div className="flex flex-col items-center gap-6">
+      <div className="text-center text-[50px] font-bold mb-16">
+        면접 모드 선택
+      </div>
+
       <div className="flex gap-16">
         <SettingBtn
           label="모의면접"
@@ -22,6 +26,7 @@ const InterviewPage = () => {
           onClick={() => setMode("real")}
         />
       </div>
+
       <div className="flex gap-4 mt-8 font-semibold">
         <Link href="/">
           <button className="bg-secondary w-24 text-white py-2 px-6 rounded-md">
