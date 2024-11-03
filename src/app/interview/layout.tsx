@@ -9,7 +9,7 @@ const InterviewLayout = ({ children }: InterviewLayoutProps) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="relative flex-1 flex flex-col items-center justify-center">
+      <main className="relative flex-1 flex flex-col items-center justify-start">
         {children}
       </main>
       <Footer />

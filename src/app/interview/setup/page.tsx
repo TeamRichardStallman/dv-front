@@ -44,7 +44,7 @@ const InterviewSetupPage = () => {
 
   return (
     <>
-      <div className="text-center text-lg font-semibold mb-4">
+      <div className="text-center text-[50px] font-bold mb-16">
         {getStepLabel(currentStep)}
       </div>
       <div className="pb-10 px-8">
