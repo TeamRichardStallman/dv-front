@@ -47,7 +47,7 @@ const InterviewSetupPage = () => {
       <div className="text-center text-[50px] font-bold mb-16">
         {getStepLabel(currentStep)}
       </div>
-      <div className="pb-10 px-8">
+      <div className="pb-10 px-8 mb-8">
         <SetupProgressBar steps={steps} currentStep={currentStep} />
       </div>
       <div className="relative w-[200px] h-[200px]">
