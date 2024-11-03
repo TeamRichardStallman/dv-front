@@ -4,6 +4,7 @@ import Image from "next/image";
 export default function Header() {
   return (
     <header className="flex h-16 justify-between items-center px-8 border-b mb-24">
+
       <Link href="/">
         <div className="relative w-[72.2px] h-[40px]">
           <Image
