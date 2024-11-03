@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import TypeStep from "./step/\btype-step";
+import TypeStep from "./step/type-step";
 import MethodStep from "./step/method-step";
 import JobStep from "./step/job-step";
 import CoverLetterStep from "./step/cover-letter-step";
