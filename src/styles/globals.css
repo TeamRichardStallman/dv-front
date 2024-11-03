@@ -78,3 +78,16 @@ body {
   font-weight: 900;
   src: url("../app/fonts/Pretendard-Black.woff2") format("woff2");
 }
+
+@keyframes fade-in-out {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.dot-fade {
+  animation: fade-in-out 0.85s linear infinite;
+}
