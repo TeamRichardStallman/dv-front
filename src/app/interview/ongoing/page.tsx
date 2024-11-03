@@ -2,9 +2,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { QUESTIONS } from "@/data/questions";
 import { formatTime } from "@/utils/format";
+import { useRouter } from "next/navigation";
 
 const InterviewOngoingPage = () => {
   const questions = QUESTIONS.questions;
+  const router = useRouter();
   const [answers, setAnswers] = useState<
     {
       question_id: number;
@@ -31,6 +33,7 @@ const InterviewOngoingPage = () => {
 
     if (currentQuestionIndex === questions.length - 1) {
       console.log("Submit answers to backend:", newAnswers);
+      router.push("/interview/feedback");
     } else {
       setCurrentQuestionIndex((prev) => prev + 1);
       setAnswerText("");
