@@ -1,5 +1,7 @@
+"use client";
 import { useState } from "react";
 import NavButtons from "./nav-button";
+import FileUploadButton from "@/components/file-upload-btn";
 
 const CoverLetterStep = ({ onPrev, onNext }: StepProps) => {
   const [coverLetter, setCoverLetter] = useState("");
@@ -18,6 +20,7 @@ const CoverLetterStep = ({ onPrev, onNext }: StepProps) => {
           className="w-[900px] h-[350px] p-3 border rounded-md resize-none"
         />
       </div>
+      <FileUploadButton />
       <NavButtons
         onPrev={onPrev}
         onNext={onNext}
