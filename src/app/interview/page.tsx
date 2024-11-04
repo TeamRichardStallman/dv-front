@@ -4,7 +4,7 @@ import Link from "next/link";
 import SettingBtn from "@/components/settingbtn";
 
 const InterviewPage = () => {
-  const [mode, setMode] = useState("mock");
+  const [mode, setMode] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -27,17 +27,32 @@ const InterviewPage = () => {
         />
       </div>
 
-      <div className="flex gap-4 mt-8 font-semibold">
+      <div className="flex gap-4 mt-8 font-semibold relative">
         <Link href="/">
           <button className="bg-secondary w-24 text-white py-2 px-6 rounded-md">
             홈으로
           </button>
         </Link>
-        <Link href={`/interview/setup?type=${mode}`}>
-          <button className="bg-secondary w-24 text-white py-2 px-6 rounded-md">
-            다음
-          </button>
-        </Link>
+        <div className="relative group">
+          <Link href={mode ? `/interview/setup?type=${mode}` : "#"}>
+            <button
+              className={`w-24 py-2 px-6 rounded-md text-white ${
+                mode ? "bg-secondary" : "bg-gray-400 cursor-not-allowed"
+              }`}
+              disabled={!mode}
+            >
+              다음
+            </button>
+          </Link>
+          {!mode && (
+            <div
+              className="absolute invisible group-hover:visible -top-10 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-200 text-gray-700 text-sm rounded-md shadow-md z-10"
+              style={{ whiteSpace: "nowrap" }}
+            >
+              버튼을 클릭해주세요
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

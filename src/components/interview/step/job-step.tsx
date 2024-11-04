@@ -30,6 +30,7 @@ const JobStep = ({ onPrev, onNext }: StepProps) => {
         onNext={onNext}
         prevButtonText="이전"
         nextButtonText="다음"
+        disabled={!selectedJob}
       />
     </>
   );
