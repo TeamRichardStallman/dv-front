@@ -22,7 +22,9 @@ const SettingBtn = ({
   return (
     <div
       className={`relative border rounded-3xl w-[400px] h-[300px] flex items-center justify-center text-center cursor-pointer transition-all duration-300 ${
-        selected ? "bg-primary text-white" : "bg-gray-200 text-black"
+        selected || isHovered
+          ? "bg-primary text-white"
+          : "bg-gray-200 text-black"
       } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
       onClick={!disabled ? onClick : undefined}
       onMouseEnter={() => !disabled && setIsHovered(true)}
@@ -30,7 +32,7 @@ const SettingBtn = ({
     >
       <div
         className={`font-bold text-4xl tracking-widest transition-transform duration-300 ${
-          isHovered ? "-translate-y-2" : ""
+          isHovered && !selected ? "-translate-y-2" : ""
         }`}
       >
         {label}
@@ -38,9 +40,7 @@ const SettingBtn = ({
 
       <div
         className={`absolute bottom-6 text-base font-medium text-black bg-white bg-opacity-90 p-5 rounded-lg shadow-lg transition-all duration-500 transform ${
-          disabled
-            ? "opacity-100 translate-y-0"
-            : isHovered
+          selected || (isHovered && !disabled)
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-4"
         }`}
