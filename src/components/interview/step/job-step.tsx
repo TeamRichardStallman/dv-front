@@ -13,7 +13,7 @@ const JobStep = ({ onPrev, onNext }: StepProps) => {
   ];
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <>
       <div className="flex gap-4 justify-center">
         {jobs.map((job) => (
           <PositionBtn
@@ -31,7 +31,7 @@ const JobStep = ({ onPrev, onNext }: StepProps) => {
         prevButtonText="이전"
         nextButtonText="다음"
       />
-    </div>
+    </>
   );
 };
 

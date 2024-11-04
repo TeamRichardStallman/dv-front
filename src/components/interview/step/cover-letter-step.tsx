@@ -9,7 +9,7 @@ const CoverLetterStep = ({ onPrev, onNext }: StepProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <>
       <div className="flex justify-center w-screen">
         <textarea
           value={coverLetter}
@@ -24,7 +24,7 @@ const CoverLetterStep = ({ onPrev, onNext }: StepProps) => {
         prevButtonText="이전"
         nextButtonText="다음"
       />
-    </div>
+    </>
   );
 };
 
