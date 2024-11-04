@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Header() {
   return (
-    <header className="flex h-16 justify-between items-center px-8 border-b">
+    <header className="relative flex h-16 justify-between items-center px-8 border-b">
       <Link href="/">
         <div className="relative w-[72.2px] h-[40px]">
           <Image
@@ -16,11 +16,11 @@ export default function Header() {
           />
         </div>
       </Link>
-      <div>
+      <div className="absolute left-1/2 transform -translate-x-1/2">
         <ul className="flex gap-8">
           <li>
             <Link
-              href="/practice"
+              href="/interview"
               className="font-bold hover:text-primary hover:underline"
             >
               면접연습
