@@ -3,7 +3,7 @@ import NavButtons from "./nav-button";
 import SettingBtn from "@/components/settingbtn";
 
 const TypeStep = ({ onPrev, onNext }: StepProps) => {
-  const [selectedType, setSelectedType] = useState("Tech");
+  const [selectedType, setSelectedType] = useState<string | null>(null);
 
   return (
     <>
@@ -27,6 +27,7 @@ const TypeStep = ({ onPrev, onNext }: StepProps) => {
         onNext={onNext}
         prevButtonText="이전"
         nextButtonText="다음"
+        disabled={!selectedType}
       />
     </>
   );

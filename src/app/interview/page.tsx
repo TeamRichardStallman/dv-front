@@ -4,7 +4,7 @@ import Link from "next/link";
 import SettingBtn from "@/components/settingbtn";
 
 const InterviewPage = () => {
-  const [mode, setMode] = useState("mock");
+  const [mode, setMode] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -33,8 +33,13 @@ const InterviewPage = () => {
             홈으로
           </button>
         </Link>
-        <Link href={`/interview/setup?type=${mode}`}>
-          <button className="bg-secondary w-24 text-white py-2 px-6 rounded-md">
+        <Link href={mode ? `/interview/setup?type=${mode}` : "#"}>
+          <button
+            className={`w-24 py-2 px-6 rounded-md text-white ${
+              mode ? "bg-secondary" : "bg-gray-400 cursor-not-allowed"
+            }`}
+            disabled={!mode}
+          >
             다음
           </button>
         </Link>
