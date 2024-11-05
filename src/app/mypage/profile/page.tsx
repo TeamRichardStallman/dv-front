@@ -24,7 +24,17 @@ const ProfilePage = () => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file.name);
-      setPdfUrl(URL.createObjectURL(file));
+      setPdfUrl(URL.createObjectURL(file)); // 선택한 파일의 URL 생성해야 해서 우리 서버랑 연동해야 함
+    }
+  };
+
+  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected = event.target.value;
+    const file = fileList.find((f) => f.name === selected);
+    if (file) {
+      setPdfUrl(`/path/to/your/pdfs/${file.name}`); // 서버랑 연동해서 실제 URL로 수정해야 함
+    } else {
+      setPdfUrl(null);
     }
   };
 
@@ -76,7 +86,7 @@ const ProfilePage = () => {
         </button>
         <select
           className="ml-4 border rounded-lg p-2 w-1/3"
-          onChange={(e) => setSelectedFile(e.target.value)}
+          onChange={handleSelectChange}
         >
           <option value="">파일 선택</option>
           {fileList
