@@ -17,6 +17,19 @@ const UserForm = ({ onSubmit }: UserFormProps) => {
     }
   };
 
+  const handleNicknameCheck = async () => {
+    try {
+      const response = await fetch(`/api/check-nickname?nickname=${nickname}`); //우리 api로 수정 필요
+      const { unique } = await response.json();
+      alert(
+        unique ? "사용 가능한 닉네임입니다." : "이미 사용 중인 닉네임입니다."
+      );
+    } catch (error) {
+      console.error("닉네임 중복 검사 오류:", error);
+      alert("중복 검사 중 오류가 발생했습니다.");
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreedToPrivacy) {
@@ -35,21 +48,33 @@ const UserForm = ({ onSubmit }: UserFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 w-full max-w-2xl mx-auto px-8"
+    >
       <div>
         <label className="block font-semibold">프로필 이미지</label>
         <input type="file" accept="image/*" onChange={handleImageChange} />
       </div>
       <div>
         <label className="block font-semibold">닉네임</label>
-        <input
-          type="text"
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          className="border p-2 rounded w-full"
-          placeholder="닉네임을 입력하세요"
-          required
-        />
+        <div className="flex items-center gap-4">
+          <input
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            className="border p-2 rounded w-full h-10"
+            placeholder="닉네임을 입력하세요"
+            required
+          />
+          <button
+            type="button"
+            onClick={handleNicknameCheck}
+            className="bg-primary text-white py-2 px-6 font-semibold rounded-md h-10 whitespace-nowrap"
+          >
+            중복 검사
+          </button>
+        </div>
       </div>
       <div>
         <label className="block font-semibold">생년월일</label>
@@ -74,7 +99,6 @@ const UserForm = ({ onSubmit }: UserFormProps) => {
           <option value="female">여성</option>
         </select>
       </div>
-
       <div className="flex items-center">
         <input
           type="checkbox"
