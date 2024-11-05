@@ -2,9 +2,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import SettingBtn from "@/components/settingbtn";
+import useInterviewStore from "../stores/useInterviewStore";
+
+type Mode = "GENERAL" | "REAL" | null;
 
 const InterviewPage = () => {
-  const [mode, setMode] = useState<string | null>(null);
+  const { interview, updateInterviewField } = useInterviewStore();
+  const [mode, setMode] = useState<Mode>(interview.interviewMode ?? null);
+
+  const handleNext = (mode: Mode | null) => {
+    if (mode) {
+      updateInterviewField("interviewMode", mode);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -16,14 +26,14 @@ const InterviewPage = () => {
         <SettingBtn
           label="모의면접"
           description="선택한 관심 직무를 기반으로 가상면접을 진행합니다."
-          selected={mode === "mock"}
-          onClick={() => setMode("mock")}
+          selected={mode === "GENERAL"}
+          onClick={() => setMode("GENERAL")}
         />
         <SettingBtn
           label="실전면접"
           description="선택한 직무와 자소서, 이력서 등을 기반으로 개인 맞춤화 가상면접을 진행합니다."
-          selected={mode === "real"}
-          onClick={() => setMode("real")}
+          selected={mode === "REAL"}
+          onClick={() => setMode("REAL")}
         />
       </div>
 
@@ -40,6 +50,7 @@ const InterviewPage = () => {
                 mode ? "bg-secondary" : "bg-gray-400 cursor-not-allowed"
               }`}
               disabled={!mode}
+              onClick={() => handleNext(mode)}
             >
               다음
             </button>

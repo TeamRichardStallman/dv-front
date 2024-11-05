@@ -1,11 +1,21 @@
 import { useState } from "react";
 import NavButtons from "./nav-button";
+import useInterviewStore from "@/app/stores/useInterviewStore";
 
 const CoverLetterStep = ({ onPrev, onNext }: StepProps) => {
+  const { addFile } = useInterviewStore();
   const [coverLetter, setCoverLetter] = useState("");
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCoverLetter(e.target.value);
+  };
+
+  const handleNext = () => {
+    addFile({
+      type: "COVER_LETTER",
+      filePath: "filePath",
+    });
+    onNext();
   };
 
   return (
@@ -20,7 +30,7 @@ const CoverLetterStep = ({ onPrev, onNext }: StepProps) => {
       </div>
       <NavButtons
         onPrev={onPrev}
-        onNext={onNext}
+        onNext={handleNext}
         prevButtonText="이전"
         nextButtonText="다음"
       />
