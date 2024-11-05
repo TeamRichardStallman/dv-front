@@ -24,7 +24,7 @@ const UserForm = ({ onSubmit, isEditPage = false }: UserFormProps) => {
 
   const handleNicknameCheck = async () => {
     try {
-      const response = await fetch(`/api/check-nickname?nickname=${nickname}`); //우리 api로 수정 필요
+      const response = await fetch(`/api/check-nickname?nickname=${nickname}`);
       const { unique } = await response.json();
       alert(
         unique ? "사용 가능한 닉네임입니다." : "이미 사용 중인 닉네임입니다."
@@ -181,7 +181,7 @@ const UserForm = ({ onSubmit, isEditPage = false }: UserFormProps) => {
         className="w-full bg-primary text-white py-2 rounded font-semibold"
         disabled={!isEditPage && !agreedToPrivacy}
       >
-        완료
+        {isEditPage ? "저장" : "완료"}
       </button>
     </form>
   );
