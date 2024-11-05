@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 
 type UserFormProps = {
   onSubmit: (formData: FormData) => void;
@@ -9,11 +10,14 @@ const UserForm = ({ onSubmit }: UserFormProps) => {
   const [birthdate, setBirthdate] = useState("");
   const [gender, setGender] = useState("male");
   const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setProfileImage(e.target.files[0]);
+      const file = e.target.files[0];
+      setProfileImage(file);
+      setProfileImageUrl(URL.createObjectURL(file));
     }
   };
 
@@ -52,9 +56,57 @@ const UserForm = ({ onSubmit }: UserFormProps) => {
       onSubmit={handleSubmit}
       className="space-y-4 w-full max-w-2xl mx-auto px-8"
     >
-      <div>
-        <label className="block font-semibold">프로필 이미지</label>
-        <input type="file" accept="image/*" onChange={handleImageChange} />
+      <div className="flex flex-col items-center">
+        <label className="block font-semibold mb-2 text-center">
+          프로필 이미지
+        </label>
+        <div className="relative inline-block">
+          <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-200">
+            {profileImageUrl ? (
+              <Image
+                src={profileImageUrl}
+                alt="프로필 이미지"
+                width={200}
+                height={200}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <Image
+                src="/profile-img.png"
+                alt="기본 프로필 이미지"
+                width={200}
+                height={200}
+                className="object-cover w-full h-full"
+              />
+            )}
+          </div>
+          <label
+            htmlFor="profileImageInput"
+            className="absolute bottom-0 right-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              className="w-4 h-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M15.232 5.232a3 3 0 014.242 4.242L7.5 21H3v-4.5L15.232 5.232z"
+              />
+            </svg>
+          </label>
+          <input
+            type="file"
+            id="profileImageInput"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="hidden"
+          />
+        </div>
       </div>
       <div>
         <label className="block font-semibold">닉네임</label>
