@@ -12,16 +12,19 @@ const ProfilePage = () => {
     { name: "이력서_1.pdf", type: "이력서" },
   ]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setSelectedFile(null);
+    setPdfUrl(null);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file.name);
+      setPdfUrl(URL.createObjectURL(file));
     }
   };
 
@@ -35,6 +38,7 @@ const ProfilePage = () => {
     setFileList((prev) => [...prev, newFile]);
     toast.success(`${activeTab}에 저장되었습니다.`);
     setSelectedFile(null);
+    setPdfUrl(null);
   };
 
   return (
@@ -70,7 +74,10 @@ const ProfilePage = () => {
         >
           이력서
         </button>
-        <select className="ml-4 border rounded-lg p-2 w-1/3">
+        <select
+          className="ml-4 border rounded-lg p-2 w-1/3"
+          onChange={(e) => setSelectedFile(e.target.value)}
+        >
           <option value="">파일 선택</option>
           {fileList
             .filter((file) => file.type === activeTab)
@@ -82,8 +89,15 @@ const ProfilePage = () => {
         </select>
       </div>
 
-      <div className="flex items-center justify-end w-[1000px] mt-4">
-        <span className="text-sm text-gray-600 mr-2">{selectedFile}</span>
+      <div className="w-[900px] h-[450px] border rounded-lg overflow-hidden mt-4 flex items-center justify-center">
+        {pdfUrl ? (
+          <iframe src={pdfUrl} width="100%" height="100%" />
+        ) : (
+          <p className="text-gray-500">파일을 선택해주세요.</p>
+        )}
+      </div>
+
+      <div className="flex items-center justify-end w-[900px] mt-4">
         <label className="flex items-center cursor-pointer">
           <AiOutlinePaperClip className="text-primary text-4xl mr-2" />
           <input
@@ -96,9 +110,10 @@ const ProfilePage = () => {
             }}
           />
         </label>
+        <span className="text-sm text-gray-600 mr-2">{selectedFile}</span>
         <button
           onClick={handleSave}
-          className="py-2 px-6 bg-primary font-semibold text-white rounded-lg ml-2"
+          className="py-2 px-6 bg-primary font-semibold text-white rounded-lg ml-2 whitespace-nowrap"
         >
           저장
         </button>
