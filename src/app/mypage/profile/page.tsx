@@ -26,12 +26,15 @@ const ProfilePage = () => {
   };
 
   const handleSave = () => {
-    if (selectedFile) {
-      const newFile = { name: selectedFile, type: activeTab };
-      setFileList((prev) => [...prev, newFile]);
-      toast.success(`${activeTab}에 저장되었습니다.`);
-      setSelectedFile(null);
+    if (!selectedFile) {
+      toast.error("파일을 선택해주세요.");
+      return;
     }
+
+    const newFile = { name: selectedFile, type: activeTab };
+    setFileList((prev) => [...prev, newFile]);
+    toast.success(`${activeTab}에 저장되었습니다.`);
+    setSelectedFile(null);
   };
 
   return (
