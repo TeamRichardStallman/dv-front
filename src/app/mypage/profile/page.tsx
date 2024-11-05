@@ -94,7 +94,7 @@ const ProfilePage = () => {
         </label>
         <button
           onClick={handleSave}
-          className="py-2 px-6 bg-primary text-white rounded-lg ml-2"
+          className="py-2 px-6 bg-primary font-semibold text-white rounded-lg ml-2"
         >
           저장
         </button>
