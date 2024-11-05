@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { AiOutlinePaperClip } from "react-icons/ai";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState<string>("자기소개서");
@@ -27,6 +29,7 @@ const ProfilePage = () => {
     if (selectedFile) {
       const newFile = { name: selectedFile, type: activeTab };
       setFileList((prev) => [...prev, newFile]);
+      toast.success(`${activeTab}에 저장되었습니다.`);
       setSelectedFile(null);
     }
   };
@@ -77,9 +80,7 @@ const ProfilePage = () => {
       </div>
 
       <div className="flex items-center justify-end w-[1000px] mt-4">
-        {selectedFile && (
-          <span className="text-sm text-gray-600 mr-2">{selectedFile}</span>
-        )}
+        <span className="text-sm text-gray-600 mr-2">{selectedFile}</span>
         <label className="flex items-center cursor-pointer">
           <AiOutlinePaperClip className="text-primary text-4xl mr-2" />
           <input
@@ -99,6 +100,10 @@ const ProfilePage = () => {
           저장
         </button>
       </div>
+
+      <ToastContainer
+        toastStyle={{ fontSize: "0.875rem", fontWeight: "500" }}
+      />
     </div>
   );
 };
