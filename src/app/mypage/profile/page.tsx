@@ -76,7 +76,10 @@ const ProfilePage = () => {
         </select>
       </div>
 
-      <div className="flex justify-end items-center w-[1000px] mt-4">
+      <div className="flex items-center justify-end w-[1000px] mt-4">
+        {selectedFile && (
+          <span className="text-sm text-gray-600 mr-2">{selectedFile}</span>
+        )}
         <label className="flex items-center cursor-pointer">
           <AiOutlinePaperClip className="text-primary text-4xl mr-2" />
           <input
