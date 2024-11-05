@@ -7,7 +7,7 @@ type UserFormProps = {
 const UserForm = ({ onSubmit }: UserFormProps) => {
   const [nickname, setNickname] = useState("");
   const [birthdate, setBirthdate] = useState("");
-  const [gender, setGender] = useState("");
+  const [gender, setGender] = useState("male");
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
 
@@ -58,7 +58,7 @@ const UserForm = ({ onSubmit }: UserFormProps) => {
       </div>
       <div>
         <label className="block font-semibold">닉네임</label>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <input
             type="text"
             value={nickname}
@@ -88,16 +88,32 @@ const UserForm = ({ onSubmit }: UserFormProps) => {
       </div>
       <div>
         <label className="block font-semibold">성별</label>
-        <select
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-          className="border p-2 rounded w-full"
-          required
-        >
-          <option value="">성별을 선택하세요</option>
-          <option value="male">남성</option>
-          <option value="female">여성</option>
-        </select>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-1 font-medium">
+            <input
+              type="radio"
+              name="gender"
+              value="male"
+              checked={gender === "male"}
+              onChange={() => setGender("male")}
+              className="h-4 w-4"
+              required
+            />
+            남성
+          </label>
+          <label className="flex items-center gap-1 font-medium">
+            <input
+              type="radio"
+              name="gender"
+              value="female"
+              checked={gender === "female"}
+              onChange={() => setGender("female")}
+              className="h-4 w-4"
+              required
+            />
+            여성
+          </label>
+        </div>
       </div>
       <div className="flex items-center">
         <input
