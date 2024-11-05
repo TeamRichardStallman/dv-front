@@ -25,7 +25,7 @@ const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
       <Header />
 
       <div className="flex flex-1">
-        <nav className="bg-gray-100 p-6 shadow-lg rounded-lg fixed top-20 left-8 w-56 h-auto">
+        <nav className="bg-gray-100 p-6 shadow-lg rounded-lg fixed top-28 left-8 w-56 h-auto">
           <ul className="space-y-4">
             {menuItems.map((item) => (
               <li key={item.path}>
