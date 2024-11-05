@@ -6,17 +6,19 @@ import { usePathname } from "next/navigation";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 
-const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
-  const currentPath = usePathname();
+const menuItems = [
+  { name: "내 정보 수정", path: "/mypage/edit" },
+  { name: "나의 취업 정보", path: "/mypage/profile" },
+  { name: "면접 평가 확인", path: "/mypage/feedback" },
+  { name: "쿠폰함", path: "/mypage/coupon" },
+  { name: "이용권", path: "/mypage/voucher" },
+  { name: "결제 내역", path: "/mypage/payment-history" },
+];
 
-  const menuItems = [
-    { name: "내 정보 수정", path: "/mypage/edit" },
-    { name: "나의 취업 정보", path: "/mypage/profile" },
-    { name: "면접 평가 확인", path: "/mypage/feedback" },
-    { name: "쿠폰함", path: "/mypage/coupon" },
-    { name: "이용권", path: "/mypage/voucher" },
-    { name: "결제 내역", path: "/mypage/payment-history" },
-  ];
+const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname();
+  const currentPage =
+    menuItems.find((item) => item.path === pathname)?.name || "";
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -27,26 +29,27 @@ const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
           <ul className="space-y-4">
             {menuItems.map((item) => (
               <li key={item.path}>
-                <Link href={item.path}>
-                  <span
-                    className={`font-bold block px-4 py-2 rounded-lg ${
-                      currentPath === item.path
-                        ? "bg-primary text-white"
-                        : "hover:text-primary"
-                    }`}
-                  >
-                    {item.name}
-                  </span>
+                <Link
+                  href={item.path}
+                  className={`font-bold ${
+                    pathname === item.path
+                      ? "bg-primary text-white"
+                      : "hover:text-primary"
+                  } p-2 rounded-lg block`}
+                >
+                  {item.name}
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
 
-        <main className="flex-grow p-8 ml-auto mr-auto w-full max-w-4xl flex justify-center items-center">
-          <div className="w-full">{children}</div>
+        <main className="flex-grow p-8 ml-auto mr-auto w-full max-w-4xl flex flex-col items-center">
+          <h1 className="text-4xl font-bold mb-8">{currentPage}</h1>
+          <div className="w-full max-w-md">{children}</div>
         </main>
       </div>
+
       <Footer />
     </div>
   );
