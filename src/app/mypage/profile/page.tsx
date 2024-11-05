@@ -105,7 +105,8 @@ const ProfilePage = () => {
       </div>
 
       <ToastContainer
-        toastStyle={{ fontSize: "0.875rem", fontWeight: "500" }}
+        position="bottom-right"
+        toastStyle={{ fontWeight: "500" }}
       />
     </div>
   );
