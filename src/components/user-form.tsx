@@ -57,9 +57,6 @@ const UserForm = ({ onSubmit }: UserFormProps) => {
       className="space-y-4 w-full max-w-2xl mx-auto px-8"
     >
       <div className="flex flex-col items-center">
-        <label className="block font-semibold mb-2 text-center">
-          프로필 이미지
-        </label>
         <div className="relative inline-block">
           <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-200">
             {profileImageUrl ? (
