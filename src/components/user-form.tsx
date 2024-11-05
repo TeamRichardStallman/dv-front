@@ -3,9 +3,10 @@ import Image from "next/image";
 
 type UserFormProps = {
   onSubmit: (formData: FormData) => void;
+  isEditPage?: boolean;
 };
 
-const UserForm = ({ onSubmit }: UserFormProps) => {
+const UserForm = ({ onSubmit, isEditPage = false }: UserFormProps) => {
   const [nickname, setNickname] = useState("");
   const [birthdate, setBirthdate] = useState("");
   const [gender, setGender] = useState("male");
@@ -23,7 +24,7 @@ const UserForm = ({ onSubmit }: UserFormProps) => {
 
   const handleNicknameCheck = async () => {
     try {
-      const response = await fetch(`/api/check-nickname?nickname=${nickname}`); //우리 api로 수정 필요
+      const response = await fetch(`/api/check-nickname?nickname=${nickname}`);
       const { unique } = await response.json();
       alert(
         unique ? "사용 가능한 닉네임입니다." : "이미 사용 중인 닉네임입니다."
@@ -36,7 +37,7 @@ const UserForm = ({ onSubmit }: UserFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!agreedToPrivacy) {
+    if (!isEditPage && !agreedToPrivacy) {
       alert("개인정보 동의가 필요합니다.");
       return;
     }
@@ -164,21 +165,23 @@ const UserForm = ({ onSubmit }: UserFormProps) => {
           </label>
         </div>
       </div>
-      <div className="flex items-center">
-        <input
-          type="checkbox"
-          checked={agreedToPrivacy}
-          onChange={(e) => setAgreedToPrivacy(e.target.checked)}
-          className="mr-2"
-        />
-        <label className="text-sm">개인정보 처리 방침에 동의합니다.</label>
-      </div>
+      {!isEditPage && (
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            checked={agreedToPrivacy}
+            onChange={(e) => setAgreedToPrivacy(e.target.checked)}
+            className="mr-2"
+          />
+          <label className="text-sm">개인정보 처리 방침에 동의합니다.</label>
+        </div>
+      )}
       <button
         type="submit"
         className="w-full bg-primary text-white py-2 rounded font-semibold"
-        disabled={!agreedToPrivacy}
+        disabled={!isEditPage && !agreedToPrivacy}
       >
-        완료
+        {isEditPage ? "저장" : "완료"}
       </button>
     </form>
   );
