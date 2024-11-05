@@ -29,10 +29,11 @@ const ProfilePage = () => {
   };
 
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selected = event.target.value;
-    const file = fileList.find((f) => f.name === selected);
-    if (file) {
-      setPdfUrl(`/path/to/your/pdfs/${file.name}`); // 서버랑 연동해서 실제 URL로 수정해야 함
+    const fileName = event.target.value;
+    setSelectedFile(fileName);
+    // 선택된 파일에 대한 URL 설정해야 함
+    if (fileName) {
+      setPdfUrl(`/pdf/${fileName}`); // 서버랑 연동해서 실제 URL로 수정해야 함
     } else {
       setPdfUrl(null);
     }
