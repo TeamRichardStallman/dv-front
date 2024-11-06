@@ -38,7 +38,7 @@ const InterviewOngoingPage = () => {
       setCurrentQuestionIndex((prev) => prev + 1);
       setAnswerText("");
     }
-  }, [questions, answers, currentQuestionIndex, answerText, timeLeft]);
+  }, [questions, answers, currentQuestionIndex, answerText, timeLeft, router]);
 
   const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAnswerText(e.target.value);
@@ -56,7 +56,7 @@ const InterviewOngoingPage = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentQuestionIndex]);
+  }, [currentQuestionIndex, handleNextQuestion]);
 
   return (
     <div className="h-[65vh] flex flex-col items-center">
