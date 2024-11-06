@@ -16,7 +16,7 @@ export default function InterviewOngoingLoading() {
             />
           ))}
         </div>
-        <p>고생하셨습니다.</p>
+        <p>입력한 정보를 기반으로 면접 질문을 생성 중입니다...</p>
         <p>새로고침 버튼을 누르지 말아주세요.</p>
       </div>
     </div>

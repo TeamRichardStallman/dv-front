@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { getData } from "@/data/test";
+import { getEvaluationData } from "@/data/evaluation";
 
 const InterviewFeedbackPage = async () => {
-  const data = await getData();
+  const data = await getEvaluationData();
 
   return (
     <>

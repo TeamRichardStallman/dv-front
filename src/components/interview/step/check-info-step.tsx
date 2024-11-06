@@ -1,10 +1,21 @@
-import React from "react";
+"use client";
 import NavButtons from "./nav-button";
 import { getMappedValue } from "@/app/stores/mappings";
 import useInterviewStore from "@/app/stores/useInterviewStore";
 
 const CheckInfoStep = ({ onPrev, onNext }: StepProps) => {
-  const { interview } = useInterviewStore();
+  const { interview, setInterview } = useInterviewStore();
+
+  const handleNext = () => {
+    onNext();
+    setInterview({
+      interviewType: null,
+      interviewMode: null,
+      interviewMethod: null,
+      jobId: null,
+      files: [],
+    });
+  };
 
   return (
     <>
@@ -25,9 +36,7 @@ const CheckInfoStep = ({ onPrev, onNext }: StepProps) => {
           <p className="mb-2">
             선택 직무: {getMappedValue("jobId", interview.jobId ?? "")}
           </p>
-          <p className="mb-4">
-            입력한 문서: {getMappedValue("fileType", interview.files[0].type)}
-          </p>
+          <p className="mb-4">입력한 문서: 자기소개서</p>
           <p className="font-bold text-lg mt-10">
             위 정보가 맞는지 확인해주세요.
           </p>
@@ -39,7 +48,7 @@ const CheckInfoStep = ({ onPrev, onNext }: StepProps) => {
 
       <NavButtons
         onPrev={onPrev}
-        onNext={onNext}
+        onNext={handleNext}
         prevButtonText="이전"
         nextButtonText="다음"
       />
