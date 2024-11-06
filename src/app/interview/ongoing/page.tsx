@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 const InterviewOngoingPage = () => {
   const questions = QUESTIONS.questions;
   const router = useRouter();
-  const [answers, setAnswers] = useState<
+  const [, setAnswers] = useState<
     {
       question_id: number;
       answer_text: string;
@@ -20,35 +20,54 @@ const InterviewOngoingPage = () => {
   const [timeLeft, setTimeLeft] = useState(180);
 
   const handleNextQuestion = useCallback(() => {
-    const newAnswers = [
-      ...answers,
-      {
-        question_id: questions[currentQuestionIndex].question_id,
-        answer_text: answerText,
-        answer_time: 180 - timeLeft,
-      },
-    ];
-    setAnswers(newAnswers);
     setTimeLeft(180);
 
     if (currentQuestionIndex === questions.length - 1) {
-      console.log("Submit answers to backend:", newAnswers);
+      setAnswers((prevAnswers) => {
+        const newAnswers = [
+          ...prevAnswers,
+          {
+            question_id: questions[currentQuestionIndex].question_id,
+            answer_text: answerText,
+            answer_time: 180 - timeLeft,
+          },
+        ];
+        console.log("Submit answers to backend:", newAnswers);
+        return newAnswers;
+      });
       router.push("/interview/feedback");
     } else {
+      setAnswers((prevAnswers) => {
+        const newAnswers = [
+          ...prevAnswers,
+          {
+            question_id: questions[currentQuestionIndex].question_id,
+            answer_text: answerText,
+            answer_time: 180 - timeLeft,
+          },
+        ];
+        console.log("Save answers:", newAnswers);
+        return newAnswers;
+      });
       setCurrentQuestionIndex((prev) => prev + 1);
       setAnswerText("");
     }
-  }, [questions, answers, currentQuestionIndex, answerText, timeLeft, router]);
+  }, [questions, currentQuestionIndex, answerText, timeLeft, router]);
 
   const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAnswerText(e.target.value);
   };
 
   useEffect(() => {
+    if (timeLeft === 1) {
+      handleNextQuestion();
+    }
+  }, [timeLeft, handleNextQuestion]);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
         if (prevTime === 1) {
-          handleNextQuestion();
           return 180;
         }
         return prevTime - 1;
@@ -56,7 +75,7 @@ const InterviewOngoingPage = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentQuestionIndex, handleNextQuestion]);
+  }, [currentQuestionIndex]);
 
   return (
     <div className="h-[65vh] flex flex-col items-center">
