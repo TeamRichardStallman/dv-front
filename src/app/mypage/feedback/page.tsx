@@ -320,19 +320,40 @@ const InterviewFeedbackPage = () => {
                     </div>
                   </div>
 
-                  <h4 className="text-lg font-semibold mb-2 mt-4">피드백</h4>
-                  <p className="mb-2">
-                    <strong>잘한점:</strong>{" "}
-                    {selectedAnswerEvaluation.answerFeedbackStrength}
-                  </p>
-                  <p className="mb-2">
-                    <strong>개선점:</strong>{" "}
-                    {selectedAnswerEvaluation.answerFeedbackImprovement}
-                  </p>
-                  <p>
-                    <strong>제안:</strong>{" "}
-                    {selectedAnswerEvaluation.answerFeedbackSuggestion}
-                  </p>
+                  <h4 className="text-xl text-primary font-bold mb-2 mt-4">
+                    [피드백]
+                  </h4>
+                  <div className="flex justify-between mb-4">
+                    <div className="w-1/3 p-4 border rounded-lg bg-gray-50">
+                      <h4 className="text-md font-bold mb-2 text-primary">
+                        잘한 점
+                      </h4>
+                      <p className="text-sm font-semibold">
+                        {selectedAnswerEvaluation?.answerFeedbackStrength ||
+                          "내용이 없습니다."}
+                      </p>
+                    </div>
+
+                    <div className="w-1/3 p-4 border rounded-lg bg-gray-50 mx-2">
+                      <h4 className="text-md font-bold mb-2 text-primary">
+                        개선점
+                      </h4>
+                      <p className="text-sm font-semibold">
+                        {selectedAnswerEvaluation?.answerFeedbackImprovement ||
+                          "내용이 없습니다."}
+                      </p>
+                    </div>
+
+                    <div className="w-1/3 p-4 border rounded-lg bg-gray-50">
+                      <h4 className="text-md font-bold mb-2 text-primary">
+                        제안
+                      </h4>
+                      <p className="text-sm font-semibold">
+                        {selectedAnswerEvaluation?.answerFeedbackSuggestion ||
+                          "내용이 없습니다."}
+                      </p>
+                    </div>
+                  </div>
                 </>
               ) : (
                 <p>질문을 선택하세요.</p>
