@@ -37,17 +37,17 @@ const userData = {
 
 const interviewLabelMap = {
   interviewType: {
-    TECHNICAL: "기술",
-    PERSONAL: "인성",
+    TECHNICAL: "기술면접",
+    PERSONAL: "인성면접",
   },
   interviewMethod: {
-    CHAT: "채팅",
-    VOICE: "음성",
-    VIDEO: "영상",
+    CHAT: "채팅면접",
+    VOICE: "음성면접",
+    VIDEO: "영상면접",
   },
   interviewMode: {
-    GENERAL: "모의",
-    REAL: "실전",
+    GENERAL: "모의면접",
+    REAL: "실전면접",
   },
 };
 
@@ -231,37 +231,70 @@ const InterviewFeedbackPage = () => {
         <div className="w-[900px]">
           <div className="flex justify-between max-w-4xl p-6 border rounded-lg shadow-lg mb-8">
             <div className="flex flex-col items-center w-1/3 p-4">
+              <h3 className="text-lg font-bold mb-4">프로필 정보</h3>
               <Image
                 src={userData.profileImage}
                 alt={`${userData.name}의 프로필`}
-                width={96}
-                height={96}
+                width={120}
+                height={120}
                 className="rounded-full mb-4"
               />
-              <p className="text-lg font-semibold">{userData.name}</p>
-              <p className="text-md text-gray-500">
+              <p className="text-xl font-bold">{userData.name}</p>
+              <p className="text-md text-gray-500 font-semibold">
                 {userData.gender}, {userData.age}세
               </p>
             </div>
 
             <div className="flex flex-col items-center w-1/3 p-4">
-              <h3 className="text-lg font-semibold mb-2">면접 정보</h3>
-              <p>
-                {interviewTypeLabel} / {interviewMethodLabel} /{" "}
-                {interviewModeLabel}
-              </p>
-              <p>{mockInterviewData.data.interview.job.jobNameKorean}</p>
+              <h3 className="text-lg font-semibold mb-4">면접 정보</h3>
+
+              <div className="flex flex-col items-center mb-4 space-y-2">
+                <div className="flex justify-center gap-4">
+                  <span className="flex items-center justify-center px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-base font-semibold min-w-[120px] h-10">
+                    {interviewModeLabel}
+                  </span>
+                  <span className="flex items-center justify-center px-4 py-2 rounded-full bg-green-100 text-green-700 text-base font-semibold min-w-[120px] h-10">
+                    {interviewTypeLabel}
+                  </span>
+                </div>
+                <div className="flex justify-center gap-4">
+                  <span className="flex items-center justify-center px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-base font-semibold min-w-[120px] h-10">
+                    {interviewMethodLabel}
+                  </span>
+                  <span className="flex items-center justify-center px-4 py-2 rounded-full bg-yellow-100 text-yellow-700 text-base font-semibold min-w-[120px] h-10">
+                    {mockInterviewData.data.interview.job.jobNameKorean}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-4 w-full">
+                <h4 className="text-md text-gray-500 font-bold mb-2">
+                  [입력한 자료]
+                </h4>
+                <ul className="border border-gray-300 rounded-lg p-3 bg-gray-50 space-y-2">
+                  {(mockInterviewData.data.interview.files || []).map(
+                    (file, index) => (
+                      <li
+                        key={index}
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        {file}
+                      </li>
+                    )
+                  )}
+                </ul>
+              </div>
             </div>
 
             <div className="flex flex-col items-center w-1/3 p-4">
               <h3 className="text-lg font-semibold mb-2">총점</h3>
-              <div className="w-24 h-24">
+              <div className="w-48 h-48 font-semibold">
                 <CircularProgressbar
                   value={totalScore}
                   maxValue={100}
                   text={`${totalScore.toFixed(0)}점`}
                   styles={{
-                    path: { stroke: totalScore >= 75 ? "#4CAF50" : "#FFC107" },
+                    path: { stroke: "var(--primary)" },
                     text: { fill: "#333", fontSize: "20px" },
                   }}
                 />

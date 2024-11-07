@@ -15,7 +15,7 @@ export const mockInterviewData = {
         jobNameKorean: "백엔드",
         jobDescription: "백엔드 직무입니다.",
       },
-      files: [],
+      files: ["자기소개서_1.pdf", "이력서_1.docx"],
     },
     evaluationCriteria: [
       {
