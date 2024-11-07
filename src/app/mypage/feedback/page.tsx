@@ -279,7 +279,9 @@ const InterviewFeedbackPage = () => {
                     </p>
                   </div>
 
-                  <h4 className="text-lg font-semibold mb-2">평가 점수</h4>
+                  <h4 className="text-xl text-primary font-bold mb-2">
+                    [평가 기준별 점수]
+                  </h4>
                   <div className="flex items-start space-x-4">
                     <div className="w-3/5">
                       <Radar
