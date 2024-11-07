@@ -110,7 +110,7 @@ const InterviewFeedbackPage = () => {
                     key={criteria.evaluationCriteriaId}
                     className="mt-6 mb-6 flex items-center"
                   >
-                    <div className="w-32 h-32 mr-4 flex-shrink-0">
+                    <div className="w-32 h-32 mr-4 font-semibold flex-shrink-0">
                       <CircularProgressbar
                         value={criteria.score}
                         maxValue={10}
@@ -122,10 +122,10 @@ const InterviewFeedbackPage = () => {
                       />
                     </div>
                     <div>
-                      <h4 className="text-xl font-bold text-primary mb-2">
+                      <h4 className="text-xl font-extrabold text-primary mb-2">
                         {criteriaLabel}
                       </h4>
-                      <p className="font-medium">{criteria.feedbackText}</p>
+                      <p className="font-semibold">{criteria.feedbackText}</p>
                     </div>
                   </li>
                 );
@@ -134,24 +134,29 @@ const InterviewFeedbackPage = () => {
           </div>
 
           <div className="flex w-full mt-8">
-            <div className="w-1/4 border-r border-gray-300 pr-4">
-              <h3 className="text-lg font-semibold mb-4">질문 리스트</h3>
+            <div className="w-1/3 border-r border-gray-300 pr-4">
+              <h3 className="text-lg font-bold mb-4">질문 리스트</h3>
               <ul>
-                {mockInterviewData.data.answerEvaluations.map((evaluation) => (
-                  <li
-                    key={evaluation.answerEvaluationId}
-                    className={`cursor-pointer p-2 mb-2 rounded-lg ${
-                      selectedQuestion === evaluation.answerEvaluationId
-                        ? "bg-gray-200 font-semibold"
-                        : "hover:bg-gray-100"
-                    }`}
-                    onClick={() =>
-                      handleQuestionSelect(evaluation.answerEvaluationId)
-                    }
-                  >
-                    {evaluation.questionText}
-                  </li>
-                ))}
+                {mockInterviewData.data.answerEvaluations.map(
+                  (evaluation, index) => (
+                    <li
+                      key={evaluation.answerEvaluationId}
+                      className={`cursor-pointer p-2 mb-2 font-medium rounded-lg flex items-center ${
+                        selectedQuestion === evaluation.answerEvaluationId
+                          ? "bg-primary text-white font-semibold"
+                          : "hover:bg-gray-100"
+                      }`}
+                      onClick={() =>
+                        handleQuestionSelect(evaluation.answerEvaluationId)
+                      }
+                    >
+                      <span className="w-6 h-6 flex items-center justify-center rounded-full text-black bg-secondary text-xs mr-2 aspect-square font-black">
+                        {index + 1}
+                      </span>
+                      {evaluation.questionText}
+                    </li>
+                  )
+                )}
               </ul>
             </div>
 
