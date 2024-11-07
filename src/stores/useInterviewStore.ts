@@ -7,10 +7,10 @@ interface File {
 }
 
 interface Interview {
-  interviewMode: "GENERAL" | "REAL" | null;
-  interviewType: "TECHNICAL" | "PERSONAL" | null;
-  interviewMethod: "CHAT" | "VOICE" | "VIDEO" | null;
-  jobId: number | null;
+  interviewMode: "GENERAL" | "REAL" | undefined;
+  interviewType: "TECHNICAL" | "PERSONAL" | undefined;
+  interviewMethod: "CHAT" | "VOICE" | "VIDEO" | undefined;
+  jobId: number | undefined;
   files: File[];
 }
 
@@ -28,10 +28,10 @@ const useInterviewStore = create<InterviewStore>()(
   persist(
     (set) => ({
       interview: {
-        interviewType: null,
-        interviewMethod: null,
-        interviewMode: null,
-        jobId: null,
+        interviewType: undefined,
+        interviewMethod: undefined,
+        interviewMode: undefined,
+        jobId: undefined,
         files: [],
       },
       setInterview: (newData) => set({ interview: newData }),
@@ -61,7 +61,7 @@ const useInterviewStore = create<InterviewStore>()(
       },
     }),
     {
-      name: "interview-storage", // localStorage에 저장될 키 이름
+      name: "interview-setup-storage",
     }
   )
 );

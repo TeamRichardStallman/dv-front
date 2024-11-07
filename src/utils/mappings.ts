@@ -13,10 +13,10 @@ const interviewMappings = {
     VIDEO: "영상",
   },
   jobId: {
-    1: "프론트엔드 직무",
-    2: "백엔드 직무",
-    3: "인프라 직무",
-    4: "AI 직무",
+    1: "백엔드",
+    2: "프론트엔드",
+    3: "인프라",
+    4: "AI",
   },
   fileType: {
     COVER_LETTER: "자기소개서",

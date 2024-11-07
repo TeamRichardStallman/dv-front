@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import SettingBtn from "@/components/settingbtn";
-import useInterviewStore from "../stores/useInterviewStore";
+import useInterviewStore from "../../stores/useInterviewStore";
 
 type Mode = "GENERAL" | "REAL" | null;
 

@@ -1,7 +1,7 @@
 "use client";
 import NavButtons from "./nav-button";
-import { getMappedValue } from "@/app/stores/mappings";
-import useInterviewStore from "@/app/stores/useInterviewStore";
+import useInterviewStore from "@/stores/useInterviewStore";
+import { getMappedValue } from "@/utils/mappings";
 import { useState } from "react";
 
 const CheckInfoStep = ({ onPrev, onNext }: StepProps) => {
