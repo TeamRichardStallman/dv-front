@@ -41,6 +41,7 @@ const JobStep = ({ onPrev, onNext }: StepProps) => {
         prevButtonText="이전"
         nextButtonText="다음"
         disabled={!selectedJobId}
+        disabledToolTipText="직무를 선택해주세요."
       />
     </>
   );

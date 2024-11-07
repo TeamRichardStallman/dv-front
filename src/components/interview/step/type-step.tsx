@@ -40,6 +40,7 @@ const TypeStep = ({ onPrev, onNext }: StepProps) => {
         prevButtonText="이전"
         nextButtonText="다음"
         disabled={!selectedType}
+        disabledToolTipText="면접 유형을 선택해주세요."
       />
     </>
   );

@@ -40,17 +40,22 @@ const InterviewOngoingComponent = ({
       setCurrentQuestionIndex((prev) => prev + 1);
       setAnswerText("");
     }
-  }, [questions, answers, currentQuestionIndex, answerText, timeLeft]);
+  }, [questions, answers, currentQuestionIndex, answerText, timeLeft, router]);
 
   const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAnswerText(e.target.value);
   };
 
   useEffect(() => {
+    if (timeLeft === 1) {
+      handleNextQuestion();
+    }
+  }, [timeLeft, handleNextQuestion]);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
         if (prevTime === 1) {
-          handleNextQuestion();
           return 180;
         }
         return prevTime - 1;

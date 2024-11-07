@@ -60,7 +60,7 @@ const InterviewPage = () => {
               className="absolute invisible group-hover:visible -top-10 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-200 text-gray-700 text-sm rounded-md shadow-md z-10"
               style={{ whiteSpace: "nowrap" }}
             >
-              버튼을 클릭해주세요
+              면접 모드를 선택해주세요.
             </div>
           )}
         </div>

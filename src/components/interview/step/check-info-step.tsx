@@ -2,19 +2,29 @@
 import NavButtons from "./nav-button";
 import { getMappedValue } from "@/app/stores/mappings";
 import useInterviewStore from "@/app/stores/useInterviewStore";
+import { useState } from "react";
 
 const CheckInfoStep = ({ onPrev, onNext }: StepProps) => {
-  const { interview, setInterview } = useInterviewStore();
+  const { interview } = useInterviewStore();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleNext = () => {
-    onNext();
-    setInterview({
-      interviewType: null,
-      interviewMode: null,
-      interviewMethod: null,
-      jobId: null,
-      files: [],
-    });
+  const handleNext = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/interview", {
+        method: "POST",
+        body: JSON.stringify(interview),
+      });
+      const data = await response.json();
+      console.log(data);
+      setIsLoading(false);
+      onNext();
+    } catch (err) {
+      console.error("Failed to fetch questions data:", err);
+      alert(
+        "질문 데이터를 가져오는 데 실패했습니다. 나중에 다시 시도해주세요."
+      );
+    }
   };
 
   return (
@@ -47,10 +57,11 @@ const CheckInfoStep = ({ onPrev, onNext }: StepProps) => {
       </div>
 
       <NavButtons
+        isLoading={isLoading}
         onPrev={onPrev}
         onNext={handleNext}
         prevButtonText="이전"
-        nextButtonText="다음"
+        nextButtonText="면접 시작"
       />
     </>
   );
