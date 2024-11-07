@@ -346,7 +346,7 @@ const InterviewFeedbackPage = () => {
 
                     <div className="w-1/3 p-4 border rounded-lg bg-gray-50">
                       <h4 className="text-md font-bold mb-2 text-primary">
-                        제안
+                        제안사항
                       </h4>
                       <p className="text-sm font-semibold">
                         {selectedAnswerEvaluation?.answerFeedbackSuggestion ||
@@ -356,7 +356,11 @@ const InterviewFeedbackPage = () => {
                   </div>
                 </>
               ) : (
-                <p>질문을 선택하세요.</p>
+                <div className="flex items-center justify-center h-full p-4 border-2 border-dashed rounded-lg bg-gray-100 text-center">
+                  <p className="font-bold text-gray-500 text-lg">
+                    질문을 선택해주세요.
+                  </p>
+                </div>
               )}
             </div>
           </div>
