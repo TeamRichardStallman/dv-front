@@ -110,7 +110,9 @@ const InterviewFeedbackPage = () => {
         max: 10,
         pointLabels: {
           font: {
-            size: 10,
+            family: "Pretendard",
+            size: 12,
+            weight: 600,
           },
         },
         ticks: {
@@ -297,15 +299,23 @@ const InterviewFeedbackPage = () => {
                       />
                     </div>
 
-                    {selectedScoreDetail && (
-                      <div className="w-2/5 mt-4 p-4 border rounded-lg bg-gray-50">
-                        <h4 className="text-md font-bold mb-2">
-                          {selectedScoreDetail.name} -{" "}
-                          {selectedScoreDetail.score}점
-                        </h4>
-                        <p>{selectedScoreDetail.rationale}</p>
-                      </div>
-                    )}
+                    <div className="w-2/5 mt-4 p-4 border rounded-lg bg-gray-50 h-[300px] flex flex-col items-center justify-center">
+                      {selectedScoreDetail ? (
+                        <>
+                          <h4 className="text-lg text-primary font-bold mb-2">
+                            {selectedScoreDetail.name} (
+                            {selectedScoreDetail.score}/10)
+                          </h4>
+                          <p className="font-medium">
+                            {selectedScoreDetail.rationale}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="font-bold text-gray-500">
+                          점수를 클릭해주세요.
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   <h4 className="text-lg font-semibold mb-2 mt-4">피드백</h4>
