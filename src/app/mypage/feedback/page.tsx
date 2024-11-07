@@ -163,12 +163,14 @@ const InterviewFeedbackPage = () => {
             <div className="w-3/4 pl-4">
               {selectedAnswerEvaluation ? (
                 <>
-                  <h3 className="text-xl font-semibold mb-2">
-                    {selectedAnswerEvaluation.questionText}
-                  </h3>
-                  <p className="text-gray-700 mb-4">
-                    <strong>답변:</strong> {selectedAnswerEvaluation.answerText}
-                  </p>
+                  <div className="border-2 border-gray-300 rounded-lg p-4 mb-4">
+                    <h3 className="text-xl font-bold mb-2 text-primary">
+                      Q. {selectedAnswerEvaluation.questionText}
+                    </h3>
+                    <p className="text-md font-semibold">
+                      A. {selectedAnswerEvaluation.answerText}
+                    </p>
+                  </div>
 
                   <h4 className="text-lg font-semibold mb-2">평가 점수</h4>
                   <ul className="mb-4">
