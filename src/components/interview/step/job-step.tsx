@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import NavButtons from "./nav-button";
 import PositionBtn from "@/components/positionbtn";
-import useInterviewStore from "@/app/stores/useInterviewStore";
+import useInterviewStore from "@/stores/useInterviewStore";
 
 const JobStep = ({ onPrev, onNext }: StepProps) => {
   const { interview, updateInterviewField } = useInterviewStore();

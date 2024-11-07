@@ -1,5 +1,7 @@
+import { Config } from "@/config";
+
 export async function getData() {
-  const res = await fetch("http://localhost:3000/api/test", {
+  const res = await fetch(`${Config.NEXTAUTH_URL}/api/test`, {
     cache: "no-store",
   });
 

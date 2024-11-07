@@ -1,6 +1,6 @@
 import { useState } from "react";
 import NavButtons from "./nav-button";
-import useInterviewStore from "@/app/stores/useInterviewStore";
+import useInterviewStore from "@/stores/useInterviewStore";
 
 const CoverLetterStep = ({ onPrev, onNext }: StepProps) => {
   const { addFile } = useInterviewStore();

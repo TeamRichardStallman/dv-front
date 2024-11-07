@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import NavButtons from "./nav-button";
 import SettingBtn from "@/components/settingbtn";
-import useInterviewStore from "@/app/stores/useInterviewStore";
+import useInterviewStore from "@/stores/useInterviewStore";
 
 type Method = "CHAT" | "VOICE" | "VIDEO";
 const MethodStep = ({ onPrev, onNext }: StepProps) => {

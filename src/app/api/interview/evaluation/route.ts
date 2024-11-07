@@ -181,7 +181,7 @@ const exampleData: EvaluationData = {
 };
 
 export async function GET() {
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  await new Promise((resolve) => setTimeout(resolve, 3000));
 
   return NextResponse.json(exampleData);
 }

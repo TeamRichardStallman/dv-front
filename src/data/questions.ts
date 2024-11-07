@@ -1,5 +1,7 @@
+import { Config } from "@/config";
+
 export async function getQuestionsData() {
-  const res = await fetch("http://localhost:3000/api/interview/questions", {
+  const res = await fetch(`${Config.NEXTAUTH_URL}/api/interview/questions`, {
     cache: "no-store",
   });
 
