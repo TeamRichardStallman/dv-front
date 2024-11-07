@@ -6,11 +6,17 @@ import "react-circular-progressbar/dist/styles.css";
 
 const InterviewFeedbackPage = () => {
   const [selectedInterview, setSelectedInterview] = useState<string>("");
+  const [selectedQuestion, setSelectedQuestion] = useState<number | null>(null);
 
   const handleInterviewChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     setSelectedInterview(event.target.value);
+    setSelectedQuestion(null);
+  };
+
+  const handleQuestionSelect = (questionId: number) => {
+    setSelectedQuestion(questionId);
   };
 
   const getEvaluationCriteria = () => {
@@ -34,19 +40,16 @@ const InterviewFeedbackPage = () => {
   const totalScore = calculateTotalScore();
 
   const criteriaMap: Record<string, { label: string }> = {
-    GROWTH_POTENTIAL: {
-      label: "성장 가능성",
-    },
-    JOB_FIT: {
-      label: "문제 해결 능력",
-    },
-    WORK_ATTITUDE: {
-      label: "협업 능력",
-    },
-    TECHNICAL_DEPTH: {
-      label: "기술 이해도",
-    },
+    GROWTH_POTENTIAL: { label: "성장 가능성" },
+    JOB_FIT: { label: "문제 해결 능력" },
+    WORK_ATTITUDE: { label: "협업 능력" },
+    TECHNICAL_DEPTH: { label: "기술 이해도" },
   };
+
+  const selectedAnswerEvaluation =
+    mockInterviewData.data.answerEvaluations.find(
+      (evaluation) => evaluation.answerEvaluationId === selectedQuestion
+    );
 
   return (
     <div className="flex flex-col items-center p-8 min-h-screen">
@@ -113,12 +116,8 @@ const InterviewFeedbackPage = () => {
                         maxValue={10}
                         text={`${criteria.score}/10`}
                         styles={{
-                          path: {
-                            stroke: color,
-                          },
-                          text: {
-                            fill: color,
-                          },
+                          path: { stroke: color },
+                          text: { fill: color },
                         }}
                       />
                     </div>
@@ -132,6 +131,73 @@ const InterviewFeedbackPage = () => {
                 );
               })}
             </ul>
+          </div>
+
+          <div className="flex w-full mt-8">
+            <div className="w-1/4 border-r border-gray-300 pr-4">
+              <h3 className="text-lg font-semibold mb-4">질문 리스트</h3>
+              <ul>
+                {mockInterviewData.data.answerEvaluations.map((evaluation) => (
+                  <li
+                    key={evaluation.answerEvaluationId}
+                    className={`cursor-pointer p-2 mb-2 rounded-lg ${
+                      selectedQuestion === evaluation.answerEvaluationId
+                        ? "bg-gray-200 font-semibold"
+                        : "hover:bg-gray-100"
+                    }`}
+                    onClick={() =>
+                      handleQuestionSelect(evaluation.answerEvaluationId)
+                    }
+                  >
+                    {evaluation.questionText}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="w-3/4 pl-4">
+              {selectedAnswerEvaluation ? (
+                <>
+                  <h3 className="text-xl font-semibold mb-2">
+                    {selectedAnswerEvaluation.questionText}
+                  </h3>
+                  <p className="text-gray-700 mb-4">
+                    <strong>답변:</strong> {selectedAnswerEvaluation.answerText}
+                  </p>
+
+                  <h4 className="text-lg font-semibold mb-2">평가 점수</h4>
+                  <ul className="mb-4">
+                    {selectedAnswerEvaluation.answerEvaluationScores.map(
+                      (score) => (
+                        <li
+                          key={score.answerEvaluationScoreId}
+                          className="mb-2"
+                        >
+                          <strong>{score.answerEvaluationScoreName}:</strong>{" "}
+                          {score.score}점 - <em>{score.rationale}</em>
+                        </li>
+                      )
+                    )}
+                  </ul>
+
+                  <h4 className="text-lg font-semibold mb-2">피드백</h4>
+                  <p className="mb-2">
+                    <strong>잘한점:</strong>{" "}
+                    {selectedAnswerEvaluation.answerFeedbackStrength}
+                  </p>
+                  <p className="mb-2">
+                    <strong>개선점:</strong>{" "}
+                    {selectedAnswerEvaluation.answerFeedbackImprovement}
+                  </p>
+                  <p>
+                    <strong>제안:</strong>{" "}
+                    {selectedAnswerEvaluation.answerFeedbackSuggestion}
+                  </p>
+                </>
+              ) : (
+                <p>질문을 선택하세요.</p>
+              )}
+            </div>
           </div>
         </div>
       )}
