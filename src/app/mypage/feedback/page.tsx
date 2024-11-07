@@ -34,6 +34,31 @@ const userData = {
   profileImage: "/profile-img.png",
 };
 
+const interviewLabelMap = {
+  interviewType: {
+    TECHNICAL: "기술",
+    PERSONAL: "인성",
+  },
+  interviewMethod: {
+    CHAT: "채팅",
+    VOICE: "음성",
+    VIDEO: "영상",
+  },
+  interviewMode: {
+    GENERAL: "모의",
+    REAL: "실전",
+  },
+};
+
+const getInterviewLabel = (
+  category: "interviewType" | "interviewMethod" | "interviewMode",
+  key: string
+): string => {
+  const categoryMap: Record<string, string> | undefined =
+    interviewLabelMap[category];
+  return categoryMap && categoryMap[key] ? categoryMap[key] : key;
+};
+
 const InterviewFeedbackPage = () => {
   const [selectedInterview, setSelectedInterview] = useState<string>("");
   const [selectedQuestion, setSelectedQuestion] = useState<number | null>(null);
@@ -166,6 +191,25 @@ const InterviewFeedbackPage = () => {
     },
   };
 
+  const interviewTypeLabel = selectedInterview
+    ? getInterviewLabel(
+        "interviewType",
+        mockInterviewData.data.interview.interviewType
+      )
+    : "";
+  const interviewMethodLabel = selectedInterview
+    ? getInterviewLabel(
+        "interviewMethod",
+        mockInterviewData.data.interview.interviewMethod
+      )
+    : "";
+  const interviewModeLabel = selectedInterview
+    ? getInterviewLabel(
+        "interviewMode",
+        mockInterviewData.data.interview.interviewMode
+      )
+    : "";
+
   return (
     <div className="flex flex-col items-center p-8 min-h-screen">
       <div className="mb-4">
@@ -181,6 +225,14 @@ const InterviewFeedbackPage = () => {
           </option>
         </select>
       </div>
+
+      {selectedInterview && (
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-2">
+            {interviewTypeLabel} / {interviewMethodLabel} / {interviewModeLabel}
+          </h2>
+        </div>
+      )}
 
       {selectedInterview && (
         <div className="w-[900px]">
