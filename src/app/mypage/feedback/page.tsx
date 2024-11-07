@@ -88,7 +88,7 @@ const InterviewFeedbackPage = () => {
             </div>
           </div>
           <div className="mt-4">
-            <ul>
+            <ul className="border-2 border-gray-300 rounded-xl p-6">
               {evaluationCriteria.map((criteria) => {
                 const criteriaLabel =
                   criteriaMap[criteria.evaluationCriteria]?.label || "Unknown";
@@ -105,7 +105,7 @@ const InterviewFeedbackPage = () => {
                 return (
                   <li
                     key={criteria.evaluationCriteriaId}
-                    className="mb-8 flex items-center"
+                    className="mt-6 mb-6 flex items-center"
                   >
                     <div className="w-32 h-32 mr-4 flex-shrink-0">
                       <CircularProgressbar
