@@ -229,7 +229,7 @@ const InterviewFeedbackPage = () => {
 
       {selectedInterview && (
         <div className="w-[900px]">
-          <div className="flex justify-between max-w-4xl p-6 border rounded-lg shadow-lg mb-8">
+          <div className="mt-2 flex justify-between max-w-4xl p-6 border rounded-lg shadow-lg mb-8">
             <div className="flex flex-col items-center w-1/3 p-4">
               <h3 className="text-lg font-bold mb-4">프로필 정보</h3>
               <Image
@@ -302,8 +302,8 @@ const InterviewFeedbackPage = () => {
             </div>
           </div>
 
-          <div className="mt-4">
-            <ul className="border-2 border-gray-300 rounded-xl p-6">
+          <div className="mt-4 border rounded-lg shadow-lg p-6">
+            <ul>
               {evaluationCriteria.map((criteria) => {
                 const criteriaLabel =
                   criteriaMap[criteria.evaluationCriteria]?.label || "Unknown";
@@ -340,7 +340,7 @@ const InterviewFeedbackPage = () => {
             </ul>
           </div>
 
-          <div className="flex w-full mt-8">
+          <div className="flex w-full mt-8 border rounded-lg shadow-lg p-6">
             <div className="w-1/3 border-r border-gray-300 pr-4">
               <h3 className="text-lg font-bold mb-4">질문 리스트</h3>
               <ul>
