@@ -17,12 +17,17 @@ const FileUploadButton = () => {
     setUploading(true);
 
     try {
-      const response = await fetch("/api/s3/uploadResume", {
+      const keyFoler = "cover-letters";
+      const userId = "123";
+      const interviewId = "abc";
+
+      const response = await fetch("/api/s3/uploadFiles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fileName: formatFileName(file.name),
+          fileName: formatFileName(userId, interviewId, file.name),
           fileType: file.type,
+          keyFoler: keyFoler,
         }),
       });
 
