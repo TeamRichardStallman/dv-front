@@ -4,7 +4,7 @@ export const mockInterviewData = {
   data: {
     interview: {
       interviewId: 1,
-      interviewTitle: "면접 제목",
+      interviewTitle: "241101_백엔드_모의_기술_채팅 (2024.11.01.09:20)",
       interviewStatus: "INITIAL",
       interviewType: "TECHNICAL",
       interviewMethod: "CHAT",

@@ -26,6 +26,14 @@ ChartJS.register(
   Legend
 );
 
+//테스트를 위해 임의로 넣어둔 유저 데이터
+const userData = {
+  name: "이다은",
+  gender: "여성",
+  age: 20,
+  profileImage: "/profile-img.png",
+};
+
 const InterviewFeedbackPage = () => {
   const [selectedInterview, setSelectedInterview] = useState<string>("");
   const [selectedQuestion, setSelectedQuestion] = useState<number | null>(null);
@@ -169,13 +177,7 @@ const InterviewFeedbackPage = () => {
         >
           <option value="">면접을 선택하세요</option>
           <option value="interview1">
-            241101_백엔드_모의_실전_채팅 (2024.11.01.09:20)
-          </option>
-          <option value="interview2">
-            241103_프론트엔드_실전_기술_채팅(2024.11.03.15:15)
-          </option>
-          <option value="interview3">
-            241104_클라우드_실전_인성_채팅(2024.11.04.12:20)
+            {mockInterviewData.data.interview.interviewTitle}
           </option>
         </select>
       </div>
@@ -183,7 +185,8 @@ const InterviewFeedbackPage = () => {
       {selectedInterview && (
         <div className="w-[900px]">
           <h3 className="text-xl font-bold mt-8 mb-2">
-            이다은님의 면접 평가 점수는 {totalScore.toFixed(0)}점입니다.
+            {userData.name}님의 면접 평가 점수는 {totalScore.toFixed(0)}
+            점입니다.
           </h3>
           <div className="mt-4">
             <div className="relative h-6 bg-gray-200 rounded">
