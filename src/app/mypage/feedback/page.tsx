@@ -72,7 +72,7 @@ const InterviewFeedbackPage = () => {
 
       {selectedInterview && (
         <div className="w-[900px]">
-          <h3 className="text-lg font-semibold mb-2">
+          <h3 className="text-xl font-bold mt-8 mb-2">
             이다은님의 면접 평가 점수는 {totalScore.toFixed(0)}점입니다.
           </h3>
           <div className="mt-4">
@@ -82,16 +82,12 @@ const InterviewFeedbackPage = () => {
                 style={{ width: `${totalScore}%` }}
               />
             </div>
-            <div className="flex justify-between text-xs mt-1">
+            <div className="flex font-normal justify-between text-s mt-1">
               <span>0</span>
               <span>100</span>
             </div>
-            <span className="text-center text-lg font-semibold mt-1">
-              {totalScore.toFixed(0)}
-            </span>
           </div>
           <div className="mt-4">
-            <h3 className="text-lg font-semibold">평가 기준</h3>
             <ul>
               {evaluationCriteria.map((criteria) => {
                 const criteriaLabel =
@@ -109,9 +105,9 @@ const InterviewFeedbackPage = () => {
                 return (
                   <li
                     key={criteria.evaluationCriteriaId}
-                    className="mb-4 flex items-center"
+                    className="mb-8 flex items-center"
                   >
-                    <div className="w-24 h-24 mr-4">
+                    <div className="w-32 h-32 mr-4 flex-shrink-0">
                       <CircularProgressbar
                         value={criteria.score}
                         maxValue={10}
@@ -127,8 +123,10 @@ const InterviewFeedbackPage = () => {
                       />
                     </div>
                     <div>
-                      <h4 className="text-md font-semibold">{criteriaLabel}</h4>
-                      <p> {criteria.feedbackText}</p>
+                      <h4 className="text-xl font-bold text-primary mb-2">
+                        {criteriaLabel}
+                      </h4>
+                      <p className="font-medium">{criteria.feedbackText}</p>
                     </div>
                   </li>
                 );

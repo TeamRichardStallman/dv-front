@@ -21,25 +21,29 @@ export const mockInterviewData = {
       {
         evaluationCriteriaId: 1,
         evaluationCriteria: "GROWTH_POTENTIAL",
-        feedbackText: "성장 가능성이 매우 높습니다.",
+        feedbackText:
+          "귀하는 현재의 역량을 잘 발휘하고 있으며, 문제 해결 능력과 협업 능력이 뛰어나 팀에 긍정적인 영향을 미치고 있습니다. 앞으로도 다양한 기술과 도구에 대한 학습을 이어가며 자신의 전문성을 더욱 높이기를 권장합니다. 또한, 다양한 프로젝트에 참여하여 실무 경험을 쌓고 이를 통해 자신의 성장 가능성을 극대화하는 방향으로 나아가길 바랍니다.",
         score: 8,
       },
       {
         evaluationCriteriaId: 2,
         evaluationCriteria: "JOB_FIT",
-        feedbackText: "자격이 잘 맞습니다.",
+        feedbackText:
+          "문제를 해결하는 과정에서 약간의 어려움이 있는 것으로 보입니다. 문제를 더 깊이 분석하고 다양한 접근 방식을 시도해보는 연습이 필요합니다. 앞으로는 문제를 작은 단계로 나누어 해결하는 방법과, 주변 동료나 팀원과 협력하여 해결 방안을 모색하는 습관을 기르시면 좋겠습니다.",
         score: 3,
       },
       {
         evaluationCriteriaId: 3,
         evaluationCriteria: "WORK_ATTITUDE",
-        feedbackText: "긍정적인 태도를 보였습니다.",
+        feedbackText:
+          "귀하는 팀원들과의 소통과 협업에 있어 긍정적인 태도를 보이고 있으며, 협력적인 분위기를 조성하는 데 기여하고 있습니다. 앞으로는 팀 내에서 더 주도적으로 의견을 제시하고, 다른 팀원들의 아이디어를 적극적으로 수용하는 모습을 통해 협업 능력을 더욱 발전시킬 수 있을 것입니다.",
         score: 7,
       },
       {
         evaluationCriteriaId: 4,
         evaluationCriteria: "TECHNICAL_DEPTH",
-        feedbackText: "기술적인 깊이는 양호하나 추가 학습이 필요합니다.",
+        feedbackText:
+          "현재 귀하는 기술에 대한 기본적인 이해도를 갖추고 있으며, 업무에 필요한 지식을 충분히 활용하고 있습니다. 다만, 심화된 기술적 개념이나 최신 기술 트렌드에 대한 이해를 넓히면 더 나은 성과를 낼 수 있을 것입니다. 추가적인 학습과 경험을 통해 기술 깊이를 향상시키길 권장합니다.",
         score: 6,
       },
     ],
