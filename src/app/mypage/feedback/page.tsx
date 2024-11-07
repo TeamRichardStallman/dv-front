@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 import { mockInterviewData } from "@/data/mockInterviewData";
 import { CircularProgressbar } from "react-circular-progressbar";
 import { Radar } from "react-chartjs-2";
@@ -227,45 +228,56 @@ const InterviewFeedbackPage = () => {
       </div>
 
       {selectedInterview && (
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-2">
-            {interviewTypeLabel} / {interviewMethodLabel} / {interviewModeLabel}
-          </h2>
-        </div>
-      )}
-
-      {selectedInterview && (
         <div className="w-[900px]">
-          <h3 className="text-xl font-bold mt-8 mb-2">
-            {userData.name}님의 면접 평가 점수는 {totalScore.toFixed(0)}
-            점입니다.
-          </h3>
-          <div className="mt-4">
-            <div className="relative h-6 bg-gray-200 rounded">
-              <div
-                className="absolute h-full bg-primary rounded"
-                style={{ width: `${totalScore}%` }}
+          <div className="flex justify-between max-w-4xl p-6 border rounded-lg shadow-lg mb-8">
+            <div className="flex flex-col items-center w-1/3 p-4">
+              <Image
+                src={userData.profileImage}
+                alt={`${userData.name}의 프로필`}
+                width={96}
+                height={96}
+                className="rounded-full mb-4"
               />
+              <p className="text-lg font-semibold">{userData.name}</p>
+              <p className="text-md text-gray-500">
+                {userData.gender}, {userData.age}세
+              </p>
             </div>
-            <div className="flex font-normal justify-between text-s mt-1">
-              <span>0</span>
-              <span>100</span>
+
+            <div className="flex flex-col items-center w-1/3 p-4">
+              <h3 className="text-lg font-semibold mb-2">면접 정보</h3>
+              <p>
+                {interviewTypeLabel} / {interviewMethodLabel} /{" "}
+                {interviewModeLabel}
+              </p>
+              <p>{mockInterviewData.data.interview.job.jobNameKorean}</p>
+            </div>
+
+            <div className="flex flex-col items-center w-1/3 p-4">
+              <h3 className="text-lg font-semibold mb-2">총점</h3>
+              <div className="w-24 h-24">
+                <CircularProgressbar
+                  value={totalScore}
+                  maxValue={100}
+                  text={`${totalScore.toFixed(0)}점`}
+                  styles={{
+                    path: { stroke: totalScore >= 75 ? "#4CAF50" : "#FFC107" },
+                    text: { fill: "#333", fontSize: "20px" },
+                  }}
+                />
+              </div>
             </div>
           </div>
+
           <div className="mt-4">
             <ul className="border-2 border-gray-300 rounded-xl p-6">
               {evaluationCriteria.map((criteria) => {
                 const criteriaLabel =
                   criteriaMap[criteria.evaluationCriteria]?.label || "Unknown";
-
                 let color;
-                if (criteria.score >= 7) {
-                  color = "#4CAF50";
-                } else if (criteria.score >= 4) {
-                  color = "#FFC107";
-                } else {
-                  color = "#F44336";
-                }
+                if (criteria.score >= 7) color = "#4CAF50";
+                else if (criteria.score >= 4) color = "#FFC107";
+                else color = "#F44336";
 
                 return (
                   <li
@@ -339,23 +351,8 @@ const InterviewFeedbackPage = () => {
                   </h4>
                   <div className="flex items-start space-x-4">
                     <div className="w-3/5">
-                      <Radar
-                        data={radarData}
-                        options={{
-                          ...radarOptions,
-                          maintainAspectRatio: true,
-                          responsive: true,
-                          scales: {
-                            r: {
-                              ...radarOptions.scales.r,
-                              suggestedMin: 0,
-                              suggestedMax: 10,
-                            },
-                          },
-                        }}
-                      />
+                      <Radar data={radarData} options={radarOptions} />
                     </div>
-
                     <div className="w-2/5 mt-4 p-4 border rounded-lg bg-gray-50 h-[300px] flex flex-col items-center justify-center">
                       {selectedScoreDetail ? (
                         <>
