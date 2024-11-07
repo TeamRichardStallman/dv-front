@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { mockInterviewData } from "@/data/mockInterviewData";
+import { CircularProgressbar } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
 
 const InterviewFeedbackPage = () => {
   const [selectedInterview, setSelectedInterview] = useState<string>("");
@@ -31,6 +33,21 @@ const InterviewFeedbackPage = () => {
 
   const totalScore = calculateTotalScore();
 
+  const criteriaMap: Record<string, { label: string }> = {
+    GROWTH_POTENTIAL: {
+      label: "성장 가능성",
+    },
+    JOB_FIT: {
+      label: "문제 해결 능력",
+    },
+    WORK_ATTITUDE: {
+      label: "협업 능력",
+    },
+    TECHNICAL_DEPTH: {
+      label: "기술 이해도",
+    },
+  };
+
   return (
     <div className="flex flex-col items-center p-8 min-h-screen">
       <div className="mb-4">
@@ -55,10 +72,10 @@ const InterviewFeedbackPage = () => {
 
       {selectedInterview && (
         <div className="w-[900px]">
-          <h3 className="text-lg font-semibold mt-2">
+          <h3 className="text-lg font-semibold mb-2">
             이다은님의 면접 평가 점수는 {totalScore.toFixed(0)}점입니다.
           </h3>
-          <div className="mt-2">
+          <div className="mt-4">
             <div className="relative h-6 bg-gray-200 rounded">
               <div
                 className="absolute h-full bg-primary rounded"
@@ -69,17 +86,53 @@ const InterviewFeedbackPage = () => {
               <span>0</span>
               <span>100</span>
             </div>
+            <span className="text-center text-lg font-semibold mt-1">
+              {totalScore.toFixed(0)}
+            </span>
           </div>
           <div className="mt-4">
             <h3 className="text-lg font-semibold">평가 기준</h3>
             <ul>
-              {evaluationCriteria.map((criteria) => (
-                <li key={criteria.evaluationCriteriaId} className="mb-2">
-                  <p>{criteria.evaluationCriteria}</p>
-                  <p>점수: {criteria.score}</p>
-                  <p>피드백: {criteria.feedbackText}</p>
-                </li>
-              ))}
+              {evaluationCriteria.map((criteria) => {
+                const criteriaLabel =
+                  criteriaMap[criteria.evaluationCriteria]?.label || "Unknown";
+
+                let color;
+                if (criteria.score >= 7) {
+                  color = "#4CAF50";
+                } else if (criteria.score >= 4) {
+                  color = "#FFC107";
+                } else {
+                  color = "#F44336";
+                }
+
+                return (
+                  <li
+                    key={criteria.evaluationCriteriaId}
+                    className="mb-4 flex items-center"
+                  >
+                    <div className="w-24 h-24 mr-4">
+                      <CircularProgressbar
+                        value={criteria.score}
+                        maxValue={10}
+                        text={`${criteria.score}/10`}
+                        styles={{
+                          path: {
+                            stroke: color,
+                          },
+                          text: {
+                            fill: color,
+                          },
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <h4 className="text-md font-semibold">{criteriaLabel}</h4>
+                      <p> {criteria.feedbackText}</p>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>

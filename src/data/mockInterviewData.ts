@@ -28,7 +28,7 @@ export const mockInterviewData = {
         evaluationCriteriaId: 2,
         evaluationCriteria: "JOB_FIT",
         feedbackText: "자격이 잘 맞습니다.",
-        score: 9,
+        score: 3,
       },
       {
         evaluationCriteriaId: 3,
