@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SetupFunnel from "@/components/interview/setup-funnel";
 import SetupProgressBar from "@/components/interview/setup-progress-bar";
@@ -61,4 +61,10 @@ const InterviewSetupPage = () => {
   );
 };
 
-export default InterviewSetupPage;
+export default function PageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InterviewSetupPage />
+    </Suspense>
+  );
+}
