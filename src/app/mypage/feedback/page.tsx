@@ -2,11 +2,38 @@
 import React, { useState } from "react";
 import { mockInterviewData } from "@/data/mockInterviewData";
 import { CircularProgressbar } from "react-circular-progressbar";
+import { Radar } from "react-chartjs-2";
 import "react-circular-progressbar/dist/styles.css";
+import {
+  Chart as ChartJS,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+  ChartEvent,
+  TooltipItem,
+  ActiveElement,
+} from "chart.js";
+
+ChartJS.register(
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend
+);
 
 const InterviewFeedbackPage = () => {
   const [selectedInterview, setSelectedInterview] = useState<string>("");
   const [selectedQuestion, setSelectedQuestion] = useState<number | null>(null);
+  const [selectedScoreDetail, setSelectedScoreDetail] = useState<{
+    name: string;
+    score: number;
+    rationale: string;
+  } | null>(null);
 
   const handleInterviewChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -50,6 +77,84 @@ const InterviewFeedbackPage = () => {
     mockInterviewData.data.answerEvaluations.find(
       (evaluation) => evaluation.answerEvaluationId === selectedQuestion
     );
+
+  const labelMap = {
+    APPROPRIATE_RESPONSE: "적절한 답변",
+    LOGICAL_FLOW: "논리적 흐름",
+    KEY_TERMS: "핵심 단어",
+    CONSISTENCY: "일관성",
+    GRAMMATICAL_ERRORS: "문법적 오류",
+  };
+
+  const radarData = {
+    labels: Object.values(labelMap),
+    datasets: [
+      {
+        label: "평가 점수",
+        data: selectedAnswerEvaluation
+          ? selectedAnswerEvaluation.answerEvaluationScores.map(
+              (score) => score.score
+            )
+          : [0, 0, 0, 0, 0],
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const radarOptions = {
+    scales: {
+      r: {
+        beginAtZero: true,
+        max: 10,
+        pointLabels: {
+          font: {
+            size: 10,
+          },
+        },
+        ticks: {
+          stepSize: 2,
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: TooltipItem<"radar">) => {
+            const index = context.dataIndex;
+            const scoreDetail = selectedAnswerEvaluation
+              ? selectedAnswerEvaluation.answerEvaluationScores[index]
+              : null;
+            if (scoreDetail) {
+              return `${scoreDetail.score}점`;
+            }
+            return "";
+          },
+        },
+      },
+    },
+    onClick: (event: ChartEvent, elements: ActiveElement[]) => {
+      if (elements.length > 0) {
+        const index = elements[0].index;
+        const scoreDetails = selectedAnswerEvaluation
+          ? selectedAnswerEvaluation.answerEvaluationScores[index]
+          : null;
+        setSelectedScoreDetail(
+          scoreDetails
+            ? {
+                name: radarData.labels[index],
+                score: scoreDetails.score,
+                rationale: scoreDetails.rationale,
+              }
+            : null
+        );
+      }
+    },
+  };
 
   return (
     <div className="flex flex-col items-center p-8 min-h-screen">
@@ -173,21 +278,37 @@ const InterviewFeedbackPage = () => {
                   </div>
 
                   <h4 className="text-lg font-semibold mb-2">평가 점수</h4>
-                  <ul className="mb-4">
-                    {selectedAnswerEvaluation.answerEvaluationScores.map(
-                      (score) => (
-                        <li
-                          key={score.answerEvaluationScoreId}
-                          className="mb-2"
-                        >
-                          <strong>{score.answerEvaluationScoreName}:</strong>{" "}
-                          {score.score}점 - <em>{score.rationale}</em>
-                        </li>
-                      )
-                    )}
-                  </ul>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-3/5">
+                      <Radar
+                        data={radarData}
+                        options={{
+                          ...radarOptions,
+                          maintainAspectRatio: true,
+                          responsive: true,
+                          scales: {
+                            r: {
+                              ...radarOptions.scales.r,
+                              suggestedMin: 0,
+                              suggestedMax: 10,
+                            },
+                          },
+                        }}
+                      />
+                    </div>
 
-                  <h4 className="text-lg font-semibold mb-2">피드백</h4>
+                    {selectedScoreDetail && (
+                      <div className="w-2/5 mt-4 p-4 border rounded-lg bg-gray-50">
+                        <h4 className="text-md font-bold mb-2">
+                          {selectedScoreDetail.name} -{" "}
+                          {selectedScoreDetail.score}점
+                        </h4>
+                        <p>{selectedScoreDetail.rationale}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <h4 className="text-lg font-semibold mb-2 mt-4">피드백</h4>
                   <p className="mb-2">
                     <strong>잘한점:</strong>{" "}
                     {selectedAnswerEvaluation.answerFeedbackStrength}
