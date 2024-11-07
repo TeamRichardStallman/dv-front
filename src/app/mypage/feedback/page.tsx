@@ -287,8 +287,8 @@ const InterviewFeedbackPage = () => {
             </div>
 
             <div className="flex flex-col items-center w-1/3 p-4">
-              <h3 className="text-lg font-semibold mb-2">총점</h3>
-              <div className="w-48 h-48 font-semibold">
+              <h3 className="text-lg font-bold mb-2">총점</h3>
+              <div className="w-48 h-48 font-bold">
                 <CircularProgressbar
                   value={totalScore}
                   maxValue={100}
