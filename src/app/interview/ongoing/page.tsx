@@ -3,6 +3,10 @@ import { useCallback, useEffect, useState } from "react";
 import { QUESTIONS } from "@/data/questions";
 import { formatTime } from "@/utils/format";
 import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+const MAX_TIME = 180;
 
 const InterviewOngoingPage = () => {
   const questions = QUESTIONS.questions;
@@ -17,10 +21,10 @@ const InterviewOngoingPage = () => {
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answerText, setAnswerText] = useState("");
-  const [timeLeft, setTimeLeft] = useState(180);
+  const [timeLeft, setTimeLeft] = useState(MAX_TIME);
 
   const handleNextQuestion = useCallback(() => {
-    setTimeLeft(180);
+    setTimeLeft(MAX_TIME);
 
     if (currentQuestionIndex === questions.length - 1) {
       setAnswers((prevAnswers) => {
@@ -29,7 +33,7 @@ const InterviewOngoingPage = () => {
           {
             question_id: questions[currentQuestionIndex].question_id,
             answer_text: answerText,
-            answer_time: 180 - timeLeft,
+            answer_time: MAX_TIME - timeLeft,
           },
         ];
         console.log("Submit answers to backend:", newAnswers);
@@ -43,7 +47,7 @@ const InterviewOngoingPage = () => {
           {
             question_id: questions[currentQuestionIndex].question_id,
             answer_text: answerText,
-            answer_time: 180 - timeLeft,
+            answer_time: MAX_TIME - timeLeft,
           },
         ];
         console.log("Save answers:", newAnswers);
@@ -60,6 +64,15 @@ const InterviewOngoingPage = () => {
 
   useEffect(() => {
     if (timeLeft === 1) {
+      toast.info("시간이 초과되어 다음 질문으로 넘어갑니다.", {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: { fontWeight: "600", whiteSpace: "nowrap", width: "350px" },
+      });
       handleNextQuestion();
     }
   }, [timeLeft, handleNextQuestion]);
@@ -68,7 +81,7 @@ const InterviewOngoingPage = () => {
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
         if (prevTime === 1) {
-          return 180;
+          return MAX_TIME;
         }
         return prevTime - 1;
       });
@@ -79,7 +92,8 @@ const InterviewOngoingPage = () => {
 
   return (
     <div className="h-[65vh] flex flex-col items-center">
-      <div className="flex gap-4 items-center mb-12">
+      <ToastContainer />
+      <div className="flex gap-4 items-center mb-12 font-bold">
         <h1 className="text-3xl">OOO님의 실전/기술 면접</h1>
         <div className="text-xl rounded-md px-4 py-3 bg-[#BDC3C7] text-white w-35 h-15">
           OO 직무
@@ -87,12 +101,12 @@ const InterviewOngoingPage = () => {
       </div>
 
       <div className="flex flex-col w-[900px] gap-6">
-        <div className="flex w-full bg-primary text-white rounded-md items-center justify-center p-3 text-lg">
+        <div className="flex w-full bg-primary font-semibold text-white rounded-md items-center justify-center p-3 text-lg">
           Q{currentQuestionIndex + 1}.{" "}
           {questions[currentQuestionIndex].question_text}
         </div>
         <textarea
-          className="w-full h-72 border-2 rounded-md p-3"
+          className="w-full h-72 border-2 font-medium rounded-md p-3"
           placeholder="답변을 작성해주세요."
           value={answerText}
           onChange={handleAnswerChange}
@@ -100,21 +114,27 @@ const InterviewOngoingPage = () => {
       </div>
 
       <div className="flex w-full justify-end py-6 items-center gap-4">
-        <div className="flex gap-1 items-center">
+        <div className="flex items-center gap-2 w-[100px] justify-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="36"
             height="36"
-            fill="#000000"
+            fill={timeLeft <= 30 ? "#FF0000" : "#000000"}
             viewBox="0 0 256 256"
           >
             <path d="M128,40a96,96,0,1,0,96,96A96.11,96.11,0,0,0,128,40Zm0,176a80,80,0,1,1,80-80A80.09,80.09,0,0,1,128,216ZM173.66,90.34a8,8,0,0,1,0,11.32l-40,40a8,8,0,0,1-11.32-11.32l40-40A8,8,0,0,1,173.66,90.34ZM96,16a8,8,0,0,1,8-8h48a8,8,0,0,1,0,16H104A8,8,0,0,1,96,16Z"></path>
           </svg>
-          <span className="text-xl font-semibold">{formatTime(timeLeft)}</span>
+          <span
+            className={`text-xl w-[50px] font-semibold text-center ${
+              timeLeft <= 30 ? "text-red-500" : "text-black"
+            }`}
+          >
+            {formatTime(timeLeft)}
+          </span>
         </div>
 
         <button
-          className="px-6 py-3 bg-secondary text-white rounded text-xl"
+          className="px-6 py-3 bg-secondary text-white rounded font-semibold text-xl"
           onClick={handleNextQuestion}
         >
           {currentQuestionIndex === questions.length - 1 ? "제출" : "다음"}
