@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import { QUESTIONS } from "@/data/questions";
 import { formatTime } from "@/utils/format";
 import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const InterviewOngoingPage = () => {
   const questions = QUESTIONS.questions;
@@ -60,6 +62,14 @@ const InterviewOngoingPage = () => {
 
   useEffect(() => {
     if (timeLeft === 1) {
+      toast.info("시간이 초과되어 다음 질문으로 넘어갑니다.", {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       handleNextQuestion();
     }
   }, [timeLeft, handleNextQuestion]);
@@ -79,6 +89,7 @@ const InterviewOngoingPage = () => {
 
   return (
     <div className="h-[65vh] flex flex-col items-center">
+      <ToastContainer />
       <div className="flex gap-4 items-center mb-12 font-bold">
         <h1 className="text-3xl">OOO님의 실전/기술 면접</h1>
         <div className="text-xl rounded-md px-4 py-3 bg-[#BDC3C7] text-white w-35 h-15">
