@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { AiOutlineDown, AiOutlineUp } from "react-icons/ai";
 import Image from "next/image";
 import { mockInterviewData } from "@/data/mockInterviewData";
 import { CircularProgressbar } from "react-circular-progressbar";
@@ -395,9 +396,14 @@ const InterviewFeedbackPage = () => {
                       <div className="flex justify-end mt-2">
                         <button
                           onClick={toggleExpand}
-                          className="text-primary font-semibold hover:text-secondary"
+                          className="flex items-center text-primary font-bold hover:text-secondary"
                         >
                           {isExpanded ? "간략히" : "더보기"}
+                          {isExpanded ? (
+                            <AiOutlineUp className="ml-1" />
+                          ) : (
+                            <AiOutlineDown className="ml-1" />
+                          )}
                         </button>
                       </div>
                     )}
