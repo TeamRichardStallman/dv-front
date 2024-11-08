@@ -52,6 +52,7 @@ const SetupFunnel = ({ step, setStep, interviewMode, onFinalSubmit }: SetupFunne
             router.push("/interview");
           }}
           onNext={(data) => {
+            setStep("method", data);
             alert(JSON.stringify(data));
             handleNextStep("method", {interviewType: data.interviewType})
           }}
@@ -63,6 +64,7 @@ const SetupFunnel = ({ step, setStep, interviewMode, onFinalSubmit }: SetupFunne
             setStep("type");
           }}
           onNext={(data) => {
+            setStep("job", data);
             handleNextStep("job", {interviewMethod: data.interviewMethod})
           }}
         />
@@ -73,6 +75,7 @@ const SetupFunnel = ({ step, setStep, interviewMode, onFinalSubmit }: SetupFunne
             setStep("method");
           }}
           onNext={(data) => {
+            setStep(interviewMode === "GENERAL" ? "check-info" : "cover-letter", data);
             handleNextStep(interviewMode === "GENERAL" ? "check-info" : "cover-letter", { jobId: data.jobId })
           }}
         />
@@ -83,6 +86,7 @@ const SetupFunnel = ({ step, setStep, interviewMode, onFinalSubmit }: SetupFunne
             setStep("job");
           }}
           onNext={(data) => {
+            setStep("check-info", data);
             handleNextStep("check-info", { files: data.files })
           }}
         />
