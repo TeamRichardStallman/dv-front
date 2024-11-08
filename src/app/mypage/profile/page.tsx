@@ -24,7 +24,7 @@ const ProfilePage = () => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file.name);
-      setPdfUrl(URL.createObjectURL(file)); // 선택한 파일의 URL 생성해야 해서 우리 서버랑 연동해야 함
+      setPdfUrl(URL.createObjectURL(file)); // 선택한 파일의 URL 생성
     }
   };
 
@@ -72,6 +72,11 @@ const ProfilePage = () => {
               ? "bg-primary text-white"
               : "bg-gray-200 hover:bg-secondary"
           }`}
+          disabled
+          style={{
+            cursor: "not-allowed",
+            opacity: activeTab === "포트폴리오" ? 1 : 0.5,
+          }}
         >
           포트폴리오
         </button>
@@ -82,6 +87,11 @@ const ProfilePage = () => {
               ? "bg-primary text-white"
               : "bg-gray-200 hover:bg-secondary"
           }`}
+          disabled
+          style={{
+            cursor: "not-allowed",
+            opacity: activeTab === "이력서" ? 1 : 0.5,
+          }}
         >
           이력서
         </button>
