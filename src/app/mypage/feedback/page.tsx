@@ -408,10 +408,10 @@ const InterviewFeedbackPage = () => {
                   <h4 className="text-xl text-primary font-bold mb-2 mt-4">
                     [피드백]
                   </h4>
-                  <div className="flex justify-between mb-4">
-                    <div className="w-1/3 p-4 border rounded-lg bg-gray-50">
+                  <div className="flex flex-col justify-between mb-4">
+                    <div className="w-full p-4 border rounded-lg bg-gray-50 mb-2">
                       <h4 className="text-md font-bold mb-2 text-primary">
-                        잘한 점
+                        잘한점
                       </h4>
                       <p className="text-sm font-semibold">
                         {selectedAnswerEvaluation?.answerFeedbackStrength ||
@@ -419,7 +419,7 @@ const InterviewFeedbackPage = () => {
                       </p>
                     </div>
 
-                    <div className="w-1/3 p-4 border rounded-lg bg-gray-50 mx-2">
+                    <div className="w-full p-4 border rounded-lg bg-gray-50 mb-2">
                       <h4 className="text-md font-bold mb-2 text-primary">
                         개선점
                       </h4>
@@ -429,7 +429,7 @@ const InterviewFeedbackPage = () => {
                       </p>
                     </div>
 
-                    <div className="w-1/3 p-4 border rounded-lg bg-gray-50">
+                    <div className="w-full p-4 border rounded-lg bg-gray-50">
                       <h4 className="text-md font-bold mb-2 text-primary">
                         제안사항
                       </h4>
