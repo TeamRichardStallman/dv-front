@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+const MAX_TIME = 180;
+
 const InterviewOngoingPage = () => {
   const questions = QUESTIONS.questions;
   const router = useRouter();
@@ -19,10 +21,10 @@ const InterviewOngoingPage = () => {
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answerText, setAnswerText] = useState("");
-  const [timeLeft, setTimeLeft] = useState(180);
+  const [timeLeft, setTimeLeft] = useState(MAX_TIME);
 
   const handleNextQuestion = useCallback(() => {
-    setTimeLeft(180);
+    setTimeLeft(MAX_TIME);
 
     if (currentQuestionIndex === questions.length - 1) {
       setAnswers((prevAnswers) => {
@@ -31,7 +33,7 @@ const InterviewOngoingPage = () => {
           {
             question_id: questions[currentQuestionIndex].question_id,
             answer_text: answerText,
-            answer_time: 180 - timeLeft,
+            answer_time: MAX_TIME - timeLeft,
           },
         ];
         console.log("Submit answers to backend:", newAnswers);
@@ -45,7 +47,7 @@ const InterviewOngoingPage = () => {
           {
             question_id: questions[currentQuestionIndex].question_id,
             answer_text: answerText,
-            answer_time: 180 - timeLeft,
+            answer_time: MAX_TIME - timeLeft,
           },
         ];
         console.log("Save answers:", newAnswers);
@@ -78,7 +80,7 @@ const InterviewOngoingPage = () => {
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
         if (prevTime === 1) {
-          return 180;
+          return MAX_TIME;
         }
         return prevTime - 1;
       });
