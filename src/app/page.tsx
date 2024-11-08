@@ -15,7 +15,7 @@ export default function Home() {
         <main className="relative flex-1 flex flex-col items-center justify-center">
           <Link
             href={"/interview"}
-            className="absolute bottom-14 px-6 py-3 bg-secondary text-white rounded text-xl"
+            className="absolute bottom-14 px-6 py-3 bg-secondary font-semibold text-white rounded text-xl"
           >
             시작하기
           </Link>
