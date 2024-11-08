@@ -6,6 +6,7 @@ import JobStep from "./step/job-step";
 import CoverLetterStep from "./step/cover-letter-step";
 import CheckInfoStep from "./step/check-info-step";
 import { Funnel } from "../funnel";
+import { useState } from "react";
 
 type StepType = "type" | "method" | "job" | "cover-letter" | "check-info";
 
@@ -24,6 +25,24 @@ const SetupFunnel = ({ step, setStep, interviewMode, onFinalSubmit }: SetupFunne
       ? (["type", "method", "job", "check-info"] as const)
       : (["type", "method", "job", "cover-letter", "check-info"] as const);
 
+    const [interviewData, setInterviewData] = useState({
+      interviewTitle: "",
+    interviewType: "",
+    interviewMethod: "",
+    interviewMode: interviewMode,
+    jobId: 0,
+    files: [] as FileProps[],
+    });
+      interface FileProps {
+        type: string;
+        filePath: string;
+      }
+
+      const handleNextStep = (nextStep: StepType, data?: any) => {
+        setInterviewData((prev) => ({ ...prev, ...data }));
+        setStep(nextStep);
+      };
+
   return (
     <Funnel steps={steps} step={step}>
       <Funnel.Step name="type">
@@ -33,7 +52,8 @@ const SetupFunnel = ({ step, setStep, interviewMode, onFinalSubmit }: SetupFunne
             router.push("/interview");
           }}
           onNext={(data) => {
-            setStep("method", data);
+            alert(JSON.stringify(data));
+            handleNextStep("method", {interviewType: data.interviewType})
           }}
         />
       </Funnel.Step>
@@ -43,7 +63,7 @@ const SetupFunnel = ({ step, setStep, interviewMode, onFinalSubmit }: SetupFunne
             setStep("type");
           }}
           onNext={(data) => {
-            setStep("job", data);
+            handleNextStep("job", {interviewMethod: data.interviewMethod})
           }}
         />
       </Funnel.Step>
@@ -53,7 +73,7 @@ const SetupFunnel = ({ step, setStep, interviewMode, onFinalSubmit }: SetupFunne
             setStep("method");
           }}
           onNext={(data) => {
-            setStep(interviewMode === "GENERAL" ? "check-info" : "cover-letter", data);
+            handleNextStep(interviewMode === "GENERAL" ? "check-info" : "cover-letter", { jobId: data.jobId })
           }}
         />
       </Funnel.Step>
@@ -63,7 +83,7 @@ const SetupFunnel = ({ step, setStep, interviewMode, onFinalSubmit }: SetupFunne
             setStep("job");
           }}
           onNext={(data) => {
-            setStep("check-info", data);
+            handleNextStep("check-info", { files: data.files })
           }}
         />
       </Funnel.Step>
@@ -72,10 +92,11 @@ const SetupFunnel = ({ step, setStep, interviewMode, onFinalSubmit }: SetupFunne
           onPrev={() => {
             setStep(interviewMode === "GENERAL" ? "job" : "cover-letter");
           }}
-          onNext={() => {
-            setStep("check-info");
+          onNext={(data) => {
+            setStep("check-info", data);
             onFinalSubmit();
           }}
+          interviewData={interviewData}
         />
       </Funnel.Step>
     </Funnel>
