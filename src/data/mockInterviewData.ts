@@ -51,7 +51,7 @@ export const mockInterviewData = {
       {
         answerEvaluationId: 1,
         questionText:
-          "최근 프로젝트에서 사용한 기술 스택에 대해 설명해 주세요.",
+          "최근 프로젝트에서 사용한 기술 스택에 대해 설명해 주세요. 질문 길이 테스트를 위한 글입니다아아아아아아아아아아아아아아아아아ㅏ아아아아ㅏ아아",
         answerText:
           "저는 최근 프로젝트에서 Node.js와 Express.js를 사용하여 RESTful API를 개발했습니다. 데이터베이스로는 MongoDB를 활용했으며, 클라이언트 측에서는 React를 사용하여 사용자 인터페이스를 구현했습니다.",
         answerFeedbackStrength:

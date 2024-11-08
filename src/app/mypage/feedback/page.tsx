@@ -360,7 +360,9 @@ const InterviewFeedbackPage = () => {
                       <span className="w-6 h-6 flex items-center justify-center rounded-full text-black bg-secondary text-xs mr-2 aspect-square font-black">
                         {index + 1}
                       </span>
-                      {evaluation.questionText}
+                      {evaluation.questionText.length > 50
+                        ? `${evaluation.questionText.substring(0, 50)}...`
+                        : evaluation.questionText}
                     </li>
                   )
                 )}
