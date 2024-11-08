@@ -79,7 +79,7 @@ const InterviewOngoingPage = () => {
 
   return (
     <div className="h-[65vh] flex flex-col items-center">
-      <div className="flex gap-4 items-center mb-12">
+      <div className="flex gap-4 items-center mb-12 font-bold">
         <h1 className="text-3xl">OOO님의 실전/기술 면접</h1>
         <div className="text-xl rounded-md px-4 py-3 bg-[#BDC3C7] text-white w-35 h-15">
           OO 직무
@@ -87,12 +87,12 @@ const InterviewOngoingPage = () => {
       </div>
 
       <div className="flex flex-col w-[900px] gap-6">
-        <div className="flex w-full bg-primary text-white rounded-md items-center justify-center p-3 text-lg">
+        <div className="flex w-full bg-primary font-semibold text-white rounded-md items-center justify-center p-3 text-lg">
           Q{currentQuestionIndex + 1}.{" "}
           {questions[currentQuestionIndex].question_text}
         </div>
         <textarea
-          className="w-full h-72 border-2 rounded-md p-3"
+          className="w-full h-72 border-2 font-medium rounded-md p-3"
           placeholder="답변을 작성해주세요."
           value={answerText}
           onChange={handleAnswerChange}
@@ -114,7 +114,7 @@ const InterviewOngoingPage = () => {
         </div>
 
         <button
-          className="px-6 py-3 bg-secondary text-white rounded text-xl"
+          className="px-6 py-3 bg-secondary text-white rounded font-semibold text-xl"
           onClick={handleNextQuestion}
         >
           {currentQuestionIndex === questions.length - 1 ? "제출" : "다음"}
