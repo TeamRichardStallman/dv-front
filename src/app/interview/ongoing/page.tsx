@@ -71,6 +71,7 @@ const InterviewOngoingPage = () => {
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
+        style: { fontWeight: "600", whiteSpace: "nowrap", width: "350px" },
       });
       handleNextQuestion();
     }
