@@ -12,7 +12,7 @@ type StepLabel<T extends StepType> = StepLabels[T];
 
 interface StepProps {
   onPrev: () => void;
-  onNext: () => void;
+  onNext: (data?: any) => void;
 }
 
 interface ButtonsProps {

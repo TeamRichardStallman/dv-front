@@ -9,7 +9,7 @@ type UserFormProps = {
 const UserForm = ({ onSubmit, isEditPage = false }: UserFormProps) => {
   const [nickname, setNickname] = useState("");
   const [birthdate, setBirthdate] = useState("");
-  const [gender, setGender] = useState("male");
+  const [gender, setGender] = useState("MAN");
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
@@ -143,9 +143,9 @@ const UserForm = ({ onSubmit, isEditPage = false }: UserFormProps) => {
             <input
               type="radio"
               name="gender"
-              value="male"
-              checked={gender === "male"}
-              onChange={() => setGender("male")}
+              value="MAN"
+              checked={gender === "MAN"}
+              onChange={() => setGender("MAN")}
               className="h-4 w-4"
               required
             />
@@ -155,9 +155,9 @@ const UserForm = ({ onSubmit, isEditPage = false }: UserFormProps) => {
             <input
               type="radio"
               name="gender"
-              value="female"
-              checked={gender === "female"}
-              onChange={() => setGender("female")}
+              value="WOMAN"
+              checked={gender === "WOMAN"}
+              onChange={() => setGender("WOMAN")}
               className="h-4 w-4"
               required
             />

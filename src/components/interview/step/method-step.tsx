@@ -32,7 +32,11 @@ const MethodStep = ({ onPrev, onNext }: StepProps) => {
 
       <NavButtons
         onPrev={onPrev}
-        onNext={onNext}
+        onNext={() => {
+          if(selectedMethod) {
+            onNext({interviewMethod: selectedMethod==="채팅"?"CHAT":selectedMethod==="음성"?"VOICE":"VIDEO"})
+          }
+        }}
         prevButtonText="이전"
         nextButtonText="다음"
       />

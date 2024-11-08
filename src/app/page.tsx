@@ -1,8 +1,17 @@
+"use client"
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { isLogined } from "@/utils/isLogined";
 
 export default function Home() {
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setLoggedIn(isLogined());
+  }, []);
+
   return (
     <div className="relative min-h-screen">
       {/* <div
@@ -11,7 +20,7 @@ export default function Home() {
       ></div> */}
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Header />
+        <Header loggedIn={loggedIn}/>
         <main className="relative flex-1 flex flex-col items-center justify-center">
           <Link
             href={"/interview"}

@@ -11,15 +11,16 @@ type StepType = "type" | "method" | "job" | "cover-letter" | "check-info";
 
 interface SetupFunnelProps {
   step: StepType;
-  setStep: (step: StepType) => void;
-  interviewMode: "mock" | "real";
+  setStep: (step: StepType, data?: any) => void;
+  interviewMode: "GENERAL" | "REAL";
+  onFinalSubmit: () => void;
 }
 
-const SetupFunnel = ({ step, setStep, interviewMode }: SetupFunnelProps) => {
+const SetupFunnel = ({ step, setStep, interviewMode, onFinalSubmit }: SetupFunnelProps) => {
   const router = useRouter();
 
   const steps =
-    interviewMode === "mock"
+    interviewMode === "GENERAL"
       ? (["type", "method", "job", "check-info"] as const)
       : (["type", "method", "job", "cover-letter", "check-info"] as const);
 
@@ -31,8 +32,8 @@ const SetupFunnel = ({ step, setStep, interviewMode }: SetupFunnelProps) => {
             setStep("type");
             router.push("/interview");
           }}
-          onNext={() => {
-            setStep("method");
+          onNext={(data) => {
+            setStep("method", data);
           }}
         />
       </Funnel.Step>
@@ -41,8 +42,8 @@ const SetupFunnel = ({ step, setStep, interviewMode }: SetupFunnelProps) => {
           onPrev={() => {
             setStep("type");
           }}
-          onNext={() => {
-            setStep("job");
+          onNext={(data) => {
+            setStep("job", data);
           }}
         />
       </Funnel.Step>
@@ -51,8 +52,8 @@ const SetupFunnel = ({ step, setStep, interviewMode }: SetupFunnelProps) => {
           onPrev={() => {
             setStep("method");
           }}
-          onNext={() => {
-            setStep(interviewMode === "mock" ? "check-info" : "cover-letter");
+          onNext={(data) => {
+            setStep(interviewMode === "GENERAL" ? "check-info" : "cover-letter", data);
           }}
         />
       </Funnel.Step>
@@ -61,19 +62,19 @@ const SetupFunnel = ({ step, setStep, interviewMode }: SetupFunnelProps) => {
           onPrev={() => {
             setStep("job");
           }}
-          onNext={() => {
-            setStep("check-info");
+          onNext={(data) => {
+            setStep("check-info", data);
           }}
         />
       </Funnel.Step>
       <Funnel.Step name="check-info">
         <CheckInfoStep
           onPrev={() => {
-            setStep(interviewMode === "mock" ? "job" : "cover-letter");
+            setStep(interviewMode === "GENERAL" ? "job" : "cover-letter");
           }}
           onNext={() => {
             setStep("check-info");
-            router.push("/interview/ongoing");
+            onFinalSubmit();
           }}
         />
       </Funnel.Step>
