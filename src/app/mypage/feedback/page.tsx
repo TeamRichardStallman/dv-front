@@ -63,11 +63,16 @@ const getInterviewLabel = (
 const InterviewFeedbackPage = () => {
   const [selectedInterview, setSelectedInterview] = useState<string>("");
   const [selectedQuestion, setSelectedQuestion] = useState<number | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [selectedScoreDetail, setSelectedScoreDetail] = useState<{
     name: string;
     score: number;
     rationale: string;
   } | null>(null);
+
+  const toggleExpand = () => {
+    setIsExpanded((prev) => !prev);
+  };
 
   const handleInterviewChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -377,8 +382,25 @@ const InterviewFeedbackPage = () => {
                       Q. {selectedAnswerEvaluation.questionText}
                     </h3>
                     <p className="text-md font-semibold">
-                      A. {selectedAnswerEvaluation.answerText}
+                      A.{" "}
+                      {selectedAnswerEvaluation.answerText.length > 180 &&
+                      !isExpanded
+                        ? `${selectedAnswerEvaluation.answerText.substring(
+                            0,
+                            180
+                          )}...`
+                        : selectedAnswerEvaluation.answerText}
                     </p>
+                    {selectedAnswerEvaluation.answerText.length > 180 && (
+                      <div className="flex justify-end mt-2">
+                        <button
+                          onClick={toggleExpand}
+                          className="text-primary font-semibold hover:text-secondary"
+                        >
+                          {isExpanded ? "간략히" : "더보기"}
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <h4 className="text-xl text-primary font-bold mb-2">
