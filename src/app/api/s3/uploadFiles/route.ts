@@ -15,16 +15,12 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { fileName, fileType, keyFoler } = await req.json();
+  const { fileName, fileType } = await req.json();
 
   const s3Params = {
     Bucket: process.env.S3_BUCKET_NAME!,
-    Key: `${keyFoler}/${fileName}`,
+    Key: fileName,
     ContentType: fileType,
-    Metadata: {
-      userId: "1",
-      interviewId: "abc",
-    },
   };
 
   try {

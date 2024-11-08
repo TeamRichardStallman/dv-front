@@ -1,5 +1,4 @@
 "use client";
-import { formatFileName } from "@/utils/format";
 import React, { useState } from "react";
 
 const FileUploadButton = () => {
@@ -17,17 +16,12 @@ const FileUploadButton = () => {
     setUploading(true);
 
     try {
-      const keyFoler = "cover-letters";
-      const userId = "123";
-      const interviewId = "abc";
-
       const response = await fetch("/api/s3/uploadFiles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fileName: formatFileName(userId, interviewId, file.name),
+          fileName: `cover-letters/${file.name}`,
           fileType: file.type,
-          keyFoler: keyFoler,
         }),
       });
 
