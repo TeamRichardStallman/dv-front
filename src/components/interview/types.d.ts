@@ -11,7 +11,7 @@ type StepLabels = {
 type StepLabel<T extends StepType> = StepLabels[T];
 
 interface StepProps {
-  onPrev: () => void;
+  onPrev?: () => void;
   onNext: () => void;
 }
 
