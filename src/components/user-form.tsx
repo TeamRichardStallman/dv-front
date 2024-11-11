@@ -1,37 +1,51 @@
-import { useState } from "react";
+"use client";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { GetUserProps } from "@/app/(user)/auth/page";
 
-type UserFormProps = {
-  onSubmit: (formData: FormData) => void;
-  isEditPage?: boolean;
+export type formDataType = {
+  nickname: string;
+  birthdate: Date;
+  gender: string;
 };
 
-const UserForm = ({ onSubmit, isEditPage = false }: UserFormProps) => {
-  const [nickname, setNickname] = useState("");
-  const [birthdate, setBirthdate] = useState("");
-  const [gender, setGender] = useState("MAN");
-  const [profileImage, setProfileImage] = useState<File | null>(null);
+type UserFormProps = {
+  onSubmit: (formData: formDataType) => void;
+  isEditPage?: boolean;
+  initUserData?: GetUserProps;
+};
+
+const UserForm = ({
+  onSubmit,
+  isEditPage = false,
+  initUserData,
+}: UserFormProps) => {
+  const [nickname, setNickname] = useState(
+    initUserData?.nickname ? initUserData?.nickname : ""
+  );
+  const [birthdate, setBirthdate] = useState(
+    initUserData?.birthdate ? new Date(initUserData.birthdate) : undefined
+  );
+  const [gender, setGender] = useState(
+    initUserData?.gender ? initUserData?.gender : "MAN"
+  );
+  const [, setProfileImage] = useState<File | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+
+  useEffect(() => {
+    setNickname(initUserData?.nickname ?? "");
+    if (initUserData?.birthdate) {
+      setBirthdate(new Date(initUserData.birthdate));
+    }
+    setGender(initUserData?.gender ?? "MAN");
+  }, [initUserData]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setProfileImage(file);
       setProfileImageUrl(URL.createObjectURL(file));
-    }
-  };
-
-  const handleNicknameCheck = async () => {
-    try {
-      const response = await fetch(`/api/check-nickname?nickname=${nickname}`);
-      const { unique } = await response.json();
-      alert(
-        unique ? "사용 가능한 닉네임입니다." : "이미 사용 중인 닉네임입니다."
-      );
-    } catch (error) {
-      console.error("닉네임 중복 검사 오류:", error);
-      alert("중복 검사 중 오류가 발생했습니다.");
     }
   };
 
@@ -42,12 +56,16 @@ const UserForm = ({ onSubmit, isEditPage = false }: UserFormProps) => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("nickname", nickname);
-    formData.append("birthdate", birthdate);
-    formData.append("gender", gender);
-    if (profileImage) formData.append("profileImage", profileImage);
-    formData.append("agreedToPrivacy", String(agreedToPrivacy));
+    if (!birthdate) {
+      alert("생일을 입력해주세요");
+      return;
+    }
+
+    const formData = {
+      nickname: nickname,
+      birthdate: birthdate,
+      gender: gender,
+    };
 
     onSubmit(formData);
   };
@@ -117,21 +135,20 @@ const UserForm = ({ onSubmit, isEditPage = false }: UserFormProps) => {
             placeholder="닉네임을 입력하세요"
             required
           />
-          <button
-            type="button"
-            onClick={handleNicknameCheck}
-            className="bg-primary text-white py-2 px-6 font-semibold rounded-md h-10 whitespace-nowrap"
-          >
-            중복 검사
-          </button>
         </div>
       </div>
       <div>
         <label className="block font-semibold">생년월일</label>
         <input
           type="date"
-          value={birthdate}
-          onChange={(e) => setBirthdate(e.target.value)}
+          value={
+            birthdate instanceof Date
+              ? birthdate.toISOString().substring(0, 10)
+              : ""
+          }
+          onChange={(e) =>
+            setBirthdate(e.target.value ? new Date(e.target.value) : undefined)
+          }
           className="border p-2 rounded w-full"
           required
         />

@@ -1,9 +1,9 @@
-'use client';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import axios from 'axios';
-import { setUrl } from '@/utils/setUrl';
-import {setLocalStorage} from '@/utils/setLocalStorage';
+"use client";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import axios from "axios";
+import { setUrl } from "@/utils/setUrl";
+import { setLocalStorage } from "@/utils/setLocalStorage";
 
 const apiUrl = `${setUrl}/user`;
 
@@ -44,35 +44,34 @@ const AuthPage = () => {
     const handleKakaoLogin = async () => {
       try {
         const response = await axios.get<GetResponse>(`${apiUrl}/login`, {
-            withCredentials: true,
-            headers: {
-                "Content-Type": "application/json",
-            },
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
-        if(response.data.data.type==="signup") {
+        if (response.data.data.type === "signup") {
           router.push(`/signup?id=${response.data.data.userId}`);
-        }else{
-            alert(response.data.data.name+"님 환영합니다.");
+        } else {
+          alert(response.data.data.name + "님 환영합니다.");
           setLocalStorage();
-          router.push('/');
+          router.push("/");
         }
-
       } catch (error) {
         if (isAxiosError(error)) {
           if (error.response?.status === 500) {
             alert("비정상적인 접근입니다.");
             router.push(`/`);
           }
-      }
-      console.error("Error fetching user info:", error);
-      throw error;
+        }
+        console.error("Error fetching user info:", error);
+        throw error;
       }
     };
-    
+
     handleKakaoLogin();
   }, [router]);
   return (
-    <div className='bg-main-blue w-screen h-screen max-w-[500px] pt-32'>
+    <div className="bg-main-blue w-screen h-screen max-w-[500px] pt-32">
       Loading ...
     </div>
   );
