@@ -1,11 +1,14 @@
 "use client";
-import FileUploadButton from "@/components/file-upload-btn";
 import { FILES } from "@/data/profileData";
 import MultiFileUploadPanel from "@/components/multi-file-upload-panel";
+import useInterviewStore from "@/stores/useInterviewStore";
 
 const CoverLetterStep = ({ onNext }: StepProps) => {
-  const handleSubmit = () => {
+  const { updateInterviewField } = useInterviewStore();
+
+  const handleSubmit = (files: string[]) => {
     onNext();
+    updateInterviewField("files", files);
   };
 
   return (
@@ -16,7 +19,6 @@ const CoverLetterStep = ({ onNext }: StepProps) => {
         submitButtonColor="bg-[#fabe41]"
         onSubmitButtonClick={handleSubmit}
       />
-      <FileUploadButton />
     </>
   );
 };

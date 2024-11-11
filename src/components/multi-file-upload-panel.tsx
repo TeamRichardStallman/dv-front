@@ -9,7 +9,7 @@ export interface MultiFileUploadPanelProps {
   files: MultiFileUploadPanelDataType[];
   submitButtonText?: string;
   submitButtonColor?: string;
-  onSubmitButtonClick?: () => void;
+  onSubmitButtonClick?: (files: string[]) => void;
 }
 
 const MultiFileUploadPanel = ({
@@ -78,7 +78,9 @@ const MultiFileUploadPanel = ({
   const handleSubmitButtonClick = () => {
     handleSave();
     if (onSubmitButtonClick) {
-      onSubmitButtonClick();
+      if (selectedFile) {
+        onSubmitButtonClick([`cover-letters/${selectedFile}`]);
+      }
     }
   };
 

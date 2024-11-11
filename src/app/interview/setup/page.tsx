@@ -3,10 +3,6 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SetupFunnel from "@/components/interview/setup-funnel";
 import SetupProgressBar from "@/components/interview/setup-progress-bar";
-import axios from "axios";
-import { setUrl } from '@/utils/setUrl';
-
-const apiUrl = `${setUrl}`;
 
 type StepType = "type" | "method" | "job" | "cover-letter" | "check-info";
 
@@ -24,22 +20,9 @@ const getStepLabel = (step: StepType) => {
 const InterviewSetupPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const interviewMode = (searchParams.get("type") as "GENERAL" | "REAL") || "REAL";
+  const interviewMode =
+    (searchParams.get("type") as "GENERAL" | "REAL") || "REAL";
   const [currentStep, setCurrentStep] = useState<StepType>("type");
-
-  interface FileProps {
-    type: string;
-    filePath: string;
-  }
-
-  const [interviewData, setInterviewData] = useState({
-    "interviewTitle": "",
-  "interviewType": "",
-  "interviewMethod": "",
-  "interviewMode": interviewMode,
-  "jobId": 0,
-  "files": [] as FileProps[],
-  });
 
   const steps: StepType[] =
     interviewMode === "GENERAL"
@@ -55,37 +38,9 @@ const InterviewSetupPage = () => {
     }
   }, [searchParams, router, interviewMode]);
 
-  const updateStep = (newStep: StepType, data?: Partial<typeof interviewData>) => {
-    if(data) {
-      setInterviewData((prevData) => ({
-        ...prevData,
-        ...data,
-      }));
-    }
+  const updateStep = (newStep: StepType) => {
     setCurrentStep(newStep);
     router.push(`/interview/setup?type=${interviewMode}&step=${newStep}`);
-  };
-
-  const handleFinalSubmit = async () => {
-    try {
-      const dataToSend = {
-        interviewTitle: interviewData.interviewTitle || null,
-        interviewType: interviewData.interviewType || null,
-        interviewMethod: interviewData.interviewMethod || null,
-        interviewMode: interviewData.interviewMode || null,
-        jobId: interviewData.jobId || null,
-        files: interviewData.files || null,
-      };
-      await axios.post(`${apiUrl}/interview`, dataToSend, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      router.push("/interview/ongoing");
-    } catch (error) {
-      console.error("Failed to submit interview setup data:", error);
-    }
   };
 
   return (
@@ -101,7 +56,6 @@ const InterviewSetupPage = () => {
           step={currentStep}
           setStep={updateStep}
           interviewMode={interviewMode}
-          onFinalSubmit={handleFinalSubmit}
         />
       </div>
     </>
