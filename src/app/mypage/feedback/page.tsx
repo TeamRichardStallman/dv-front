@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { AiOutlineDown, AiOutlineUp } from "react-icons/ai";
 import Image from "next/image";
 import { mockInterviewData } from "@/data/mockInterviewData";
 import { CircularProgressbar } from "react-circular-progressbar";
@@ -63,11 +64,16 @@ const getInterviewLabel = (
 const InterviewFeedbackPage = () => {
   const [selectedInterview, setSelectedInterview] = useState<string>("");
   const [selectedQuestion, setSelectedQuestion] = useState<number | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [selectedScoreDetail, setSelectedScoreDetail] = useState<{
     name: string;
     score: number;
     rationale: string;
   } | null>(null);
+
+  const toggleExpand = () => {
+    setIsExpanded((prev) => !prev);
+  };
 
   const handleInterviewChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -360,7 +366,9 @@ const InterviewFeedbackPage = () => {
                       <span className="w-6 h-6 flex items-center justify-center rounded-full text-black bg-secondary text-xs mr-2 aspect-square font-black">
                         {index + 1}
                       </span>
-                      {evaluation.questionText}
+                      {evaluation.questionText.length > 50
+                        ? `${evaluation.questionText.substring(0, 50)}...`
+                        : evaluation.questionText}
                     </li>
                   )
                 )}
@@ -375,8 +383,30 @@ const InterviewFeedbackPage = () => {
                       Q. {selectedAnswerEvaluation.questionText}
                     </h3>
                     <p className="text-md font-semibold">
-                      A. {selectedAnswerEvaluation.answerText}
+                      A.{" "}
+                      {selectedAnswerEvaluation.answerText.length > 180 &&
+                      !isExpanded
+                        ? `${selectedAnswerEvaluation.answerText.substring(
+                            0,
+                            180
+                          )}...`
+                        : selectedAnswerEvaluation.answerText}
                     </p>
+                    {selectedAnswerEvaluation.answerText.length > 180 && (
+                      <div className="flex justify-end mt-2">
+                        <button
+                          onClick={toggleExpand}
+                          className="flex items-center text-primary font-bold hover:text-secondary"
+                        >
+                          {isExpanded ? "간략히" : "더보기"}
+                          {isExpanded ? (
+                            <AiOutlineUp className="ml-1" />
+                          ) : (
+                            <AiOutlineDown className="ml-1" />
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <h4 className="text-xl text-primary font-bold mb-2">
@@ -408,10 +438,10 @@ const InterviewFeedbackPage = () => {
                   <h4 className="text-xl text-primary font-bold mb-2 mt-4">
                     [피드백]
                   </h4>
-                  <div className="flex justify-between mb-4">
-                    <div className="w-1/3 p-4 border rounded-lg bg-gray-50">
+                  <div className="flex flex-col justify-between mb-4">
+                    <div className="w-full p-4 border rounded-lg bg-gray-50 mb-2">
                       <h4 className="text-md font-bold mb-2 text-primary">
-                        잘한 점
+                        잘한점
                       </h4>
                       <p className="text-sm font-semibold">
                         {selectedAnswerEvaluation?.answerFeedbackStrength ||
@@ -419,7 +449,7 @@ const InterviewFeedbackPage = () => {
                       </p>
                     </div>
 
-                    <div className="w-1/3 p-4 border rounded-lg bg-gray-50 mx-2">
+                    <div className="w-full p-4 border rounded-lg bg-gray-50 mb-2">
                       <h4 className="text-md font-bold mb-2 text-primary">
                         개선점
                       </h4>
@@ -429,7 +459,7 @@ const InterviewFeedbackPage = () => {
                       </p>
                     </div>
 
-                    <div className="w-1/3 p-4 border rounded-lg bg-gray-50">
+                    <div className="w-full p-4 border rounded-lg bg-gray-50">
                       <h4 className="text-md font-bold mb-2 text-primary">
                         제안사항
                       </h4>
