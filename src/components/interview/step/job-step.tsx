@@ -27,7 +27,11 @@ const JobStep = ({ onPrev, onNext }: StepProps) => {
       </div>
       <NavButtons
         onPrev={onPrev}
-        onNext={onNext}
+        onNext={() => {
+          if(selectedJob) {
+            onNext({jobId: selectedJob==="백엔드"?1:selectedJob==="프론트엔드"?3:selectedJob==="클라우드"?3:4})
+          }
+        }}
         prevButtonText="이전"
         nextButtonText="다음"
         disabled={!selectedJob}

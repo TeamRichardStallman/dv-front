@@ -16,14 +16,14 @@ const InterviewPage = () => {
         <SettingBtn
           label="모의면접"
           description="선택한 관심 직무를 기반으로 가상면접을 진행합니다."
-          selected={mode === "mock"}
-          onClick={() => setMode("mock")}
+          selected={mode === "GENERAL"}
+          onClick={() => setMode("GENERAL")}
         />
         <SettingBtn
           label="실전면접"
           description="선택한 직무와 자소서, 이력서 등을 기반으로 개인 맞춤화 가상면접을 진행합니다."
-          selected={mode === "real"}
-          onClick={() => setMode("real")}
+          selected={mode === "REAL"}
+          onClick={() => setMode("REAL")}
         />
       </div>
 

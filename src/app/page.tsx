@@ -4,12 +4,20 @@ import { motion } from "framer-motion";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { isLogined } from "@/utils/isLogined";
 
 export default function Home() {
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setLoggedIn(isLogined());
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-gradient-to-r from-blue-100 to-purple-100 overflow-hidden">
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Header />
+        <Header loggedIn={loggedIn}/>
 
         <main className="flex-1 flex flex-col items-center justify-center text-center p-6">
           <motion.h1

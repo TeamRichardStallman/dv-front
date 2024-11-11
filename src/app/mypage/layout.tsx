@@ -1,10 +1,11 @@
 "use client";
-
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { useEffect, useState } from "react";
+import { isLogined } from "@/utils/isLogined";
 
 const menuItems = [
   { name: "내 정보 수정", path: "/mypage/edit" },
@@ -16,13 +17,18 @@ const menuItems = [
 ];
 
 const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setLoggedIn(isLogined());
+  }, []);
   const pathname = usePathname();
   const currentPage =
     menuItems.find((item) => item.path === pathname)?.name || "";
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header loggedIn={loggedIn}/>
 
       <div className="flex flex-1">
         <nav className="bg-gray-100 p-6 shadow-lg rounded-lg fixed top-28 left-8 w-56 h-auto">

@@ -24,7 +24,11 @@ const TypeStep = ({ onPrev, onNext }: StepProps) => {
 
       <NavButtons
         onPrev={onPrev}
-        onNext={onNext}
+        onNext={() => {
+          if(selectedType) {
+            onNext({interviewType: selectedType==="Tech"?"TECHNICAL":"PERSONAL"})
+          }
+        }}
         prevButtonText="이전"
         nextButtonText="다음"
         disabled={!selectedType}

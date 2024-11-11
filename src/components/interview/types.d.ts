@@ -12,7 +12,20 @@ type StepLabel<T extends StepType> = StepLabels[T];
 
 interface StepProps {
   onPrev?: () => void;
-  onNext: () => void;
+  onNext: (data?: any) => void;
+}
+
+interface StepCheckProps {
+  onPrev: () => void;
+  onNext: (data?: any) => void;
+  interviewData: {
+    interviewTitle: string;
+    interviewType: string;
+    interviewMethod: string;
+    interviewMode: string;
+    jobId: number;
+    files: FileProps[];
+  }
 }
 
 interface ButtonsProps {

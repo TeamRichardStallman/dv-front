@@ -1,7 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default function Header() {
+interface HeaderProps {
+  loggedIn: boolean;
+}
+
+export default function Header({ loggedIn }: HeaderProps) {
   return (
     <header className="relative flex h-16 justify-between items-center px-8 border-b">
       <Link href="/">
@@ -47,12 +51,21 @@ export default function Header() {
       <div>
         <ul className="flex gap-4">
           <li>
-            <Link
-              href="/login"
+            {
+              loggedIn === true?
+              <Link
+              href="/mypage/edit"
               className="font-bold hover:text-primary hover:underline"
             >
-              로그인
-            </Link>
+              마이페이지
+            </Link>:
+            <Link
+            href="/login"
+            className="font-bold hover:text-primary hover:underline"
+          >
+            로그인
+          </Link>
+            }
           </li>
         </ul>
       </div>
