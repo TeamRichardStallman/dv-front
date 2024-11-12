@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { setUrl } from "@/utils/setUrl";
 import { setLocalStorage } from "@/utils/setLocalStorage";
+import Loading from "@/components/loading";
 
 const apiUrl = `${setUrl}/user`;
 
@@ -52,7 +53,6 @@ const AuthPage = () => {
         if (response.data.data.type === "signup") {
           router.push(`/signup?id=${response.data.data.userId}`);
         } else {
-          alert(response.data.data.name + "님 환영합니다.");
           setLocalStorage();
           router.push("/");
         }
@@ -70,11 +70,7 @@ const AuthPage = () => {
 
     handleKakaoLogin();
   }, [router]);
-  return (
-    <div className="bg-main-blue w-screen h-screen max-w-[500px] pt-32">
-      Loading ...
-    </div>
-  );
+  return <Loading title="로그인 중..." />;
 };
 
 export default AuthPage;

@@ -5,6 +5,8 @@ import useInterviewStore, { Interview } from "@/stores/useInterviewStore";
 import { setUrl } from "@/utils/setUrl";
 import axios from "axios";
 import useQuestionRequest from "@/stores/useQuestionRequest";
+import { interviewInfoMap } from "../interview-feedback-detail";
+import { getFileName } from "@/utils/format";
 
 interface Job {
   jobId: number;
@@ -117,14 +119,28 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
     <>
       <div className="flex justify-center mb-8">
         <div className="font-semibold border-2 border-secondary w-[900px] h-[300px] p-6 rounded-lg text-center">
-          <p className="mb-2">면접 모드: {interview.interviewMode}</p>
-          <p className="mb-2">면접 유형: {interview.interviewType}</p>
-          <p className="mb-2">면접 방식: {interview.interviewMethod}</p>
+          <p className="mb-2">
+            면접 모드:{" "}
+            {interview.interviewMode &&
+              interviewInfoMap[interview.interviewMode].label}
+          </p>
+          <p className="mb-2">
+            면접 유형:{" "}
+            {interview.interviewType &&
+              interviewInfoMap[interview.interviewType].label}
+          </p>
+          <p className="mb-2">
+            면접 방식:{" "}
+            {interview.interviewMethod &&
+              interviewInfoMap[interview.interviewMethod].label}
+          </p>
           <p className="mb-2">
             선택 직무: {interview.jobId && getJobLabelById(interview.jobId)}
           </p>
           {interview.files[0] && (
-            <p className="mb-4">자기소개서: {interview.files[0]}</p>
+            <p className="mb-4">
+              자기소개서: {getFileName(interview.files[0])}
+            </p>
           )}
           <p className="font-bold text-lg mt-10">
             위 정보가 맞는지 확인해주세요.

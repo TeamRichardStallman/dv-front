@@ -4,16 +4,17 @@ import Image from "next/image";
 import { Radar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
+  RadialLinearScale,
+  PointElement,
   ActiveElement,
   ChartEvent,
   TooltipItem,
-  RadialLinearScale,
-  PointElement,
   LineElement,
   Filler,
   Tooltip,
   Legend,
 } from "chart.js";
+import "react-circular-progressbar/dist/styles.css";
 import { GetUserProps } from "@/app/(user)/auth/page";
 import { CircularProgressbar } from "react-circular-progressbar";
 import { AiOutlineDown, AiOutlineUp } from "react-icons/ai";
@@ -37,7 +38,7 @@ interface JobDetails {
 
 interface InterviewFile {
   fileId: number;
-  type: string; // You can make this more specific if the types are known
+  type: string;
   fileName: string;
   s3FileUrl: string;
 }
@@ -45,24 +46,24 @@ interface InterviewFile {
 interface InterviewDetails {
   interviewId: number;
   interviewTitle: string;
-  interviewStatus: "INITIAL" | "IN_PROGRESS" | "FILE_UPLOAD"; // Add other statuses if needed
-  interviewType: "TECHNICAL" | "PERSONAL"; // Add other types if needed
-  interviewMethod: "CHAT" | "VIDEO" | "VOICE"; // Add other methods if needed
-  interviewMode: "REAL" | "GENERAL"; // Add other modes if needed
+  interviewStatus: "INITIAL" | "IN_PROGRESS" | "FILE_UPLOAD";
+  interviewType: "TECHNICAL" | "PERSONAL";
+  interviewMethod: "CHAT" | "VIDEO" | "VOICE";
+  interviewMode: "REAL" | "GENERAL";
   job: JobDetails;
   files: InterviewFile[];
 }
 
 interface EvaluationCriteria {
   evaluationCriteriaId: number;
-  evaluationCriteria: string; // Can be more specific if needed
+  evaluationCriteria: string;
   feedbackText: string;
   score: number;
 }
 
 interface AnswerEvaluationScore {
   answerEvaluationScoreId: number;
-  answerEvaluationScoreName: string; // Can be more specific if needed
+  answerEvaluationScoreName: string;
   score: number;
   rationale: string;
 }
@@ -86,6 +87,16 @@ export interface EvaluationDetailType {
 export interface GetEvaluationResponse {
   data: EvaluationDetailType;
 }
+
+export const interviewInfoMap: Record<string, { label: string }> = {
+  REAL: { label: "실전면접" },
+  TECHNICAL: { label: "기술면접" },
+  CHAT: { label: "채팅" },
+  PERSONAL: { label: "인성면접" },
+  GENERAL: { label: "모의면접" },
+  VOICE: { label: "음성" },
+  VIDEO: { label: "영상" },
+};
 
 type InterviewFeedbackDetailProps = {
   user: GetUserProps;
@@ -119,14 +130,9 @@ const InterviewFeedbackDetail = ({
 
   const totalScore = calculateTotalScore();
 
-  const interviewInfoMap: Record<string, { label: string }> = {
-    REAL: { label: "실전면접" },
-    TECHNICAL: { label: "기술면접" },
-    CHAT: { label: "채팅" },
-    PERSONAL: { label: "인성면접" },
-    GENERAL: { label: "모의면접" },
-    VOICE: { label: "음성" },
-    VIDEO: { label: "영상" },
+  const generMap: Record<string, { label: string }> = {
+    MAN: { label: "남성" },
+    WOMAN: { label: "여성" },
   };
 
   const criteriaMap: Record<string, { label: string }> = {
@@ -240,7 +246,8 @@ const InterviewFeedbackDetail = ({
             )}
             <p className="text-xl font-bold">{user?.name}</p>
             <p className="text-md text-gray-500 font-semibold">
-              {user?.gender}, {calculateAge(user?.birthdate)}세
+              {user?.gender && generMap[user?.gender].label},{" "}
+              {calculateAge(user?.birthdate)}세
             </p>
           </div>
 

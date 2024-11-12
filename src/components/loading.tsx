@@ -1,6 +1,6 @@
 type LoadingProps = {
   title: string;
-  description: string;
+  description?: string;
 };
 
 export default function Loading({ title, description }: LoadingProps) {
@@ -21,7 +21,7 @@ export default function Loading({ title, description }: LoadingProps) {
             />
           ))}
         </div>
-        <p>{description}</p>
+        {description && <p>{description}</p>}
         <p>새로고침 버튼을 누르지 말아주세요.</p>
       </div>
     </div>

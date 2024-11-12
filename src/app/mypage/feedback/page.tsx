@@ -56,13 +56,10 @@ const InterviewFeedbackListPage = () => {
             href={`/mypage/feedback/${evaluation.interviewId}`}
             key={evaluation.interviewId}
           >
-            <div className="border p-4 rounded-lg shadow-md bg-white hover:bg-gray-50 cursor-pointer">
-              <h3 className="text-lg font-semibold">
+            <div className="border p-4 py-8 rounded-lg shadow-md bg-white hover:bg-gray-50 cursor-pointer">
+              <h3 className="text-xl font-semibold">
                 {evaluation.interviewTitle}
               </h3>
-              <p className="text-sm text-gray-500">
-                ID: {evaluation.interviewId}
-              </p>
             </div>
           </Link>
         ))}

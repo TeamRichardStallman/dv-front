@@ -41,3 +41,7 @@ export const calculateAge = (
 
   return age;
 };
+
+export function getFileName(path: string) {
+  return path.split("/").pop();
+}
