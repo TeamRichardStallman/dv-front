@@ -28,7 +28,7 @@ const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header loggedIn={loggedIn}/>
+      <Header loggedIn={loggedIn} />
 
       <div className="flex flex-1">
         <nav className="bg-gray-100 p-6 shadow-lg rounded-lg fixed top-28 left-8 w-56 h-auto">
@@ -52,7 +52,7 @@ const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
 
         <main className="flex-grow p-8 ml-auto mr-auto w-full max-w-4xl flex flex-col items-center">
           <h1 className="text-4xl font-bold mb-8">{currentPage}</h1>
-          <div className="w-full max-w-md">{children}</div>
+          <div className="flex w-full max-w-2xl justify-center">{children}</div>
         </main>
       </div>
 

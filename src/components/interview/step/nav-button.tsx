@@ -15,14 +15,14 @@ const NavButtons = ({
     <div className="flex gap-4 mt-8 font-semibold justify-center relative">
       <button
         onClick={onPrev}
-        className="bg-secondary w-24 text-white py-2 px-6 rounded-md"
+        className="bg-secondary text-white py-2 px-6 rounded-md"
       >
         {prevButtonText}
       </button>
       <div className="relative group">
         <button
           onClick={!disabled ? onNext : undefined}
-          className={`w-24 py-2 px-6 rounded-md text-white ${
+          className={`py-2 px-6 rounded-md text-white ${
             disabled ? "bg-gray-400 cursor-not-allowed" : "bg-secondary"
           }`}
           disabled={disabled}

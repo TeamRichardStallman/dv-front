@@ -1,10 +1,50 @@
 "use client";
 import React from "react";
 import NavButtons from "./nav-button";
-import useInterviewStore from "@/stores/useInterviewStore";
+import useInterviewStore, { Interview } from "@/stores/useInterviewStore";
+import { setUrl } from "@/utils/setUrl";
+import axios from "axios";
+import useQuestionRequest from "@/stores/useQuestionRequest";
 
-const CheckInfoStep = ({ onPrev, onNext }: StepProps) => {
+interface Job {
+  jobId: number;
+  jobName: string;
+  jobNameKorean: string;
+  jobDescription: string;
+}
+
+interface File {
+  fileId: number;
+  type: string;
+  fileName: string;
+  s3FileUrl: string;
+}
+
+interface InterviewData {
+  interviewId: number;
+  interviewTitle: string;
+  interviewStatus: string;
+  interviewType: string;
+  interviewMethod: string;
+  interviewMode: string;
+  job: Job;
+  files: File[];
+}
+
+interface ApiResponse {
+  code: number;
+  message: string;
+  data: InterviewData;
+}
+
+const apiUrl = `${setUrl}`;
+interface StepSubmitProps extends StepProps {
+  onSubmit: (interviewId: number) => void;
+}
+
+const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
   const { interview } = useInterviewStore();
+  const { setQuestionRequest } = useQuestionRequest();
 
   const jobs = [
     { label: "프론트엔드", imageSrc: "/frontend.png", id: 2 },
@@ -16,6 +56,61 @@ const CheckInfoStep = ({ onPrev, onNext }: StepProps) => {
   const getJobLabelById = (jobId: number) => {
     const job = jobs.find((job) => job.id === jobId);
     return job ? job.label : "직업을 찾을 수 없습니다";
+  };
+
+  const getInterviewTitle = (interview: Interview) => {
+    const now = new Date();
+    const formattedDate = now.toISOString().substring(0, 10); // YYYY-MM-DD 형식
+    return `${formattedDate}_${interview.interviewType}_${interview.interviewMethod}_${interview.interviewMode}_면접`;
+  };
+
+  const handleClick = async () => {
+    try {
+      const response = await axios.post<ApiResponse>(
+        `${apiUrl}/interview`,
+        {
+          interviewTitle: getInterviewTitle(interview),
+          interviewType: interview.interviewType,
+          interviewMethod: interview.interviewMethod,
+          interviewMode: interview.interviewMode,
+          jobId: interview.jobId,
+          files: [
+            {
+              type: "COVER_LETTER",
+              filePath: interview.files[0],
+            },
+          ],
+        },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.data && response.data.data) {
+        const data = response.data;
+        setQuestionRequest({
+          interviewId: data.data.interviewId,
+          interviewTitle: data.data.interviewTitle,
+          interviewStatus: data.data.interviewStatus,
+          interviewType: data.data.interviewType,
+          interviewMethod: data.data.interviewMethod,
+          interviewMode: data.data.interviewMode,
+          files: [
+            {
+              type: "COVER_LETTER",
+              filePath: data.data.files[0].s3FileUrl,
+            },
+          ],
+          jobId: data.data.job.jobId,
+        });
+        onNext();
+        onSubmit(data.data.interviewId);
+      }
+    } catch (error) {
+      console.error("stepup data transfer failed:", error);
+    }
   };
 
   return (
@@ -42,9 +137,9 @@ const CheckInfoStep = ({ onPrev, onNext }: StepProps) => {
 
       <NavButtons
         onPrev={onPrev}
-        onNext={onNext}
+        onNext={handleClick}
         prevButtonText="이전"
-        nextButtonText="다음"
+        nextButtonText="면접 시작"
       />
     </>
   );

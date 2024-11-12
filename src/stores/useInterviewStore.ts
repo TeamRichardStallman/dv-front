@@ -5,7 +5,7 @@ export type InterviewMode = "GENERAL" | "REAL" | undefined;
 export type InterviewType = "TECHNICAL" | "PERSONAL" | undefined;
 export type InterviewMethod = "CHAT" | "VOICE" | "VIDEO" | undefined;
 
-interface Interview {
+export interface Interview {
   interviewMode: "GENERAL" | "REAL" | undefined;
   interviewType: "TECHNICAL" | "PERSONAL" | undefined;
   interviewMethod: "CHAT" | "VOICE" | "VIDEO" | undefined;

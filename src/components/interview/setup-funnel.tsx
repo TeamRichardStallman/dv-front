@@ -23,6 +23,10 @@ const SetupFunnel = ({ step, setStep, interviewMode }: SetupFunnelProps) => {
       ? (["type", "method", "job", "check-info"] as const)
       : (["type", "method", "job", "cover-letter", "check-info"] as const);
 
+  const handleSubmit = (interviewId: number) => {
+    router.push(`/interview/ongoing/${interviewId}`);
+  };
+
   return (
     <Funnel steps={steps} step={step}>
       <Funnel.Step name="type">
@@ -76,6 +80,7 @@ const SetupFunnel = ({ step, setStep, interviewMode }: SetupFunnelProps) => {
           onNext={() => {
             setStep("check-info");
           }}
+          onSubmit={handleSubmit}
         />
       </Funnel.Step>
     </Funnel>

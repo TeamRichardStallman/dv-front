@@ -78,9 +78,9 @@ const UserForm = ({
       <div className="flex flex-col items-center">
         <div className="relative inline-block">
           <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-200">
-            {profileImageUrl ? (
+            {initUserData?.s3ProfileImageUrl ? (
               <Image
-                src={profileImageUrl}
+                src={initUserData?.s3ProfileImageUrl}
                 alt="프로필 이미지"
                 width={200}
                 height={200}

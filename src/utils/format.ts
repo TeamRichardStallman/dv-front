@@ -15,3 +15,29 @@ export const formatFileName = (
 
   return `user-${userId}/interview-${interviewId}/${uniqueId}-${originalName}`;
 };
+
+export const calculateAge = (
+  birthdate: string | Date | undefined
+): number | null => {
+  if (!birthdate) return null;
+
+  // Convert to Date if birthdate is a string
+  const birthDateObj =
+    typeof birthdate === "string" ? new Date(birthdate) : birthdate;
+
+  const today = new Date();
+  const birthYear = birthDateObj.getFullYear();
+  const birthMonth = birthDateObj.getMonth();
+  const birthDay = birthDateObj.getDate();
+
+  let age = today.getFullYear() - birthYear;
+
+  if (
+    today.getMonth() < birthMonth ||
+    (today.getMonth() === birthMonth && today.getDate() < birthDay)
+  ) {
+    age--;
+  }
+
+  return age;
+};

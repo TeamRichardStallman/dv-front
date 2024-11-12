@@ -52,8 +52,7 @@ const MultiFileUploadPanel = ({
       reader.onload = (e) => {
         if (e.target?.result instanceof ArrayBuffer) {
           const decoder = new TextDecoder("utf-8");
-          const text = decoder.decode(e.target.result);
-          console.log(text);
+          decoder.decode(e.target.result);
         }
       };
       reader.readAsArrayBuffer(file);
