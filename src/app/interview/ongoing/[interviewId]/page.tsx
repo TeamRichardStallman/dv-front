@@ -5,13 +5,14 @@ import useQuestionRequest from "@/stores/useQuestionRequest";
 import { setUrl } from "@/utils/setUrl";
 import axios from "axios";
 import Loading from "@/components/loading";
-import { ToastContainer } from "react-toastify";
 import { formatTime, removeInterview } from "@/utils/format";
 import { GetResponse, GetUserProps } from "@/app/(user)/auth/page";
 import {
   interviewInfoMap,
   jobsMap,
 } from "@/components/interview/interview-feedback-detail";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const apiUrl = `${setUrl}`;
 
@@ -160,6 +161,34 @@ const InterviewOngoingDetailPage = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (timeLeft === 1) {
+      toast.info("시간이 초과되어 다음 질문으로 넘어갑니다.", {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: { fontWeight: "600", whiteSpace: "nowrap", width: "350px" },
+      });
+      sendNextQuestion();
+    }
+  }, [timeLeft, sendNextQuestion]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime === 1) {
+          return MAX_TIME;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [questionResponse]);
 
   const handleNextClick = () => {
     if (shouldRedirect) {
