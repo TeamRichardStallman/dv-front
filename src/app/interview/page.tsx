@@ -2,9 +2,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import SettingBtn from "@/components/settingbtn";
+import useInterviewStore, { InterviewMode } from "@/stores/useInterviewStore";
 
 const InterviewPage = () => {
-  const [mode, setMode] = useState<string | null>(null);
+  const [mode, setMode] = useState<InterviewMode>();
+  const { updateInterviewField } = useInterviewStore();
+
+  const handleClick = () => {
+    if (mode) {
+      updateInterviewField("interviewMode", mode);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -40,6 +48,7 @@ const InterviewPage = () => {
                 mode ? "bg-secondary" : "bg-gray-400 cursor-not-allowed"
               }`}
               disabled={!mode}
+              onClick={handleClick}
             >
               다음
             </button>

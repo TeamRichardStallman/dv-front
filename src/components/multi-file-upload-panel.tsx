@@ -9,7 +9,7 @@ export interface MultiFileUploadPanelProps {
   files: MultiFileUploadPanelDataType[];
   submitButtonText?: string;
   submitButtonColor?: string;
-  onSubmitButtonClick?: () => void;
+  onSubmitButtonClick?: (files: string[]) => void;
 }
 
 const MultiFileUploadPanel = ({
@@ -52,8 +52,7 @@ const MultiFileUploadPanel = ({
       reader.onload = (e) => {
         if (e.target?.result instanceof ArrayBuffer) {
           const decoder = new TextDecoder("utf-8");
-          const text = decoder.decode(e.target.result);
-          console.log(text);
+          decoder.decode(e.target.result);
         }
       };
       reader.readAsArrayBuffer(file);
@@ -78,7 +77,9 @@ const MultiFileUploadPanel = ({
   const handleSubmitButtonClick = () => {
     handleSave();
     if (onSubmitButtonClick) {
-      onSubmitButtonClick();
+      if (selectedFile) {
+        onSubmitButtonClick([`cover-letters/${selectedFile}`]);
+      }
     }
   };
 
