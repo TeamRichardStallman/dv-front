@@ -12,14 +12,14 @@ export interface GetEvaluationListResponse {
   code: number;
   message: string;
   data: {
-    evaluationInfos: EvaluationInfo[];
+    interviews: EvaluationInfo[];
   };
 }
 
 const apiUrl = `${setUrl}`;
 
 const InterviewFeedbackListPage = () => {
-  const [evaluationInfos, setEvaluationInfos] = useState<EvaluationInfo[]>([]);
+  const [interviews, setInterviews] = useState<EvaluationInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,10 +32,10 @@ const InterviewFeedbackListPage = () => {
             headers: { "Content-Type": "application/json" },
           }
         );
-        const sortedEvaluations = response.data.data.evaluationInfos.sort(
+        const sortedEvaluations = response.data.data.interviews.sort(
           (a, b) => b.interviewId - a.interviewId
         );
-        setEvaluationInfos(sortedEvaluations);
+        setInterviews(sortedEvaluations);
       } catch (error) {
         console.error("Failed to fetch interview/evaluations:", error);
       } finally {
@@ -51,7 +51,7 @@ const InterviewFeedbackListPage = () => {
   return (
     <div className="container mx-auto p-4">
       <ul className="flex flex-col gap-4">
-        {evaluationInfos.map((evaluation) => (
+        {interviews.map((evaluation) => (
           <Link
             href={`/mypage/feedback/${evaluation.interviewId}`}
             key={evaluation.interviewId}
