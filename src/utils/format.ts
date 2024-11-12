@@ -45,3 +45,7 @@ export const calculateAge = (
 export function getFileName(path: string) {
   return path.split("/").pop();
 }
+
+export function removeInterview(text: string): string {
+  return text.replace("면접", "");
+}

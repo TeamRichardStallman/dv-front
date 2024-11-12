@@ -6,7 +6,12 @@ import { setUrl } from "@/utils/setUrl";
 import axios from "axios";
 import Loading from "@/components/loading";
 import { ToastContainer } from "react-toastify";
-import { formatTime } from "@/utils/format";
+import { formatTime, removeInterview } from "@/utils/format";
+import { GetResponse, GetUserProps } from "@/app/(user)/auth/page";
+import {
+  interviewInfoMap,
+  jobsMap,
+} from "@/components/interview/interview-feedback-detail";
 
 const apiUrl = `${setUrl}`;
 
@@ -68,6 +73,7 @@ const InterviewOngoingDetailPage = () => {
   >();
   const [count, setCount] = useState(1);
   const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [user, setUser] = useState<GetUserProps>();
 
   useEffect(() => {
     let hasFetched = false;
@@ -76,6 +82,14 @@ const InterviewOngoingDetailPage = () => {
       if (!hasFetched) {
         hasFetched = true;
         setLoading(true);
+        const userResponse = await axios.get<GetResponse>(
+          `${apiUrl}/user/info`,
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        setUser(userResponse.data.data);
         try {
           const response = await axios.post<QuestionResponse>(
             `${apiUrl}/question/initial-question`,
@@ -163,17 +177,26 @@ const InterviewOngoingDetailPage = () => {
   return (
     <div>
       {loading ? (
-        <Loading
-          title="질문 리스트 생성중"
-          description="잠시만 기다려주세요."
-        />
+        <Loading title="질문 생성중" description="잠시만 기다려주세요." />
       ) : (
         <div className="h-[65vh] flex flex-col items-center">
           <ToastContainer />
           <div className="flex gap-4 items-center mb-12 font-bold">
-            <h1 className="text-3xl">OOO님의 실전/기술 면접</h1>
+            <h1 className="text-3xl">
+              {user?.nickname}님의{" "}
+              {questionRequest.interviewMode &&
+                removeInterview(
+                  interviewInfoMap[questionRequest.interviewMode].label
+                )}
+              /
+              {questionRequest.interviewType &&
+                removeInterview(
+                  interviewInfoMap[questionRequest.interviewType].label
+                )}{" "}
+              면접
+            </h1>
             <div className="text-xl rounded-md px-4 py-3 bg-[#BDC3C7] text-white w-35 h-15">
-              OO 직무
+              {questionRequest.jobId && jobsMap[questionRequest.jobId].label}{" "}
             </div>
           </div>
 

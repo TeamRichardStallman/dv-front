@@ -98,6 +98,13 @@ export const interviewInfoMap: Record<string, { label: string }> = {
   VIDEO: { label: "영상" },
 };
 
+export const jobsMap: Record<number, { label: string; imageSrc: string }> = {
+  2: { label: "프론트엔드", imageSrc: "/frontend.png" },
+  1: { label: "백엔드", imageSrc: "/backend.png" },
+  3: { label: "클라우드", imageSrc: "/cloud.png" },
+  4: { label: "인공지능", imageSrc: "/ai.png" },
+};
+
 type InterviewFeedbackDetailProps = {
   user: GetUserProps;
   evaluation: EvaluationDetailType;
