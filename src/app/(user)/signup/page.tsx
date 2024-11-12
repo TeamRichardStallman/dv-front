@@ -36,7 +36,7 @@ const SignupPage = () => {
   };
   return (
     <div className="flex flex-col items-center justify-center">
-      <h1 className="text-4xl font-bold mb-8">회원정보입력</h1>
+      <h1 className="text-4xl font-bold mb-8">회원가입</h1>
       <div className="w-full min-w-[420px] max-w-2xl p-8 border rounded-lg shadow-md bg-white">
         <UserForm onSubmit={handleFormSubmit} initUserData={user} />
       </div>
