@@ -30,7 +30,7 @@ const UserForm = ({
     initUserData?.gender ? initUserData?.gender : "MAN"
   );
   const [, setProfileImage] = useState<File | null>(null);
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [, setProfileImageUrl] = useState<string | null>(null);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
 
   useEffect(() => {
