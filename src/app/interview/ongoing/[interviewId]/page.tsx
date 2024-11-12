@@ -126,10 +126,11 @@ const InterviewOngoingDetailPage = () => {
             },
           }
         );
-        // if (shouldRedirect) {
-        //   return;
-        // }
+        if (shouldRedirect) {
+          return;
+        }
         setQuestionResponse(response.data);
+        setCount((prev) => prev + 1);
         setTimeLeft(MAX_TIME);
         setAnswerText("");
 
