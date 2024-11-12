@@ -21,9 +21,9 @@ interface InterviewDetails {
   interviewId: number;
   interviewTitle: string;
   interviewStatus: "IN_PROGRESS" | "FILE_UPLOADED" | "COMPLETED" | "CANCELLED";
-  interviewType: "TECHNICAL" | "BEHAVIORAL" | "OTHER_TYPE";
-  interviewMethod: "CHAT" | "VIDEO" | "IN_PERSON";
-  interviewMode: "REAL" | "MOCK";
+  interviewType: "TECHNICAL" | "PERSONAL";
+  interviewMethod: "CHAT" | "VIDEO" | "VOICE";
+  interviewMode: "GENERAL" | "REAL";
   job: JobDetails;
 }
 
@@ -35,14 +35,17 @@ interface Answer {
 
 interface InterviewAnswerRequest {
   interviewId: number;
-  questionId: number;
+  answerQuestionId: number;
+  nextQuestionId?: number;
   answer: Answer;
 }
 
 interface QuestionResponseData {
   interview: InterviewDetails;
-  questionText: string;
-  nextQuestionId: number;
+  currentQuestionId: number;
+  currentQuestionText: string;
+  nextQuestionId?: number;
+  nextQuestionText?: string;
   hasNext: boolean;
 }
 
@@ -63,9 +66,8 @@ const InterviewOngoingDetailPage = () => {
   const [questionResponse, setQuestionResponse] = useState<
     QuestionResponse | undefined
   >();
-  const [currentQuestionId, setCurrentQuestionId] = useState<
-    number | undefined
-  >();
+  const [count, setCount] = useState(1);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
     let hasFetched = false;
@@ -86,7 +88,6 @@ const InterviewOngoingDetailPage = () => {
             }
           );
           setQuestionResponse(response.data);
-          setCurrentQuestionId(response.data.data.nextQuestionId - 1);
         } catch (error) {
           console.error("Error:", error);
         } finally {
@@ -99,10 +100,14 @@ const InterviewOngoingDetailPage = () => {
   }, []);
 
   const sendNextQuestion = async () => {
-    if (questionRequest.interviewId && currentQuestionId !== undefined) {
+    if (
+      questionRequest.interviewId &&
+      questionResponse?.data.currentQuestionId !== undefined
+    ) {
       const interviewAnswerRequest: InterviewAnswerRequest = {
         interviewId: questionRequest.interviewId,
-        questionId: currentQuestionId,
+        answerQuestionId: questionResponse?.data.currentQuestionId,
+        nextQuestionId: questionResponse?.data.nextQuestionId ?? undefined,
         answer: {
           answerText: answerText,
           s3AudioUrl: "",
@@ -121,21 +126,32 @@ const InterviewOngoingDetailPage = () => {
             },
           }
         );
+        // if (shouldRedirect) {
+        //   return;
+        // }
         setQuestionResponse(response.data);
         setTimeLeft(MAX_TIME);
         setAnswerText("");
 
-        if (response.data.data.hasNext) {
-          setCurrentQuestionId(response.data.data.nextQuestionId);
+        if (!response.data.data.hasNext) {
+          setShouldRedirect(true);
         } else {
-          router.push(`/interview/feedback/${questionRequest.interviewId}`);
-          return;
+          setShouldRedirect(false);
         }
       } catch (error) {
         console.error("Error:", error);
       } finally {
         setLoading(false);
       }
+    }
+  };
+
+  const handleNextClick = () => {
+    if (shouldRedirect) {
+      sendNextQuestion();
+      router.push(`/interview/feedback/${questionRequest.interviewId}`);
+    } else {
+      sendNextQuestion();
     }
   };
 
@@ -162,7 +178,7 @@ const InterviewOngoingDetailPage = () => {
 
           <div className="flex flex-col w-[900px] gap-6">
             <div className="flex w-full bg-primary font-semibold text-white rounded-md items-center justify-center p-3 text-lg">
-              Q. {questionResponse?.data.questionText}
+              Q{count}. {questionResponse?.data.currentQuestionText}
             </div>
             <textarea
               className="w-full h-72 border-2 font-medium rounded-md p-3"
@@ -194,9 +210,9 @@ const InterviewOngoingDetailPage = () => {
 
             <button
               className="px-6 py-3 bg-secondary text-white rounded font-semibold text-xl"
-              onClick={sendNextQuestion}
+              onClick={handleNextClick}
             >
-              {questionResponse?.data.hasNext ? "다음" : "제출"}
+              {shouldRedirect ? "제출" : "다음"}
             </button>
           </div>
         </div>
