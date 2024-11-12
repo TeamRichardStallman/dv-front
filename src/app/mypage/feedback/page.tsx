@@ -26,7 +26,7 @@ const InterviewFeedbackListPage = () => {
     const fetchEvaluations = async () => {
       try {
         const response = await axios.get<GetEvaluationListResponse>(
-          `${apiUrl}/evaluation`,
+          `${apiUrl}/interview/evaluation`,
           {
             withCredentials: true,
             headers: { "Content-Type": "application/json" },
@@ -37,7 +37,7 @@ const InterviewFeedbackListPage = () => {
         );
         setEvaluationInfos(sortedEvaluations);
       } catch (error) {
-        console.error("Failed to fetch evaluations:", error);
+        console.error("Failed to fetch interview/evaluations:", error);
       } finally {
         setLoading(false);
       }
