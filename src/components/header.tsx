@@ -14,12 +14,16 @@ export default function Header({ loggedIn }: HeaderProps) {
   const handleLogout = async () => {
     setLocalStorage("false");
 
-    await axios.post(`${apiUrl}/user/logout`, {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    await axios.post(
+      `${apiUrl}/user/logout`,
+      {},
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     window.location.href = "/login";
   };
