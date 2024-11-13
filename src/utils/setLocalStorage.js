@@ -1,3 +1,3 @@
-export const setLocalStorage = () => {
-    return localStorage.setItem("isAuthenticated", "true");
-}
+export const setLocalStorage = (isAuth = "true") => {
+  return localStorage.setItem("isAuthenticated", isAuth);
+};

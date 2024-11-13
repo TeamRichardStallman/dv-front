@@ -221,8 +221,11 @@ const InterviewFeedbackDetail = ({
       if (elements.length > 0) {
         const index = elements[0].index;
         const scoreDetails = selectedAnswerEvaluation
-          ? selectedAnswerEvaluation.answerEvaluationScores[index]
+          ? selectedAnswerEvaluation.answerEvaluationScores[
+              index + 1 <= 4 ? index + 1 : 0
+            ]
           : null;
+
         setSelectedScoreDetail(
           scoreDetails
             ? {

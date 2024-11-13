@@ -3,6 +3,7 @@ import { MultiFileUploadPanelDataType } from "@/data/profileData";
 import React, { useState } from "react";
 import { AiOutlinePaperClip } from "react-icons/ai";
 import { ToastContainer, toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 import "react-toastify/dist/ReactToastify.css";
 
 export interface MultiFileUploadPanelProps {
@@ -10,6 +11,8 @@ export interface MultiFileUploadPanelProps {
   submitButtonText?: string;
   submitButtonColor?: string;
   onSubmitButtonClick?: (files: string[]) => void;
+  showBackButton?: boolean;
+  onBackButtonClick?: () => void;
 }
 
 const MultiFileUploadPanel = ({
@@ -17,7 +20,10 @@ const MultiFileUploadPanel = ({
   submitButtonText = "저장",
   submitButtonColor = "bg-primary",
   onSubmitButtonClick,
+  showBackButton = false,
+  onBackButtonClick,
 }: MultiFileUploadPanelProps) => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("coverLetter");
   const [fileList, setFileList] = useState<{ name: string; type: string }[]>([
     { name: "자기소개서_1.pdf", type: "coverLetter" },
@@ -117,6 +123,17 @@ const MultiFileUploadPanel = ({
     }
   };
 
+  const handleBackButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    if (onBackButtonClick) {
+      onBackButtonClick();
+    } else {
+      event.preventDefault();
+      router.back();
+    }
+  };
+
   return (
     <div className="flex flex-col items-center p-8 min-h-screen">
       <div className="flex items-center mb-4 font-semibold space-x-4 w-[1000px] justify-center">
@@ -162,26 +179,38 @@ const MultiFileUploadPanel = ({
         )}
       </div>
 
-      <div className="flex items-center justify-end w-[900px] mt-4">
-        <label className="flex items-center cursor-pointer">
-          <AiOutlinePaperClip className="text-primary text-4xl mr-2" />
-          <input
-            type="file"
-            onChange={handleFileChange}
-            className="hidden"
-            accept="application/txt"
-            onClick={(e) => {
-              e.currentTarget.value = "";
-            }}
-          />
-        </label>
-        <span className="text-sm text-gray-600 mr-2">{selectedFile}</span>
-        <button
-          onClick={handleSubmitButtonClick}
-          className={`py-2 px-6 font-semibold text-white rounded-lg ml-2 whitespace-nowrap ${submitButtonColor}`}
-        >
-          {uploading ? "업로드 중..." : submitButtonText}
-        </button>
+      <div className="flex items-center justify-between w-[900px] mt-4">
+        {showBackButton ? (
+          <button
+            onClick={handleBackButtonClick}
+            className="py-2 px-6 font-semibold text-white rounded-lg ml-2 mr-2 bg-secondary whitespace-nowrap"
+          >
+            이전
+          </button>
+        ) : (
+          <div />
+        )}
+        <div className="flex items-center">
+          <label className="flex items-center cursor-pointer">
+            <AiOutlinePaperClip className="text-primary text-4xl mr-2" />
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="hidden"
+              accept="application/txt"
+              onClick={(e) => {
+                e.currentTarget.value = "";
+              }}
+            />
+          </label>
+          <span className="text-sm text-gray-600 mr-2">{selectedFile}</span>
+          <button
+            onClick={handleSubmitButtonClick}
+            className={`py-2 px-6 font-semibold text-white rounded-lg ml-2 whitespace-nowrap ${submitButtonColor}`}
+          >
+            {uploading ? "업로드 중..." : submitButtonText}
+          </button>
+        </div>
       </div>
       <ToastContainer
         position="bottom-right"
