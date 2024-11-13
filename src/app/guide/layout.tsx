@@ -5,10 +5,10 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { isLogined } from "@/utils/isLogined";
 
-interface InterviewLayoutProps {
+interface GuideLayoutProps {
   children: React.ReactNode;
 }
-const InterviewLayout = ({ children }: InterviewLayoutProps) => {
+const GuideLayout = ({ children }: GuideLayoutProps) => {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -25,4 +25,4 @@ const InterviewLayout = ({ children }: InterviewLayoutProps) => {
   );
 };
 
-export default InterviewLayout;
+export default GuideLayout;
