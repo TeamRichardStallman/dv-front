@@ -3,6 +3,8 @@ import { MultiFileUploadPanelDataType } from "@/data/profileData";
 import React, { useState } from "react";
 import { AiOutlinePaperClip } from "react-icons/ai";
 import { ToastContainer, toast } from "react-toastify";
+import { v4 as uuidv4 } from "uuid";
+import mammoth from "mammoth";
 import "react-toastify/dist/ReactToastify.css";
 
 const Modal = ({
@@ -49,9 +51,9 @@ const MultiFileUploadPanel = ({
   onSubmitButtonClick,
 }: MultiFileUploadPanelProps) => {
   const [activeTab, setActiveTab] = useState<string>("coverLetter");
-  const [fileList, setFileList] = useState<{ name: string; type: string }[]>([
-    { name: "자기소개서_1.pdf", type: "coverLetter" },
-  ]);
+  const [fileList, setFileList] = useState<
+    { id: string; name: string; type: string }[]
+  >([{ id: uuidv4(), name: "자기소개서_1.pdf", type: "coverLetter" }]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -75,14 +77,17 @@ const MultiFileUploadPanel = ({
     const fileName = event.target.value;
     setSelectedFile(fileName);
     if (fileName) {
-      setPdfUrl(`/pdf/${fileName}`);
+      const selected = fileList.find((file) => file.name === fileName);
+      setPdfUrl(selected ? `/pdf/${selected.name}` : null);
       setIsManualInput(false);
     } else {
       setPdfUrl(null);
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (isManualInput) {
       setModalState({
@@ -91,22 +96,55 @@ const MultiFileUploadPanel = ({
       });
       setPendingFile(file || null);
     } else if (file) {
-      processFile(file);
+      await processFile(file);
     }
   };
 
-  const processFile = (file: File) => {
-    setSelectedFile(file.name);
-    setPdfUrl(URL.createObjectURL(file));
-    setIsManualInput(false);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result instanceof ArrayBuffer) {
-        const decoder = new TextDecoder("utf-8");
-        decoder.decode(e.target.result);
-      }
+  const processFile = async (file: File) => {
+    const newFile = {
+      id: uuidv4(),
+      name: file.name,
+      type: activeTab,
     };
-    reader.readAsArrayBuffer(file);
+
+    setFileList((prev) => [...prev, newFile]);
+    setSelectedFile(newFile.name);
+    setPdfUrl(null);
+    setIsManualInput(false);
+
+    if (file.type === "application/pdf") {
+      setPdfUrl(URL.createObjectURL(file));
+    } else if (
+      file.type ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        if (e.target?.result instanceof ArrayBuffer) {
+          const arrayBuffer = e.target.result;
+          try {
+            const { value } = await mammoth.extractRawText({ arrayBuffer });
+            const encodedContent = encodeURIComponent(value);
+            setPdfUrl(`data:text/html;charset=utf-8,${encodedContent}`);
+          } catch {
+            toast.error("DOCX 파일 처리 중 오류가 발생했습니다.");
+          }
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else if (file.type === "text/plain") {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          const encodedContent = encodeURIComponent(e.target.result as string);
+          setPdfUrl(`data:text/html;charset=utf-8,${encodedContent}`);
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      toast.error("지원하지 않는 파일 형식입니다.");
+    }
+
     setFile(file);
   };
 
@@ -123,21 +161,16 @@ const MultiFileUploadPanel = ({
     }
   };
 
-  const handleModalConfirm = () => {
+  const handleModalConfirm = async () => {
     setModalState({ show: false, message: "" });
     if (pendingFile) {
-      processFile(pendingFile);
+      await processFile(pendingFile);
       setPendingFile(null);
     } else {
       setIsManualInput(true);
       setPdfUrl(null);
       setSelectedFile(null);
     }
-  };
-
-  const handleModalCancel = () => {
-    setModalState({ show: false, message: "" });
-    setPendingFile(null);
   };
 
   const handleSave = async () => {
@@ -154,7 +187,7 @@ const MultiFileUploadPanel = ({
     if (isManualInput) {
       toast.success(`${activeTab}에 텍스트가 저장되었습니다.`);
     } else {
-      const newFile = { name: selectedFile!, type: activeTab };
+      const newFile = { id: uuidv4(), name: selectedFile!, type: activeTab };
       setFileList((prev) => [...prev, newFile]);
       toast.success(`${activeTab}에 파일이 저장되었습니다.`);
       await handleUpload();
@@ -207,12 +240,8 @@ const MultiFileUploadPanel = ({
       });
 
       toast.success("파일이 성공적으로 업로드되었습니다.");
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(`업로드 실패: ${error.message}`);
-      } else {
-        toast.error("업로드 중 알 수 없는 오류가 발생했습니다.");
-      }
+    } catch {
+      toast.error("업로드 중 오류가 발생했습니다.");
     } finally {
       setUploading(false);
     }
@@ -224,7 +253,7 @@ const MultiFileUploadPanel = ({
         <Modal
           message={modalState.message}
           onConfirm={handleModalConfirm}
-          onCancel={handleModalCancel}
+          onCancel={() => setModalState({ show: false, message: "" })}
         />
       )}
       <div className="flex items-center justify-between w-[900px] mb-4">
@@ -252,7 +281,7 @@ const MultiFileUploadPanel = ({
           {fileList
             .filter((file) => file.type === activeTab)
             .map((file) => (
-              <option key={file.name} value={file.name}>
+              <option key={file.id} value={file.name}>
                 {file.name}
               </option>
             ))}
@@ -297,7 +326,12 @@ const MultiFileUploadPanel = ({
             onChange={(e) => setManualText(e.target.value)}
           />
         ) : pdfUrl ? (
-          <iframe src={pdfUrl} width="100%" height="100%" />
+          <iframe
+            src={pdfUrl}
+            width="100%"
+            height="100%"
+            title="file-preview"
+          />
         ) : (
           <p className="text-gray-500">파일을 선택하거나 직접 입력하세요.</p>
         )}
