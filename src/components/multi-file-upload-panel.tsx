@@ -209,7 +209,7 @@ const MultiFileUploadPanel = ({
   };
 
   return (
-    <div className="flex flex-col items-center p-8 min-h-screen">
+    <div className="flex flex-col items-center">
       {showModal && (
         <Modal
           message={modalMessage}
