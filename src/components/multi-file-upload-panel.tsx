@@ -175,7 +175,10 @@ const MultiFileUploadPanel = ({
   };
 
   const handleUpload = async () => {
-    if (!file) return alert("파일을 선택하세요.");
+    if (!file) {
+      toast.error("파일이 선택되지 않았습니다.");
+      return;
+    }
 
     setUploading(true);
 
@@ -190,7 +193,7 @@ const MultiFileUploadPanel = ({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to get presigned URL");
+        throw new Error("서버에서 URL을 가져오지 못했습니다.");
       }
 
       const { presignedUrl } = await response.json();
@@ -200,9 +203,14 @@ const MultiFileUploadPanel = ({
         headers: { "Content-Type": file.type },
         body: file,
       });
-    } catch (error) {
-      console.error("Upload error:", error);
-      alert("파일 업로드에 실패했습니다.");
+
+      toast.success("파일이 성공적으로 업로드되었습니다.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(`업로드 실패: ${error.message}`);
+      } else {
+        toast.error("업로드 중 알 수 없는 오류가 발생했습니다.");
+      }
     } finally {
       setUploading(false);
     }
