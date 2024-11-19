@@ -223,6 +223,11 @@ const MultiFileUploadPanel = ({
           </p>
         )}
       </div>
+      {selectedFile && (
+        <div className="mt-2 text-gray-500 font-medium">
+          파일명: {selectedFile}
+        </div>
+      )}
       <ToastContainer
         position="bottom-right"
         toastStyle={{ fontWeight: "500" }}
