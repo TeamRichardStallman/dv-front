@@ -184,7 +184,7 @@ const MultiFileUploadPanel = ({
               type="file"
               onChange={handleFileChange}
               className="hidden"
-              accept="application/txt"
+              accept=".pdf,.docx,.txt,.md"
               onClick={(e) => {
                 e.currentTarget.value = "";
               }}
