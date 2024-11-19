@@ -58,8 +58,10 @@ const MultiFileUploadPanel = ({
   const [file, setFile] = useState<File | null>(null);
   const [isManualInput, setIsManualInput] = useState<boolean>(false);
   const [manualText, setManualText] = useState<string>("");
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [modalMessage, setModalMessage] = useState<string>("");
+  const [modalState, setModalState] = useState({
+    show: false,
+    message: "",
+  });
   const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const handleTabChange = (tab: string) => {
@@ -83,10 +85,10 @@ const MultiFileUploadPanel = ({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (isManualInput) {
-      setModalMessage(
-        "현재 입력 중인 내용이 사라집니다. 파일을 선택하시겠습니까?"
-      );
-      setShowModal(true);
+      setModalState({
+        show: true,
+        message: "현재 입력 중인 내용이 사라집니다. 파일을 선택하시겠습니까?",
+      });
       setPendingFile(file || null);
     } else if (file) {
       processFile(file);
@@ -110,10 +112,10 @@ const MultiFileUploadPanel = ({
 
   const handleManualInput = () => {
     if (selectedFile) {
-      setModalMessage(
-        "현재 선택된 파일이 해제됩니다. 직접 입력을 진행하시겠습니까?"
-      );
-      setShowModal(true);
+      setModalState({
+        show: true,
+        message: "현재 선택된 파일이 해제됩니다. 직접 입력을 진행하시겠습니까?",
+      });
     } else {
       setIsManualInput(true);
       setPdfUrl(null);
@@ -122,7 +124,7 @@ const MultiFileUploadPanel = ({
   };
 
   const handleModalConfirm = () => {
-    setShowModal(false);
+    setModalState({ show: false, message: "" });
     if (pendingFile) {
       processFile(pendingFile);
       setPendingFile(null);
@@ -134,7 +136,7 @@ const MultiFileUploadPanel = ({
   };
 
   const handleModalCancel = () => {
-    setShowModal(false);
+    setModalState({ show: false, message: "" });
     setPendingFile(null);
   };
 
@@ -218,9 +220,9 @@ const MultiFileUploadPanel = ({
 
   return (
     <div className="flex flex-col items-center">
-      {showModal && (
+      {modalState.show && (
         <Modal
-          message={modalMessage}
+          message={modalState.message}
           onConfirm={handleModalConfirm}
           onCancel={handleModalCancel}
         />
