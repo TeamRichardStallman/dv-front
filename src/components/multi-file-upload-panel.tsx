@@ -5,6 +5,36 @@ import { AiOutlinePaperClip } from "react-icons/ai";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+const Modal = ({
+  message,
+  onConfirm,
+  onCancel,
+}: {
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) => (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="bg-white p-6 rounded-lg shadow-md w-[500px]">
+      <p className="mb-8 text-lg font-semibold text-gray-800">{message}</p>
+      <div className="flex justify-end space-x-4">
+        <button
+          onClick={onCancel}
+          className="py-2 px-4 bg-gray-300 rounded-lg text-gray-800 font-semibold"
+        >
+          취소
+        </button>
+        <button
+          onClick={onConfirm}
+          className="py-2 px-4 bg-primary text-white rounded-lg font-semibold"
+        >
+          확인
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 export interface MultiFileUploadPanelProps {
   files: MultiFileUploadPanelDataType[];
   submitButtonText?: string;
@@ -28,6 +58,9 @@ const MultiFileUploadPanel = ({
   const [file, setFile] = useState<File | null>(null);
   const [isManualInput, setIsManualInput] = useState<boolean>(false);
   const [manualText, setManualText] = useState<string>("");
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMessage, setModalMessage] = useState<string>("");
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -49,26 +82,60 @@ const MultiFileUploadPanel = ({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file.name);
-      setPdfUrl(URL.createObjectURL(file));
-      setIsManualInput(false);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result instanceof ArrayBuffer) {
-          const decoder = new TextDecoder("utf-8");
-          decoder.decode(e.target.result);
-        }
-      };
-      reader.readAsArrayBuffer(file);
-      setFile(file || null);
+    if (isManualInput) {
+      setModalMessage(
+        "현재 입력 중인 내용이 사라집니다. 파일을 선택하시겠습니까?"
+      );
+      setShowModal(true);
+      setPendingFile(file || null);
+    } else if (file) {
+      processFile(file);
     }
   };
 
+  const processFile = (file: File) => {
+    setSelectedFile(file.name);
+    setPdfUrl(URL.createObjectURL(file));
+    setIsManualInput(false);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result instanceof ArrayBuffer) {
+        const decoder = new TextDecoder("utf-8");
+        decoder.decode(e.target.result);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    setFile(file);
+  };
+
   const handleManualInput = () => {
-    setIsManualInput(true);
-    setPdfUrl(null);
-    setSelectedFile(null);
+    if (selectedFile) {
+      setModalMessage(
+        "현재 선택된 파일이 해제됩니다. 직접 입력을 진행하시겠습니까?"
+      );
+      setShowModal(true);
+    } else {
+      setIsManualInput(true);
+      setPdfUrl(null);
+      setSelectedFile(null);
+    }
+  };
+
+  const handleModalConfirm = () => {
+    setShowModal(false);
+    if (pendingFile) {
+      processFile(pendingFile);
+      setPendingFile(null);
+    } else {
+      setIsManualInput(true);
+      setPdfUrl(null);
+      setSelectedFile(null);
+    }
+  };
+
+  const handleModalCancel = () => {
+    setShowModal(false);
+    setPendingFile(null);
   };
 
   const handleSave = async () => {
@@ -143,6 +210,13 @@ const MultiFileUploadPanel = ({
 
   return (
     <div className="flex flex-col items-center p-8 min-h-screen">
+      {showModal && (
+        <Modal
+          message={modalMessage}
+          onConfirm={handleModalConfirm}
+          onCancel={handleModalCancel}
+        />
+      )}
       <div className="flex items-center justify-between w-[900px] mb-4">
         <div className="flex space-x-4 font-semibold">
           {files.map((file, index) => (
@@ -154,9 +228,6 @@ const MultiFileUploadPanel = ({
                   ? "bg-primary text-white"
                   : "bg-gray-200 hover:bg-secondary"
               }`}
-              style={{
-                cursor: "pointer",
-              }}
             >
               {file.name}
             </button>
@@ -218,9 +289,7 @@ const MultiFileUploadPanel = ({
         ) : pdfUrl ? (
           <iframe src={pdfUrl} width="100%" height="100%" />
         ) : (
-          <p className="text-gray-500">
-            텍스트 파일을 선택하거나 직접 입력하세요.
-          </p>
+          <p className="text-gray-500">파일을 선택하거나 직접 입력하세요.</p>
         )}
       </div>
       {selectedFile && (
