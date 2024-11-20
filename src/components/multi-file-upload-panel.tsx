@@ -185,12 +185,25 @@ const MultiFileUploadPanel = ({
     }
 
     if (isManualInput) {
-      toast.success(`${activeTab}에 텍스트가 저장되었습니다.`);
+      const fileName = `자기소개서-${new Date()
+        .toISOString()
+        .slice(0, 10)}.txt`;
+      const textBlob = new Blob([manualText], { type: "text/plain" });
+      const textFile = new File([textBlob], fileName);
+
+      setFileList((prev) => [
+        ...prev,
+        { id: uuidv4(), name: fileName, type: activeTab },
+      ]);
+
+      await handleUpload(textFile);
+
+      toast.success(`${activeTab}에 텍스트 파일이 저장되었습니다.`);
     } else {
       const newFile = { id: uuidv4(), name: selectedFile!, type: activeTab };
       setFileList((prev) => [...prev, newFile]);
       toast.success(`${activeTab}에 파일이 저장되었습니다.`);
-      await handleUpload();
+      await handleUpload(file!);
     }
 
     setSelectedFile(null);
@@ -209,8 +222,8 @@ const MultiFileUploadPanel = ({
     }
   };
 
-  const handleUpload = async () => {
-    if (!file) {
+  const handleUpload = async (uploadFile: File) => {
+    if (!uploadFile) {
       toast.error("파일이 선택되지 않았습니다.");
       return;
     }
@@ -222,8 +235,8 @@ const MultiFileUploadPanel = ({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fileName: `cover-letters/${file.name}`,
-          fileType: file.type,
+          fileName: `cover-letters/${uploadFile.name}`,
+          fileType: uploadFile.type,
         }),
       });
 
@@ -235,8 +248,8 @@ const MultiFileUploadPanel = ({
 
       await fetch(presignedUrl, {
         method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
+        headers: { "Content-Type": uploadFile.type },
+        body: uploadFile,
       });
 
       toast.success("파일이 성공적으로 업로드되었습니다.");
