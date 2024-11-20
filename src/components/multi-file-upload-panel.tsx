@@ -184,6 +184,8 @@ const MultiFileUploadPanel = ({
       return;
     }
 
+    let savedFileName = "";
+
     if (isManualInput) {
       const fileName = `자기소개서-${new Date()
         .toISOString()
@@ -198,12 +200,18 @@ const MultiFileUploadPanel = ({
 
       await handleUpload(textFile);
 
+      savedFileName = fileName;
       toast.success(`${activeTab}에 텍스트 파일이 저장되었습니다.`);
     } else {
       const newFile = { id: uuidv4(), name: selectedFile!, type: activeTab };
       setFileList((prev) => [...prev, newFile]);
+      savedFileName = selectedFile!;
       toast.success(`${activeTab}에 파일이 저장되었습니다.`);
       await handleUpload(file!);
+    }
+
+    if (onSubmitButtonClick) {
+      onSubmitButtonClick([`cover-letters/${savedFileName}`]);
     }
 
     setSelectedFile(null);
