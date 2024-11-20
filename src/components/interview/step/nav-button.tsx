@@ -2,6 +2,7 @@ import React from "react";
 
 interface NavButtonsProps extends StepProps, ButtonsProps {
   disabled?: boolean;
+  tooltipMessage?: string;
 }
 
 const NavButtons = ({
@@ -10,6 +11,7 @@ const NavButtons = ({
   prevButtonText,
   nextButtonText,
   disabled = false,
+  tooltipMessage = "버튼을 클릭해주세요",
 }: NavButtonsProps) => {
   return (
     <div className="flex gap-4 mt-8 font-semibold justify-center relative">
@@ -34,7 +36,7 @@ const NavButtons = ({
             className="absolute invisible group-hover:visible -top-10 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-200 text-gray-700 text-sm rounded-md shadow-md z-10"
             style={{ whiteSpace: "nowrap" }}
           >
-            버튼을 클릭해주세요
+            {tooltipMessage}
           </div>
         )}
       </div>
