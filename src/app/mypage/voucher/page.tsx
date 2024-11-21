@@ -4,11 +4,29 @@ import React, { useState } from "react";
 const VoucherPage = () => {
   const [activeTab, setActiveTab] = useState("owned");
 
-  const vouchers = [
+  const ownedVouchers = [
     { label: "모의 채팅", count: 4 },
     { label: "모의 음성", count: 2 },
     { label: "실전 채팅", count: 3 },
     { label: "실전 음성", count: 1 },
+  ];
+
+  const usedVouchers = [
+    {
+      label: "모의 채팅",
+      usedCount: 2,
+      usedDate: "2024년 11월 18일",
+    },
+    {
+      label: "실전 채팅",
+      usedCount: 3,
+      usedDate: "2024년 11월 15일",
+    },
+    {
+      label: "실전 음성",
+      usedCount: 1,
+      usedDate: "2024년 11월 14일",
+    },
   ];
 
   return (
@@ -29,21 +47,39 @@ const VoucherPage = () => {
         ))}
       </div>
 
-      <div className="w-[900px] h-[500px] overflow-y-auto rounded-lg border border-gray-300 p-6 bg-white grid grid-cols-2 gap-6">
-        {vouchers.map((voucher) => (
-          <div
-            key={voucher.label}
-            className={`p-4 rounded-lg border border-gray-300 shadow-md text-center ${
-              activeTab === "used" ? "opacity-50" : "opacity-100"
-            }`}
-          >
-            <p className="mt-10 text-4xl font-extrabold">{voucher.label}</p>
-            <p className="text-3xl font-semibold text-primary mt-6">
-              {voucher.count}개
-            </p>
-          </div>
-        ))}
-      </div>
+      {activeTab === "owned" && (
+        <div className="w-[900px] h-[500px] overflow-y-auto rounded-lg border border-gray-300 p-6 bg-white grid grid-cols-2 gap-6">
+          {ownedVouchers.map((voucher) => (
+            <div
+              key={voucher.label}
+              className="p-4 rounded-lg border border-gray-300 shadow-md text-center"
+            >
+              <p className="mt-10 text-4xl font-extrabold">{voucher.label}</p>
+              <p className="text-3xl font-semibold text-primary mt-6">
+                {voucher.count}개
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab === "used" && (
+        <div className="w-[900px] h-[500px] overflow-y-auto rounded-lg border border-gray-300 p-6 bg-white space-y-4">
+          {usedVouchers.map((voucher) => (
+            <div
+              key={voucher.label}
+              className="p-4 rounded-lg border border-gray-300 shadow-md text-left"
+            >
+              <p className="text-2xl font-semibold">
+                {voucher.label} 이용권 {voucher.usedCount}매
+              </p>
+              <p className="mt-4 text-md font-medium text-red-500">
+                {voucher.usedDate}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
