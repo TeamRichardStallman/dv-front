@@ -8,6 +8,7 @@ const VoucherPage = () => {
     "모의 채팅" | "모의 음성" | "실전 채팅" | "실전 음성"
   >("모의 채팅");
   const [selectedCoupon, setSelectedCoupon] = useState<string | null>(null);
+  const [selectedQuantity, setSelectedQuantity] = useState<number>(1);
 
   const ownedVouchers = [
     { label: "모의 채팅", count: 4 },
@@ -56,11 +57,12 @@ const VoucherPage = () => {
     setShowModal(false);
     setSelectedVoucher("모의 채팅");
     setSelectedCoupon(null);
+    setSelectedQuantity(1);
   };
 
   const handleConfirmPurchase = () => {
     alert(
-      `결제가 완료되었습니다. ${selectedVoucher} 이용권이 충전되었습니다. ${
+      `결제가 완료되었습니다. ${selectedVoucher} 이용권 ${selectedQuantity}매가 충전되었습니다. ${
         selectedCoupon ? "(쿠폰 사용)" : ""
       }`
     );
@@ -68,7 +70,9 @@ const VoucherPage = () => {
   };
 
   const calculatePrice = () =>
-    selectedVoucher && !selectedCoupon ? voucherPrices[selectedVoucher] : 0;
+    selectedVoucher && !selectedCoupon
+      ? voucherPrices[selectedVoucher] * selectedQuantity
+      : 0;
 
   const handleVoucherClick = (
     voucher: "모의 채팅" | "모의 음성" | "실전 채팅" | "실전 음성"
@@ -181,10 +185,33 @@ const VoucherPage = () => {
               </select>
             </div>
 
-            <p className="text-right text-xl font-bold">
-              결제 금액:{" "}
-              <span className="text-primary">{calculatePrice()}원</span>
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <label
+                  htmlFor="quantitySelect"
+                  className="block text-lg font-semibold mb-2"
+                >
+                  매수 선택
+                </label>
+                <input
+                  type="number"
+                  id="quantitySelect"
+                  min="1"
+                  max="99"
+                  value={selectedQuantity}
+                  onChange={(e) =>
+                    setSelectedQuantity(
+                      Math.min(99, Math.max(1, Number(e.target.value)))
+                    )
+                  }
+                  className="w-24 p-2 border rounded-md text-center"
+                />
+              </div>
+              <p className="text-right text-xl font-bold">
+                결제 금액:{" "}
+                <span className="text-primary">{calculatePrice()}원</span>
+              </p>
+            </div>
 
             <div className="flex justify-end space-x-4">
               <button
