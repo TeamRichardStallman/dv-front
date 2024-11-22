@@ -5,7 +5,7 @@ import SettingBtn from "@/components/settingbtn";
 import useInterviewStore, { InterviewMode } from "@/stores/useInterviewStore";
 
 const InterviewPage = () => {
-  const [mode, setMode] = useState<InterviewMode>();
+  const [mode, setMode] = useState<InterviewMode>("REAL");
   const { updateInterviewField } = useInterviewStore();
 
   const handleClick = () => {
@@ -26,6 +26,7 @@ const InterviewPage = () => {
           description="선택한 관심 직무를 기반으로 가상면접을 진행합니다."
           selected={mode === "GENERAL"}
           onClick={() => setMode("GENERAL")}
+          disabled={true}
         />
         <SettingBtn
           label="실전면접"
@@ -42,25 +43,26 @@ const InterviewPage = () => {
           </button>
         </Link>
         <div className="relative group">
-          <Link href={mode ? `/interview/setup?type=${mode}` : "#"}>
+          <Link href={`/interview/setup?type=${mode}`}>
             <button
-              className={`w-24 py-2 px-6 rounded-md text-white ${
-                mode ? "bg-secondary" : "bg-gray-400 cursor-not-allowed"
-              }`}
-              disabled={!mode}
+              className="bg-secondary w-24 py-2 px-6 rounded-md text-white"
+              // className={`w-24 py-2 px-6 rounded-md text-white ${
+              //   mode ? "bg-secondary" : "bg-gray-400 cursor-not-allowed"
+              // }`}
+              // disabled={!mode}
               onClick={handleClick}
             >
               다음
             </button>
           </Link>
-          {!mode && (
+          {/* {!mode && (
             <div
               className="absolute invisible group-hover:visible -top-10 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-200 text-gray-700 text-sm rounded-md shadow-md z-10"
               style={{ whiteSpace: "nowrap" }}
             >
               버튼을 클릭해주세요
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

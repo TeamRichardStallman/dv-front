@@ -36,7 +36,7 @@ const SettingBtn = ({
     >
       <div
         className={`font-bold text-4xl tracking-widest transition-transform duration-300 ${
-          isHovered && !disabled ? "-translate-y-2" : ""
+          selected || (isHovered && !disabled) ? "-translate-y-12" : ""
         }`}
       >
         {label}
