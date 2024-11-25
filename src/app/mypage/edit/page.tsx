@@ -41,7 +41,6 @@ const EditPage = () => {
       );
 
       alert(response.data.data.name + "님의 정보가 수정되었습니다.");
-
       setUser(response.data.data);
     } catch (error) {
       console.error("Signup failed:", error);
@@ -49,7 +48,7 @@ const EditPage = () => {
   };
 
   return (
-    <div className="w-full max-w-md p-8 border rounded-lg shadow-md bg-white">
+    <div className="w-full max-w-md mx-auto p-8 border rounded-lg shadow-md bg-white">
       <UserForm onSubmit={handleSubmit} isEditPage={true} initUserData={user} />
     </div>
   );

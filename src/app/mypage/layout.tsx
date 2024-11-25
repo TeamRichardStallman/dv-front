@@ -1,10 +1,9 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import { useEffect, useState } from "react";
 import { isLogined } from "@/utils/isLogined";
 
 const menuItems = [
@@ -18,10 +17,25 @@ const menuItems = [
 
 const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
   const [loggedIn, setLoggedIn] = useState(false);
+  const [nickname, setNickname] = useState("사용자 이름");
+  const [licenseCounts, setLicenseCounts] = useState({
+    mockChat: 4,
+    mockVoice: 2,
+    realChat: 3,
+    realVoice: 1,
+  });
 
   useEffect(() => {
     setLoggedIn(isLogined());
+    setNickname("Lian");
+    setLicenseCounts({
+      mockChat: 4,
+      mockVoice: 2,
+      realChat: 3,
+      realVoice: 1,
+    });
   }, []);
+
   const pathname = usePathname();
   const currentPage =
     menuItems.find((item) => item.path === pathname)?.name || "";
@@ -30,8 +44,18 @@ const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex flex-col min-h-screen">
       <Header loggedIn={loggedIn} />
 
-      <div className="flex flex-1">
-        <nav className="bg-gray-100 p-6 shadow-lg rounded-lg fixed top-28 left-8 w-56 h-auto">
+      <div className="flex flex-1 relative">
+        <div className="absolute bg-gray-100 p-4 shadow-lg rounded-lg top-8 left-8 w-[240px]">
+          <h3 className="text-lg font-bold mb-2">{nickname}</h3>
+          <p className="text-sm font-semibold mb-1">
+            모의 채팅/음성: {licenseCounts.mockChat}/{licenseCounts.mockVoice}
+          </p>
+          <p className="text-sm font-semibold">
+            실전 채팅/음성: {licenseCounts.realChat}/{licenseCounts.realVoice}
+          </p>
+        </div>
+
+        <nav className="absolute bg-gray-100 p-6 shadow-lg rounded-lg top-40 left-8 w-[240px]">
           <ul className="space-y-4">
             {menuItems.map((item) => (
               <li key={item.path}>
@@ -50,9 +74,13 @@ const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
           </ul>
         </nav>
 
-        <main className="flex-grow p-8 ml-auto mr-auto w-full max-w-4xl flex flex-col items-center">
-          <h1 className="text-4xl font-bold mb-8">{currentPage}</h1>
-          <div className="flex w-full max-w-2xl justify-center">{children}</div>
+        <main className="flex-grow flex justify-center items-start p-8">
+          <div className="w-full max-w-4xl">
+            <h1 className="text-4xl font-bold mb-8 text-center">
+              {currentPage}
+            </h1>
+            <div className="w-full">{children}</div>
+          </div>
         </main>
       </div>
 
