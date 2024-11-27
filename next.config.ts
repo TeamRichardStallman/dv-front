@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
-    domains: ["k.kakaocdn.net"],
+    domains: [
+      "k.kakaocdn.net",
+      "ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com",
+    ],
   },
   reactStrictMode: false,
 };

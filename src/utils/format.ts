@@ -49,3 +49,14 @@ export function getFileName(path: string) {
 export function removeInterview(text: string): string {
   return text.replace("면접", "");
 }
+
+export const removeBucketDomain = (url: string): string => {
+  const bucketDomain =
+    "https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/";
+
+  if (url.startsWith(bucketDomain)) {
+    return url.replace(bucketDomain, "");
+  }
+
+  throw new Error("Invalid URL: Does not match the bucket domain");
+};

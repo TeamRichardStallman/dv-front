@@ -1,18 +1,22 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { GetUserProps } from "@/app/(user)/auth/page";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { removeBucketDomain } from "@/utils/format";
 
 export type formDataType = {
   nickname: string;
   birthdate: Date;
   gender: string;
+  s3ProfileImageObjectKey?: string;
 };
 
 type UserFormProps = {
   onSubmit: (formData: formDataType) => void;
   isEditPage?: boolean;
-  initUserData?: GetUserProps;
+  initUserData?: formDataType;
 };
 
 const UserForm = ({
@@ -20,54 +24,123 @@ const UserForm = ({
   isEditPage = false,
   initUserData,
 }: UserFormProps) => {
-  const [nickname, setNickname] = useState(
-    initUserData?.nickname ? initUserData?.nickname : ""
-  );
-  const [birthdate, setBirthdate] = useState(
+  const [nickname, setNickname] = useState(initUserData?.nickname || "");
+  const [birthdate, setBirthdate] = useState<Date | undefined>(
     initUserData?.birthdate ? new Date(initUserData.birthdate) : undefined
   );
-  const [gender, setGender] = useState(
-    initUserData?.gender ? initUserData?.gender : "MAN"
+  const [gender, setGender] = useState(initUserData?.gender || "MAN");
+  const [profileImageUrl, setProfileImageUrl] = useState<string>(
+    initUserData?.s3ProfileImageObjectKey
+      ? `https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/${initUserData.s3ProfileImageObjectKey}`
+      : "/profile-img.png"
   );
-  const [, setProfileImage] = useState<File | null>(null);
-  const [, setProfileImageUrl] = useState<string | null>(null);
-  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+  const [s3ProfileImageObjectKey, setS3ProfileImageObjectKey] = useState<
+    string | undefined
+  >(initUserData?.s3ProfileImageObjectKey);
+  const [uploading, setUploading] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState<boolean>(false);
 
   useEffect(() => {
-    setNickname(initUserData?.nickname ?? "");
+    setNickname(initUserData?.nickname || "");
     if (initUserData?.birthdate) {
       setBirthdate(new Date(initUserData.birthdate));
     }
-    setGender(initUserData?.gender ?? "MAN");
+    setGender(initUserData?.gender || "MAN");
   }, [initUserData]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setProfileImage(file);
-      setProfileImageUrl(URL.createObjectURL(file));
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("이미지 파일만 업로드 가능합니다.");
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      // Presigned URL 요청
+      const uploadResponse = await fetch("/api/s3/uploadFiles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: `profile-images/${file.name}`,
+          fileType: file.type,
+        }),
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Presigned URL 요청 실패");
+      }
+
+      const { presignedUrl } = await uploadResponse.json();
+
+      // S3로 파일 업로드
+      await fetch(presignedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+
+      const uploadedUrl = presignedUrl.split("?")[0];
+      const objectKey = removeBucketDomain(uploadedUrl);
+
+      setS3ProfileImageObjectKey(objectKey);
+
+      // Presigned URL로 이미지 URL 가져오기
+      const fetchResponse = await fetch("/api/s3/getFile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bucketName: "ktb-8-dev-bucket",
+          objectKey: objectKey,
+        }),
+      });
+
+      if (!fetchResponse.ok) {
+        throw new Error("Presigned URL 요청 실패");
+      }
+
+      const { presignedUrl: viewUrl } = await fetchResponse.json();
+      setProfileImageUrl(viewUrl);
+
+      toast.success("프로필 이미지가 성공적으로 업로드되었습니다!");
+    } catch (error) {
+      console.error("이미지 업로드 실패", error);
+      toast.error("이미지 업로드에 실패했습니다.");
+    } finally {
+      setUploading(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!isEditPage && !agreedToPrivacy) {
-      alert("개인정보 동의가 필요합니다.");
+      toast.error("개인정보 동의가 필요합니다.");
       return;
     }
 
     if (!birthdate) {
-      alert("생일을 입력해주세요");
+      toast.error("생년월일을 입력해주세요.");
       return;
     }
 
-    const formData = {
-      nickname: nickname,
-      birthdate: birthdate,
-      gender: gender,
+    const formData: formDataType = {
+      nickname,
+      birthdate,
+      gender,
+      s3ProfileImageObjectKey,
     };
 
-    onSubmit(formData);
+    try {
+      onSubmit(formData);
+      toast.success("프로필이 성공적으로 저장되었습니다!");
+    } catch (error) {
+      console.error("프로필 저장 실패", error);
+      toast.error("프로필 저장에 실패했습니다.");
+    }
   };
 
   return (
@@ -78,23 +151,16 @@ const UserForm = ({
       <div className="flex flex-col items-center">
         <div className="relative inline-block">
           <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-200">
-            {initUserData?.s3ProfileImageUrl ? (
-              <Image
-                src={initUserData?.s3ProfileImageUrl}
-                alt="프로필 이미지"
-                width={200}
-                height={200}
-                className="object-cover w-full h-full"
-              />
-            ) : (
-              <Image
-                src="/profile-img.png"
-                alt="기본 프로필 이미지"
-                width={200}
-                height={200}
-                className="object-cover w-full h-full"
-              />
-            )}
+            <Image
+              src={profileImageUrl}
+              alt="프로필 이미지"
+              width={200}
+              height={200}
+              className="object-cover w-full h-full"
+              onError={() =>
+                console.error("이미지 로드 실패. URL:", profileImageUrl)
+              }
+            />
           </div>
           <label
             htmlFor="profileImageInput"
@@ -110,7 +176,7 @@ const UserForm = ({
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2"
+                strokeWidth={2}
                 d="M15.232 5.232a3 3 0 014.242 4.242L7.5 21H3v-4.5L15.232 5.232z"
               />
             </svg>
@@ -123,29 +189,28 @@ const UserForm = ({
             className="hidden"
           />
         </div>
+        {uploading && (
+          <p className="text-sm text-gray-500 mt-2">
+            이미지를 업로드 중입니다...
+          </p>
+        )}
       </div>
       <div>
         <label className="block font-semibold">닉네임</label>
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            className="border p-2 rounded w-full h-10"
-            placeholder="닉네임을 입력하세요"
-            required
-          />
-        </div>
+        <input
+          type="text"
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          className="border p-2 rounded w-full h-10"
+          placeholder="닉네임을 입력하세요"
+          required
+        />
       </div>
       <div>
         <label className="block font-semibold">생년월일</label>
         <input
           type="date"
-          value={
-            birthdate instanceof Date
-              ? birthdate.toISOString().substring(0, 10)
-              : ""
-          }
+          value={birthdate ? birthdate.toISOString().substring(0, 10) : ""}
           onChange={(e) =>
             setBirthdate(e.target.value ? new Date(e.target.value) : undefined)
           }
@@ -200,6 +265,10 @@ const UserForm = ({
       >
         {isEditPage ? "저장" : "완료"}
       </button>
+      <ToastContainer
+        position="bottom-right"
+        toastStyle={{ fontWeight: "500" }}
+      />
     </form>
   );
 };

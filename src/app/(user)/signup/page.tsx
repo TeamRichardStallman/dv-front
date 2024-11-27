@@ -15,7 +15,7 @@ const SignupPage = () => {
 
   const handleFormSubmit = async (formData: formDataType) => {
     try {
-      const response = await axios.put<GetResponse>(
+      const response = await axios.post<GetResponse>(
         `${apiUrl}/user/info`,
         formData,
         {
