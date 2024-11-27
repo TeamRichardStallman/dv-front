@@ -1,53 +1,136 @@
 "use client";
-import React, { useState } from "react";
+import axios from "axios";
+import { setUrl } from "@/utils/setUrl";
+import React, { useEffect, useState } from "react";
+import NoContent from "@/components/no-content";
+
+const apiUrl = `${setUrl}/coupon`;
+
+export interface GetSimpleCouponListResponse {
+  data: GetSimpleCouponList;
+}
+
+export interface GetUsedCouponListResponse {
+  data: GetUsedCouponList;
+}
+
+export interface GetExpiredCouponListResponse {
+  data: GetExpiredCouponList;
+}
+
+interface GetSimpleCouponList {
+  coupons: GetSimpleCouponProps[];
+}
+
+interface GetUsedCouponList {
+  coupons: GetUsedCouponProps[];
+}
+
+interface GetExpiredCouponList {
+  coupons: GetExpiredCouponProps[];
+}
+
+export interface GetSimpleCouponProps {
+  couponId: number;
+  chargeAmount: number;
+  couponName: string;
+  interviewModeKorean: string;
+  interviewAssetTypeKorean: string;
+  expireAt: Date;
+}
+
+export interface GetUsedCouponProps {
+  couponId: number;
+  chargeAmount: number;
+  couponName: string;
+  interviewModeKorean: string;
+  interviewAssetTypeKorean: string;
+  usedAt: Date;
+}
+
+export interface GetExpiredCouponProps {
+  couponId: number;
+  chargeAmount: number;
+  couponName: string;
+  interviewModeKorean: string;
+  interviewAssetTypeKorean: string;
+  expireAt: Date;
+}
 
 const CouponPage = () => {
   const [activeTab, setActiveTab] = useState("owned");
+  const [simpleCoupons, setSimpleCoupons] = useState<
+    GetSimpleCouponProps[] | null
+  >(null);
+  const [usedCoupons, setUsedCoupons] = useState<GetUsedCouponProps[] | null>(
+    null
+  );
+  const [expireCoupons, setExpiredCoupons] = useState<
+    GetExpiredCouponProps[] | null
+  >(null);
 
-  const coupons = [
-    {
-      id: 1,
-      title: "모의 채팅 이용권 쿠폰",
-      reason: "[11월 출첵 이벤트] 5일 연속 출석",
-      expiry: "2024년 11월 30일 23시까지",
-      status: "owned",
-    },
-    {
-      id: 2,
-      title: "모의 음성 이용권 쿠폰",
-      reason: "[가을 감사 이벤트] 신규 가입 축하",
-      expiry: "2024년 12월 15일 23시까지",
-      status: "used",
-    },
-    {
-      id: 3,
-      title: "실전 채팅 이용권 쿠폰",
-      reason: "[추천인 이벤트] 친구 초대 성공",
-      expiry: "2024년 12월 20일 23시까지",
-      status: "expired",
-    },
-    {
-      id: 4,
-      title: "실전 음성 이용권 쿠폰",
-      reason: "[연말 감사 이벤트] 감사 인사",
-      expiry: "2024년 12월 31일 23시까지",
-      status: "owned",
-    },
-    {
-      id: 5,
-      title: "모의 채팅 이용권 쿠폰",
-      reason: "[겨울 특별 이벤트] 첫 구매 혜택",
-      expiry: "2025년 01월 10일 23시까지",
-      status: "expired",
-    },
-    {
-      id: 6,
-      title: "모의 음성 이용권 쿠폰",
-      reason: "[신년 출석 이벤트] 3일 연속 출석",
-      expiry: "2025년 01월 15일 23시까지",
-      status: "used",
-    },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (activeTab === "owned") {
+          const response = await axios.get<GetSimpleCouponListResponse>(
+            `${apiUrl}/user/simple`,
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          const transformedCoupons = response.data.data.coupons.map(
+            (coupon) => ({
+              ...coupon,
+              expireAt: new Date(coupon.expireAt),
+            })
+          );
+          setSimpleCoupons(transformedCoupons);
+        } else if (activeTab === "used") {
+          const response = await axios.get<GetUsedCouponListResponse>(
+            `${apiUrl}/user/used`,
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          const transformedCoupons = response.data.data.coupons.map(
+            (coupon) => ({
+              ...coupon,
+              usedAt: new Date(coupon.usedAt),
+            })
+          );
+          setUsedCoupons(transformedCoupons);
+        } else if (activeTab === "expired") {
+          const response = await axios.get<GetExpiredCouponListResponse>(
+            `${apiUrl}/user/expired`,
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          const transformedCoupons = response.data.data.coupons.map(
+            (coupon) => ({
+              ...coupon,
+              expireAt: new Date(coupon.expireAt),
+            })
+          );
+          setExpiredCoupons(transformedCoupons);
+        }
+      } catch (error) {
+        console.error("Error fetching coupon data:", error);
+      }
+    };
+
+    fetchData();
+  }, [activeTab]);
 
   return (
     <div className="flex flex-col items-center p-6 space-y-4">
@@ -72,30 +155,98 @@ const CouponPage = () => {
       </div>
 
       <div className="w-[900px] h-[500px] overflow-y-auto rounded-lg border border-gray-300 p-6 bg-white">
-        {coupons
-          .filter((coupon) => coupon.status === activeTab)
-          .map((coupon) => (
+        {activeTab === "owned" ? (
+          simpleCoupons === null || simpleCoupons.length === 0 ? (
+            <div className="p-4 mb-4 rounded-lg opacity-100">
+              <NoContent text="보유 쿠폰이" />
+            </div>
+          ) : (
+            simpleCoupons.map((coupon) => (
+              <div
+                key={coupon.couponId}
+                className="p-4 mb-4 rounded-lg border border-gray-300 shadow-md opacity-100"
+              >
+                <p className="text-2xl font-bold">
+                  {coupon.interviewModeKorean +
+                    " " +
+                    coupon.interviewAssetTypeKorean +
+                    " 쿠폰 " +
+                    coupon.chargeAmount +
+                    "장"}
+                </p>
+                <p className="text-lg font-semibold text-gray-600">
+                  {coupon.couponName}
+                </p>
+                <div className="mt-4">
+                  <p className={`text-sm font-medium ${"text-primary"}`}>
+                    사용 기한: {coupon.expireAt.getFullYear()}.
+                    {coupon.expireAt.getMonth() + 1}.{coupon.expireAt.getDate()}
+                  </p>
+                </div>
+              </div>
+            ))
+          )
+        ) : activeTab === "used" ? (
+          usedCoupons === null || usedCoupons.length === 0 ? (
+            <div className="p-4 mb-4 rounded-lg opacity-100">
+              <NoContent text="사용한 쿠폰이" />
+            </div>
+          ) : (
+            usedCoupons.map((coupon) => (
+              <div
+                key={coupon.couponId}
+                className={`p-4 mb-4 rounded-lg border border-gray-300 shadow-md ${"opacity-50"}`}
+              >
+                <p className="text-2xl font-bold">
+                  {coupon.interviewModeKorean +
+                    " " +
+                    coupon.interviewAssetTypeKorean +
+                    " 쿠폰 " +
+                    coupon.chargeAmount +
+                    "장"}
+                </p>
+                <p className="text-lg font-semibold text-gray-600">
+                  {coupon.couponName}
+                </p>
+                <div className="mt-4">
+                  <p className={`text-sm font-medium ${"text-primary"}`}>
+                    사용 일자: {coupon.usedAt.getFullYear()}.
+                    {coupon.usedAt.getMonth() + 1}.{coupon.usedAt.getDate()}
+                  </p>
+                </div>
+              </div>
+            ))
+          )
+        ) : expireCoupons === null || expireCoupons.length === 0 ? (
+          <div className="p-4 mb-4 rounded-lg opacity-100">
+            <NoContent text="만료된 쿠폰이" />
+          </div>
+        ) : (
+          expireCoupons.map((coupon) => (
             <div
-              key={coupon.id}
-              className={`p-4 mb-4 rounded-lg border border-gray-300 shadow-md ${
-                activeTab === "used" ? "opacity-50" : "opacity-100"
-              }`}
+              key={coupon.couponId}
+              className={`p-4 mb-4 rounded-lg border border-gray-300 shadow-md ${"opacity-100"}`}
             >
-              <p className="text-2xl font-bold">{coupon.title}</p>
+              <p className="text-2xl font-bold">
+                {coupon.interviewModeKorean +
+                  " " +
+                  coupon.interviewAssetTypeKorean +
+                  " 쿠폰 " +
+                  coupon.chargeAmount +
+                  "장"}
+              </p>
               <p className="text-lg font-semibold text-gray-600">
-                {coupon.reason}
+                {coupon.couponName}
               </p>
               <div className="mt-4">
-                <p
-                  className={`text-sm font-medium ${
-                    activeTab === "expired" ? "text-red-500" : "text-primary"
-                  }`}
-                >
-                  {coupon.expiry}
+                <p className={`text-sm font-medium ${"text-red-500"}`}>
+                  만료 일자: {coupon.expireAt.getFullYear()}.
+                  {coupon.expireAt.getMonth() + 1}. {coupon.expireAt.getDate()}
                 </p>
               </div>
             </div>
-          ))}
+          ))
+        )}
       </div>
     </div>
   );
