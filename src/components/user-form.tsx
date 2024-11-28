@@ -47,6 +47,8 @@ const UserForm = ({
   const [nickname, setNickname] = useState<string>(
     initUserData?.nickname || ""
   );
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [birthdate, setBirthdate] = useState<string>(
     initUserData?.birthdate
       ? new Date(initUserData.birthdate).toISOString().substring(0, 10)
@@ -67,6 +69,27 @@ const UserForm = ({
     boolean | null
   >(null);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+
+  const handleUsernameChange = (value: string) => {
+    const regex = /^[a-zA-Z0-9]*$/;
+    if (!regex.test(value)) {
+      setUsernameError("Username은 영어와 숫자만 사용할 수 있습니다.");
+    } else {
+      setUsernameError(null);
+    }
+    setUsername(value);
+    setIsUsernameAvailable(null);
+  };
+
+  const handleNicknameChange = (value: string) => {
+    const regex = /^[a-zA-Z0-9]*$/;
+    if (!regex.test(value)) {
+      setNicknameError("Nickname은 영어와 숫자만 사용할 수 있습니다.");
+    } else {
+      setNicknameError(null);
+    }
+    setNickname(value);
+  };
 
   const handleUsernameCheck = async () => {
     if (!username) {
@@ -162,6 +185,11 @@ const UserForm = ({
       return;
     }
 
+    if (usernameError || nicknameError) {
+      toast.error("영어와 숫자만 입력 가능합니다.");
+      return;
+    }
+
     const formData: formDataType = {
       name,
       username,
@@ -249,10 +277,7 @@ const UserForm = ({
           <input
             type="text"
             value={username}
-            onChange={(e) => {
-              setUsername(e.target.value);
-              setIsUsernameAvailable(null);
-            }}
+            onChange={(e) => handleUsernameChange(e.target.value)}
             className="border p-2 rounded w-full h-10"
             placeholder="Username을 입력하세요"
             required
@@ -266,6 +291,9 @@ const UserForm = ({
             {usernameChecking ? "확인 중..." : "중복 검사"}
           </button>
         </div>
+        {usernameError && (
+          <p className="text-red-600 text-sm">{usernameError}</p>
+        )}
         {isUsernameAvailable !== null && (
           <p
             className={`text-sm mt-2 ${
@@ -279,15 +307,18 @@ const UserForm = ({
         )}
       </div>
       <div>
-        <label className="block font-semibold">닉네임</label>
+        <label className="block font-semibold">Nickname</label>
         <input
           type="text"
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
+          onChange={(e) => handleNicknameChange(e.target.value)}
           className="border p-2 rounded w-full h-10"
-          placeholder="닉네임을 입력하세요"
+          placeholder="Nickname을 입력하세요"
           required
         />
+        {nicknameError && (
+          <p className="text-red-600 text-sm">{nicknameError}</p>
+        )}
       </div>
       <div>
         <label className="block font-semibold">생년월일</label>
