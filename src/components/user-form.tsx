@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 import { removeBucketDomain } from "@/utils/format";
+import { setUrl } from "@/utils/setUrl";
 
 export type formDataType = {
+  name: string;
+  username: string;
   nickname: string;
   birthdate: Date;
   gender: string;
@@ -16,19 +20,39 @@ export type formDataType = {
 type UserFormProps = {
   onSubmit: (formData: formDataType) => void;
   isEditPage?: boolean;
-  initUserData?: formDataType;
+  initUserData?: Partial<formDataType>;
 };
+
+type ValidateUsernameResponse = {
+  code: number;
+  message: string;
+  data: boolean;
+};
+
+type PresignedUrlResponse = {
+  presignedUrl: string;
+};
+
+const apiUrl = `${setUrl}`;
 
 const UserForm = ({
   onSubmit,
   isEditPage = false,
-  initUserData,
+  initUserData = {},
 }: UserFormProps) => {
-  const [nickname, setNickname] = useState(initUserData?.nickname || "");
-  const [birthdate, setBirthdate] = useState<Date | undefined>(
-    initUserData?.birthdate ? new Date(initUserData.birthdate) : undefined
+  const [name, setName] = useState<string>(initUserData?.name || "");
+  const [username, setUsername] = useState<string>(
+    initUserData?.username || ""
   );
-  const [gender, setGender] = useState(initUserData?.gender || "MAN");
+  const [nickname, setNickname] = useState<string>(
+    initUserData?.nickname || ""
+  );
+  const [birthdate, setBirthdate] = useState<string>(
+    initUserData?.birthdate
+      ? new Date(initUserData.birthdate).toISOString().substring(0, 10)
+      : ""
+  );
+  const [gender, setGender] = useState<string>(initUserData?.gender || "MAN");
   const [profileImageUrl, setProfileImageUrl] = useState<string>(
     initUserData?.s3ProfileImageObjectKey
       ? `https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/${initUserData.s3ProfileImageObjectKey}`
@@ -38,15 +62,43 @@ const UserForm = ({
     string | undefined
   >(initUserData?.s3ProfileImageObjectKey);
   const [uploading, setUploading] = useState(false);
-  const [agreedToPrivacy, setAgreedToPrivacy] = useState<boolean>(false);
+  const [usernameChecking, setUsernameChecking] = useState(false);
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState<
+    boolean | null
+  >(null);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
 
-  useEffect(() => {
-    setNickname(initUserData?.nickname || "");
-    if (initUserData?.birthdate) {
-      setBirthdate(new Date(initUserData.birthdate));
+  const handleUsernameCheck = async () => {
+    if (!username) {
+      toast.error("Username을 입력해주세요.");
+      return;
     }
-    setGender(initUserData?.gender || "MAN");
-  }, [initUserData]);
+
+    try {
+      setUsernameChecking(true);
+
+      const response = await axios.get<ValidateUsernameResponse>(
+        `${apiUrl}/user/validate-username`,
+        {
+          params: { username },
+        }
+      );
+
+      const isDuplicate = response.data.data;
+      setIsUsernameAvailable(!isDuplicate);
+
+      if (!isDuplicate) {
+        toast.success("사용 가능한 Username입니다!");
+      } else {
+        toast.error("이미 사용 중인 Username입니다.");
+      }
+    } catch (error) {
+      console.error("Username 중복 검사 실패:", error);
+      toast.error("Username 중복 검사에 실패했습니다.");
+    } finally {
+      setUsernameChecking(false);
+    }
+  };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -60,27 +112,18 @@ const UserForm = ({
     try {
       setUploading(true);
 
-      // Presigned URL 요청
-      const uploadResponse = await fetch("/api/s3/uploadFiles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const uploadResponse = await axios.post<PresignedUrlResponse>(
+        "/api/s3/uploadFiles",
+        {
           fileName: `profile-images/${file.name}`,
           fileType: file.type,
-        }),
-      });
+        }
+      );
 
-      if (!uploadResponse.ok) {
-        throw new Error("Presigned URL 요청 실패");
-      }
+      const presignedUrl = uploadResponse.data.presignedUrl;
 
-      const { presignedUrl } = await uploadResponse.json();
-
-      // S3로 파일 업로드
-      await fetch(presignedUrl, {
-        method: "PUT",
+      await axios.put(presignedUrl, file, {
         headers: { "Content-Type": file.type },
-        body: file,
       });
 
       const uploadedUrl = presignedUrl.split("?")[0];
@@ -88,26 +131,18 @@ const UserForm = ({
 
       setS3ProfileImageObjectKey(objectKey);
 
-      // Presigned URL로 이미지 URL 가져오기
-      const fetchResponse = await fetch("/api/s3/getFile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const fetchResponse = await axios.post<PresignedUrlResponse>(
+        "/api/s3/getFile",
+        {
           bucketName: "ktb-8-dev-bucket",
-          objectKey: objectKey,
-        }),
-      });
+          objectKey,
+        }
+      );
 
-      if (!fetchResponse.ok) {
-        throw new Error("Presigned URL 요청 실패");
-      }
-
-      const { presignedUrl: viewUrl } = await fetchResponse.json();
-      setProfileImageUrl(viewUrl);
-
+      setProfileImageUrl(fetchResponse.data.presignedUrl);
       toast.success("프로필 이미지가 성공적으로 업로드되었습니다!");
     } catch (error) {
-      console.error("이미지 업로드 실패", error);
+      console.error("이미지 업로드 실패:", error);
       toast.error("이미지 업로드에 실패했습니다.");
     } finally {
       setUploading(false);
@@ -128,8 +163,10 @@ const UserForm = ({
     }
 
     const formData: formDataType = {
+      name,
+      username,
       nickname,
-      birthdate,
+      birthdate: new Date(birthdate),
       gender,
       s3ProfileImageObjectKey,
     };
@@ -138,7 +175,7 @@ const UserForm = ({
       onSubmit(formData);
       toast.success("프로필이 성공적으로 저장되었습니다!");
     } catch (error) {
-      console.error("프로필 저장 실패", error);
+      console.error("프로필 저장 실패:", error);
       toast.error("프로필 저장에 실패했습니다.");
     }
   };
@@ -196,6 +233,52 @@ const UserForm = ({
         )}
       </div>
       <div>
+        <label className="block font-semibold">이름</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="border p-2 rounded w-full h-10"
+          placeholder="이름을 입력하세요"
+          required
+        />
+      </div>
+      <div>
+        <label className="block font-semibold">Username</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value);
+              setIsUsernameAvailable(null);
+            }}
+            className="border p-2 rounded w-full h-10"
+            placeholder="Username을 입력하세요"
+            required
+          />
+          <button
+            type="button"
+            onClick={handleUsernameCheck}
+            className="h-10 px-6 min-w-[140px] bg-primary text-white rounded font-bold"
+            disabled={usernameChecking}
+          >
+            {usernameChecking ? "확인 중..." : "중복 검사"}
+          </button>
+        </div>
+        {isUsernameAvailable !== null && (
+          <p
+            className={`text-sm mt-2 ${
+              isUsernameAvailable ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {isUsernameAvailable
+              ? "사용 가능한 Username입니다."
+              : "이미 사용 중인 Username입니다."}
+          </p>
+        )}
+      </div>
+      <div>
         <label className="block font-semibold">닉네임</label>
         <input
           type="text"
@@ -210,10 +293,8 @@ const UserForm = ({
         <label className="block font-semibold">생년월일</label>
         <input
           type="date"
-          value={birthdate ? birthdate.toISOString().substring(0, 10) : ""}
-          onChange={(e) =>
-            setBirthdate(e.target.value ? new Date(e.target.value) : undefined)
-          }
+          value={birthdate}
+          onChange={(e) => setBirthdate(e.target.value)}
           className="border p-2 rounded w-full"
           required
         />
