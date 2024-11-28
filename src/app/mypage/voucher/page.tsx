@@ -1,5 +1,51 @@
 "use client";
-import React, { useState } from "react";
+import axios from "axios";
+import { setUrl } from "@/utils/setUrl";
+import React, { useEffect, useState } from "react";
+import {
+  GetSimpleCouponListResponse,
+  GetSimpleCouponProps,
+} from "../coupon/page";
+import NoContent from "@/components/no-content";
+
+const apiUrl = `${setUrl}`;
+
+export interface GetTicketResponse {
+  data: GetTicketUserInfo;
+}
+
+interface GetTicketUserInfo {
+  userCountInfo: GetTicketUserCountInfo;
+  ticketTransactionDetails: GetTicketTransactionDetail[];
+}
+
+interface GetTicketUserCountInfo {
+  totalBalance: number;
+  realChatBalance: number;
+  realVoiceBalance: number;
+  generalChatBalance: number;
+  generalVoiceBalance: number;
+}
+
+export interface GetTicketTransactionDetail {
+  ticketTransactionId: number;
+  amount: number;
+  ticketTransactionType: string;
+  ticketTransactionTypeKorean: string;
+  ticketTransactionMethod: string;
+  ticketTransactionMethodKorean: string;
+  interviewMode: string;
+  interviewModeKorean: string;
+  interviewAssetType: string;
+  interviewAssetTypeKorean: string;
+  description: string;
+  generatedAt: Date;
+}
+
+interface OwnedTicket {
+  label: string;
+  count: number | null | undefined;
+}
 
 const VoucherPage = () => {
   const [activeTab, setActiveTab] = useState("owned");
@@ -7,33 +53,66 @@ const VoucherPage = () => {
   const [selectedVoucher, setSelectedVoucher] = useState<
     "모의 채팅" | "모의 음성" | "실전 채팅" | "실전 음성"
   >("모의 채팅");
+  const [ownedTickets, setOwnedTickets] = useState<OwnedTicket[] | null>(null);
+  const [ticketTransactions, setTicketTransactions] = useState<
+    GetTicketTransactionDetail[] | []
+  >([]);
   const [selectedCoupon, setSelectedCoupon] = useState<string | null>(null);
+  const [, setSelectedCouponId] = useState<number>(0);
   const [selectedQuantity, setSelectedQuantity] = useState<number>(1);
+  const [coupons, setCoupons] = useState<GetSimpleCouponProps[] | []>([]);
 
-  const ownedVouchers = [
-    { label: "모의 채팅", count: 4 },
-    { label: "모의 음성", count: 2 },
-    { label: "실전 채팅", count: 3 },
-    { label: "실전 음성", count: 1 },
-  ];
+  const filteredCoupons = coupons.filter(
+    (coupon) =>
+      coupon.interviewModeKorean + " " + coupon.interviewAssetTypeKorean ===
+      selectedVoucher
+  );
 
-  const usedVouchers = [
-    {
-      label: "모의 채팅",
-      usedCount: 2,
-      usedDate: "2024년 11월 18일",
-    },
-    {
-      label: "실전 채팅",
-      usedCount: 3,
-      usedDate: "2024년 11월 15일",
-    },
-    {
-      label: "실전 음성",
-      usedCount: 1,
-      usedDate: "2024년 11월 14일",
-    },
-  ];
+  useEffect(() => {
+    const getTicketInfo = async () => {
+      try {
+        const response = await axios.get<GetTicketResponse>(
+          `${apiUrl}/ticket/user`,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const transformedTicketTransactions =
+          response.data.data.ticketTransactionDetails.length === 0
+            ? []
+            : response.data.data.ticketTransactionDetails.map(
+                (transaction) => ({
+                  ...transaction,
+                  generatedAt: new Date(transaction.generatedAt),
+                })
+              );
+        const ticketCounts = response.data.data.userCountInfo;
+        const ownedTicketResponse = {
+          generalChatBalance: ticketCounts.generalChatBalance,
+          generalVoiceBalance: ticketCounts.generalVoiceBalance,
+          realChatBalance: ticketCounts.realChatBalance,
+          realVoiceBalance: ticketCounts.realVoiceBalance,
+        };
+        setOwnedTickets([
+          { label: "모의 채팅", count: ownedTicketResponse.generalChatBalance },
+          {
+            label: "모의 음성",
+            count: ownedTicketResponse.generalVoiceBalance,
+          },
+          { label: "실전 채팅", count: ownedTicketResponse.realChatBalance },
+          { label: "실전 음성", count: ownedTicketResponse.realVoiceBalance },
+        ]);
+        setTicketTransactions(transformedTicketTransactions);
+      } catch (error) {
+        console.error("Error fetching Ticket Info: ", error);
+        throw error;
+      }
+    };
+    getTicketInfo();
+  }, [activeTab, showModal]);
 
   const voucherPrices: Record<
     "모의 채팅" | "모의 음성" | "실전 채팅" | "실전 음성",
@@ -45,13 +124,35 @@ const VoucherPage = () => {
     "실전 음성": 12000,
   };
 
-  const coupons = [
-    { id: 1, label: "11월 출첵 쿠폰", discount: "모의 채팅" },
-    { id: 2, label: "가을 감사 쿠폰", discount: "모의 음성" },
-    { id: 3, label: "추천인 이벤트 쿠폰", discount: "실전 채팅" },
-  ];
+  useEffect(() => {
+    const getPaymentCouponList = async () => {
+      try {
+        const response = await axios.get<GetSimpleCouponListResponse>(
+          `${apiUrl}/coupon/user/simple`,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-  const handlePurchaseClick = () => setShowModal(true);
+        const transformedCoupons = response.data.data.coupons.map((coupon) => ({
+          ...coupon,
+          expireAt: new Date(coupon.expireAt),
+        }));
+        setCoupons(transformedCoupons);
+      } catch (error) {
+        console.error("Error fetching Payment Coupon List: ", error);
+        throw error;
+      }
+    };
+    getPaymentCouponList();
+  }, [activeTab, showModal]);
+
+  const handlePurchaseClick = () => {
+    setShowModal(true);
+  };
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -62,17 +163,50 @@ const VoucherPage = () => {
 
   const handleConfirmPurchase = () => {
     alert(
-      `결제가 완료되었습니다. ${selectedVoucher} 이용권 ${selectedQuantity}매가 충전되었습니다. ${
+      `결제가 완료되었습니다. ${selectedVoucher} 이용권 ${selectedQuantity}장이 충전되었습니다. ${
         selectedCoupon ? "(쿠폰 사용)" : ""
       }`
     );
     handleCloseModal();
   };
 
-  const calculatePrice = () =>
-    selectedVoucher && !selectedCoupon
-      ? voucherPrices[selectedVoucher] * selectedQuantity
-      : 0;
+  const calculatePrice = () => {
+    const chosenCoupon = selectedCoupon
+      ? coupons.find(
+          (coupon) =>
+            coupon.interviewModeKorean +
+              " " +
+              coupon.interviewAssetTypeKorean ===
+            selectedCoupon
+        ) || {
+          interviewAssetTypeKorean: "",
+          interviewModeKorean: "",
+          chargeAmount: 0,
+        }
+      : {
+          interviewAssetTypeKorean: "",
+          interviewModeKorean: "",
+          chargeAmount: 0,
+        };
+    const chosenType =
+      chosenCoupon?.interviewModeKorean === "실전"
+        ? chosenCoupon.interviewAssetTypeKorean === "채팅"
+          ? "실전 채팅"
+          : "실전 음성"
+        : chosenCoupon?.interviewAssetTypeKorean === "채팅"
+        ? "모의 채팅"
+        : "모의 음성";
+    const couponType: "모의 채팅" | "모의 음성" | "실전 채팅" | "실전 음성" =
+      chosenType;
+    if (selectedVoucher && !selectedCoupon) {
+      return voucherPrices[selectedVoucher] * selectedQuantity;
+    } else {
+      return (
+        voucherPrices[selectedVoucher] * selectedQuantity -
+        voucherPrices[couponType] * chosenCoupon?.chargeAmount
+      );
+    }
+  };
 
   const handleVoucherClick = (
     voucher: "모의 채팅" | "모의 음성" | "실전 채팅" | "실전 음성"
@@ -101,35 +235,53 @@ const VoucherPage = () => {
 
       {activeTab === "owned" && (
         <div className="relative w-[900px] h-[500px] overflow-y-auto rounded-lg border border-gray-300 p-6 bg-white grid grid-cols-2 gap-6">
-          {ownedVouchers.map((voucher) => (
-            <div
-              key={voucher.label}
-              className="p-4 rounded-lg border border-gray-300 shadow-md text-center"
-            >
-              <p className="mt-10 text-4xl font-extrabold">{voucher.label}</p>
-              <p className="text-3xl font-semibold text-primary mt-6">
-                {voucher.count}개
-              </p>
-            </div>
-          ))}
+          {ownedTickets === null || ownedTickets.length === 0 ? (
+            <div>에러</div>
+          ) : (
+            ownedTickets.map((voucher) => (
+              <div
+                key={voucher.label}
+                className="p-4 rounded-lg border border-gray-300 shadow-md text-center"
+              >
+                <p className="mt-10 text-4xl font-extrabold">{voucher.label}</p>
+                <p className="text-3xl font-semibold text-primary mt-6">
+                  {voucher.count}장
+                </p>
+              </div>
+            ))
+          )}
         </div>
       )}
 
       {activeTab === "used" && (
         <div className="w-[900px] h-[500px] overflow-y-auto rounded-lg border border-gray-300 p-6 bg-white space-y-4">
-          {usedVouchers.map((voucher) => (
-            <div
-              key={voucher.label}
-              className="p-4 rounded-lg border border-gray-300 shadow-md text-left"
-            >
-              <p className="text-2xl font-semibold">
-                {voucher.label} 이용권 {voucher.usedCount}매
-              </p>
-              <p className="mt-4 text-md font-medium text-red-500">
-                {voucher.usedDate}
-              </p>
+          {ticketTransactions === null ||
+          ticketTransactions.filter(
+            (ticket) => ticket.ticketTransactionType === "USE"
+          ).length === 0 ? (
+            <div className="p-4 mb-4 rounded-lg opacity-100">
+              <NoContent text="이용권 사용 내역이" />
             </div>
-          ))}
+          ) : (
+            ticketTransactions
+              .filter((ticket) => ticket.ticketTransactionType === "USE")
+              .map((voucher) => (
+                <div
+                  key={voucher.ticketTransactionId}
+                  className="p-4 rounded-lg border border-gray-300 shadow-md text-left"
+                >
+                  <p className="text-2xl font-semibold">
+                    {voucher.interviewModeKorean}{" "}
+                    {voucher.interviewAssetTypeKorean} 이용권 {voucher.amount}장
+                  </p>
+                  <p className="mt-4 text-md font-medium text-red-500">
+                    사용 일자: {voucher.generatedAt.getFullYear()}.
+                    {voucher.generatedAt.getMonth()}.
+                    {voucher.generatedAt.getDate()}
+                  </p>
+                </div>
+              ))
+          )}
         </div>
       )}
 
@@ -173,15 +325,55 @@ const VoucherPage = () => {
               <select
                 id="couponSelect"
                 className="w-full p-2 border rounded-md"
-                onChange={(e) => setSelectedCoupon(e.target.value || null)}
+                onChange={(e) => {
+                  const selected = e.target.value || null;
+                  const selectedIndex = e.target.selectedIndex;
+                  const selectedOption = e.target.options[selectedIndex];
+                  const selectedKey = selectedOption.getAttribute("data-key");
+                  setSelectedCoupon(selected);
+                  if (selectedKey) {
+                    setSelectedCouponId(Number(selectedKey));
+                  } else {
+                    setSelectedCouponId(0);
+                  }
+
+                  const maxQuantity =
+                    coupons.find(
+                      (coupon) =>
+                        coupon.interviewModeKorean +
+                          " " +
+                          coupon.interviewAssetTypeKorean ===
+                        selected
+                    )?.chargeAmount ?? 1;
+                  setSelectedQuantity(maxQuantity);
+                }}
                 value={selectedCoupon || ""}
               >
                 <option value="">쿠폰을 선택하세요</option>
-                {coupons.map((coupon) => (
-                  <option key={coupon.id} value={coupon.discount}>
-                    {coupon.label} ({coupon.discount})
-                  </option>
-                ))}
+                {filteredCoupons === null || filteredCoupons.length === 0 ? (
+                  <option value="">사용 가능한 쿠폰이 없습니다.</option>
+                ) : (
+                  filteredCoupons.map((coupon) => (
+                    <option
+                      key={coupon.couponId}
+                      value={
+                        coupon.interviewModeKorean +
+                        " " +
+                        coupon.interviewAssetTypeKorean
+                      }
+                      data-key={coupon.couponId}
+                    >
+                      {coupon.couponName} (
+                      {coupon.interviewModeKorean +
+                        " " +
+                        coupon.interviewAssetTypeKorean +
+                        " " +
+                        coupon.chargeAmount +
+                        "장"}
+                      )
+                    </option>
+                  ))
+                )}
               </select>
             </div>
 
@@ -196,14 +388,57 @@ const VoucherPage = () => {
                 <input
                   type="number"
                   id="quantitySelect"
-                  min="1"
-                  max="99"
-                  value={selectedQuantity}
-                  onChange={(e) =>
-                    setSelectedQuantity(
-                      Math.min(99, Math.max(1, Number(e.target.value)))
-                    )
+                  min={
+                    selectedCoupon
+                      ? coupons.find(
+                          (coupon) =>
+                            coupon.interviewModeKorean +
+                              " " +
+                              coupon.interviewAssetTypeKorean ===
+                            selectedCoupon
+                        )?.chargeAmount || 1
+                      : 1
                   }
+                  max={
+                    selectedCoupon
+                      ? coupons.find(
+                          (coupon) =>
+                            coupon.interviewModeKorean +
+                              " " +
+                              coupon.interviewAssetTypeKorean ===
+                            selectedCoupon
+                        )?.chargeAmount || 99
+                      : 99
+                  }
+                  value={selectedQuantity}
+                  onChange={(e) => {
+                    const maxQuantity = selectedCoupon
+                      ? coupons.find(
+                          (coupon) =>
+                            coupon.interviewModeKorean +
+                              " " +
+                              coupon.interviewAssetTypeKorean ===
+                            selectedCoupon
+                        )?.chargeAmount || 99
+                      : 99;
+
+                    const minQuantity = selectedCoupon
+                      ? coupons.find(
+                          (coupon) =>
+                            coupon.interviewModeKorean +
+                              " " +
+                              coupon.interviewAssetTypeKorean ===
+                            selectedCoupon
+                        )?.chargeAmount || 1
+                      : 1;
+
+                    setSelectedQuantity(
+                      Math.min(
+                        maxQuantity,
+                        Math.max(minQuantity, Number(e.target.value))
+                      )
+                    );
+                  }}
                   className="w-24 p-2 border rounded-md text-center"
                 />
               </div>
@@ -226,7 +461,9 @@ const VoucherPage = () => {
                     ? "bg-primary text-white hover:bg-primary-dark"
                     : "bg-gray-300 text-gray-700 cursor-not-allowed"
                 }`}
-                onClick={selectedVoucher ? handleConfirmPurchase : undefined}
+                onClick={() =>
+                  selectedVoucher ? handleConfirmPurchase() : undefined
+                }
                 disabled={!selectedVoucher}
               >
                 결제

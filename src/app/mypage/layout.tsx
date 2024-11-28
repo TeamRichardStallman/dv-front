@@ -5,6 +5,10 @@ import { usePathname } from "next/navigation";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { isLogined } from "@/utils/isLogined";
+import { setUrl } from "@/utils/setUrl";
+import axios from "axios";
+
+const apiUrl = `${setUrl}`;
 
 const menuItems = [
   { name: "내 정보 수정", path: "/mypage/edit" },
@@ -15,25 +19,94 @@ const menuItems = [
   { name: "결제 내역", path: "/mypage/payment-history" },
 ];
 
+interface LicenseCounts {
+  mockChat: number;
+  mockVoice: number;
+  realChat: number;
+  realVoice: number;
+}
+
+interface UserInfo {
+  userId: number;
+  socialId: string;
+  email: string;
+  username: string;
+  name: string;
+  nickname: string;
+  s3ProfileImageUrl: string;
+  leave: boolean;
+  gender: string;
+  birthDate: Date;
+}
+
 const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [nickname, setNickname] = useState("사용자 이름");
-  const [licenseCounts, setLicenseCounts] = useState({
-    mockChat: 4,
-    mockVoice: 2,
-    realChat: 3,
-    realVoice: 1,
+  const [, setNickname] = useState("Loading...");
+  const [licenseCounts, setLicenseCounts] = useState<LicenseCounts>({
+    mockChat: 0,
+    mockVoice: 0,
+    realChat: 0,
+    realVoice: 0,
   });
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+
+  interface GetMyPageResponse {
+    data: GetMyPageInfo;
+  }
+
+  interface GetMyPageInfo {
+    user: GetUserInfo;
+    ticketInfo: GetTicketUserCountInfo;
+  }
+
+  interface GetUserInfo {
+    userId: number;
+    socialId: string;
+    email: string;
+    username: string;
+    name: string;
+    nickname: string;
+    s3ProfileImageUrl: string;
+    leave: boolean;
+    gender: string;
+    birthDate: Date;
+  }
+
+  interface GetTicketUserCountInfo {
+    totalBalance: number;
+    realChatBalance: number;
+    realVoiceBalance: number;
+    generalChatBalance: number;
+    generalVoiceBalance: number;
+  }
 
   useEffect(() => {
     setLoggedIn(isLogined());
-    setNickname("Lian");
-    setLicenseCounts({
-      mockChat: 4,
-      mockVoice: 2,
-      realChat: 3,
-      realVoice: 1,
-    });
+    const getMyPageUserInfo = async () => {
+      try {
+        const response = await axios.get<GetMyPageResponse>(
+          `${apiUrl}/user/my-page`,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setNickname(response.data.data.user.nickname);
+        setLicenseCounts({
+          mockChat: response.data.data.ticketInfo.generalChatBalance,
+          mockVoice: response.data.data.ticketInfo.generalVoiceBalance,
+          realChat: response.data.data.ticketInfo.realChatBalance,
+          realVoice: response.data.data.ticketInfo.realVoiceBalance,
+        });
+        setUserInfo(response.data.data.user);
+      } catch (error) {
+        console.error("Error fetching Simple Coupon List: ", error);
+        throw error;
+      }
+    };
+    getMyPageUserInfo();
   }, []);
 
   const pathname = usePathname();
@@ -46,12 +119,12 @@ const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
 
       <div className="flex flex-1 relative">
         <div className="absolute bg-gray-100 p-4 shadow-lg rounded-lg top-8 left-8 w-[240px]">
-          <h3 className="text-lg font-bold mb-2">{nickname}</h3>
+          <h3 className="text-lg font-bold mb-2">{userInfo?.nickname}</h3>
           <p className="text-sm font-semibold mb-1">
-            모의 채팅/음성: {licenseCounts.mockChat}/{licenseCounts.mockVoice}
+            모의 채팅/음성: {licenseCounts?.mockChat}/{licenseCounts?.mockVoice}
           </p>
           <p className="text-sm font-semibold">
-            실전 채팅/음성: {licenseCounts.realChat}/{licenseCounts.realVoice}
+            실전 채팅/음성: {licenseCounts?.realChat}/{licenseCounts?.realVoice}
           </p>
         </div>
 
