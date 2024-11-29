@@ -72,6 +72,11 @@ const UserForm = ({
   >(null);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
 
+  const getUserIdFromUrl = () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    return queryParams.get("id") || "unknown";
+  };
+
   useEffect(() => {
     if (initUserData) {
       setName((prev) => initUserData.name ?? prev);
@@ -158,13 +163,15 @@ const UserForm = ({
       return;
     }
 
+    const userId = getUserIdFromUrl();
+
     try {
       setUploading(true);
 
       const uploadResponse = await axios.post<PresignedUrlResponse>(
         "/api/s3/uploadFiles",
         {
-          fileName: `profile-images/${file.name}`,
+          fileName: `profile-image/${userId}/profile-images/${file.name}`,
           fileType: file.type,
         }
       );
