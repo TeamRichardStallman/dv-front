@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -69,6 +69,26 @@ const UserForm = ({
     boolean | null
   >(null);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+
+  useEffect(() => {
+    if (initUserData) {
+      setName(initUserData.name || "");
+      setUsername(initUserData.username || "");
+      setNickname(initUserData.nickname || "");
+      setBirthdate(
+        initUserData.birthdate
+          ? new Date(initUserData.birthdate).toISOString().substring(0, 10)
+          : ""
+      );
+      setGender(initUserData.gender || "MAN");
+      setProfileImageUrl(
+        initUserData.s3ProfileImageObjectKey
+          ? `https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/${initUserData.s3ProfileImageObjectKey}`
+          : "/profile-img.png"
+      );
+      setS3ProfileImageObjectKey(initUserData.s3ProfileImageObjectKey);
+    }
+  }, [initUserData]);
 
   const handleUsernameChange = (value: string) => {
     const regex = /^[a-zA-Z0-9]*$/;
