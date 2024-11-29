@@ -15,6 +15,7 @@ export type formDataType = {
   birthdate: Date | string;
   gender: string;
   s3ProfileImageObjectKey?: string;
+  s3ProfileImageUrl?: string;
 };
 
 type UserFormProps = {
@@ -90,16 +91,20 @@ const UserForm = ({
           : prev
       );
       setGender((prev) => initUserData.gender ?? prev);
-      setProfileImageUrl((prev) =>
-        initUserData.s3ProfileImageObjectKey
-          ? `https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/${initUserData.s3ProfileImageObjectKey}`
-          : prev
-      );
+      if (isEditPage && initUserData?.s3ProfileImageUrl) {
+        setProfileImageUrl(initUserData.s3ProfileImageUrl);
+      } else {
+        setProfileImageUrl((prev) =>
+          initUserData?.s3ProfileImageObjectKey
+            ? `https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/${initUserData.s3ProfileImageObjectKey}`
+            : prev
+        );
+      }
       setS3ProfileImageObjectKey(
         (prev) => initUserData.s3ProfileImageObjectKey ?? prev
       );
     }
-  }, [initUserData]);
+  }, [isEditPage, initUserData]);
 
   const handleUsernameChange = (value: string) => {
     const regex = /^[a-zA-Z0-9]*$/;
