@@ -12,7 +12,7 @@ export type formDataType = {
   name: string;
   username: string;
   nickname: string;
-  birthdate: Date;
+  birthdate: Date | string;
   gender: string;
   s3ProfileImageObjectKey?: string;
 };
@@ -51,7 +51,9 @@ const UserForm = ({
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [birthdate, setBirthdate] = useState<string>(
     initUserData?.birthdate
-      ? new Date(initUserData.birthdate).toISOString().substring(0, 10)
+      ? typeof initUserData.birthdate === "string"
+        ? initUserData.birthdate
+        : new Date(initUserData.birthdate).toISOString().substring(0, 10)
       : ""
   );
   const [gender, setGender] = useState<string>(initUserData?.gender || "MAN");
@@ -72,21 +74,25 @@ const UserForm = ({
 
   useEffect(() => {
     if (initUserData) {
-      setName(initUserData.name || "");
-      setUsername(initUserData.username || "");
-      setNickname(initUserData.nickname || "");
-      setBirthdate(
+      setName((prev) => initUserData.name ?? prev);
+      setUsername((prev) => initUserData.username ?? prev);
+      setNickname((prev) => initUserData.nickname ?? prev);
+      setBirthdate((prev) =>
         initUserData.birthdate
-          ? new Date(initUserData.birthdate).toISOString().substring(0, 10)
-          : ""
+          ? typeof initUserData.birthdate === "string"
+            ? initUserData.birthdate
+            : new Date(initUserData.birthdate).toISOString().substring(0, 10)
+          : prev
       );
-      setGender(initUserData.gender || "MAN");
-      setProfileImageUrl(
+      setGender((prev) => initUserData.gender ?? prev);
+      setProfileImageUrl((prev) =>
         initUserData.s3ProfileImageObjectKey
           ? `https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/${initUserData.s3ProfileImageObjectKey}`
-          : "/profile-img.png"
+          : prev
       );
-      setS3ProfileImageObjectKey(initUserData.s3ProfileImageObjectKey);
+      setS3ProfileImageObjectKey(
+        (prev) => initUserData.s3ProfileImageObjectKey ?? prev
+      );
     }
   }, [initUserData]);
 
@@ -214,7 +220,7 @@ const UserForm = ({
       name,
       username,
       nickname,
-      birthdate: new Date(birthdate),
+      birthdate: new Date(birthdate).toISOString(),
       gender,
       s3ProfileImageObjectKey,
     };
