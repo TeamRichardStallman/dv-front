@@ -185,8 +185,11 @@ const UserForm = ({
       const uploadedUrl = presignedUrl.split("?")[0];
       const objectKey = removeBucketDomain(uploadedUrl);
 
-      setS3ProfileImageObjectKey(objectKey);
-
+      const simplifiedObjectKey = objectKey.replace(
+        `profile-image/${userId}/`,
+        ""
+      );
+      setS3ProfileImageObjectKey(simplifiedObjectKey);
       const fetchResponse = await axios.post<PresignedUrlResponse>(
         "/api/s3/getFile",
         {
