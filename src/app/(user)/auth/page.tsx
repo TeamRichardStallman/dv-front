@@ -5,8 +5,9 @@ import axios from "axios";
 import { setUrl } from "@/utils/setUrl";
 import { setLocalStorage } from "@/utils/setLocalStorage";
 import Loading from "@/components/loading";
+import { requestPermissionAndGetToken } from "@/utils/requestFcmToken";
 
-const apiUrl = `${setUrl}/user`;
+const apiUrl = `${setUrl}`;
 
 export interface GetResponse {
   data: GetUserProps;
@@ -42,9 +43,31 @@ const AuthPage = () => {
   const router = useRouter();
 
   useEffect(() => {
+    const handleFirebaseToken = async () => {
+      try {
+        const token = await requestPermissionAndGetToken();
+
+        if (token !== null && token !== undefined) {
+          console.log("FCM token 처리 완: ", token);
+          await axios.post(
+            `${apiUrl}/fcm/token`,
+            { token },
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          console.log("FCM 토큰 전송 성공");
+        }
+      } catch (error) {
+        console.error("FCM 토큰 처리 중 에러:", error);
+      }
+    };
     const handleKakaoLogin = async () => {
       try {
-        const response = await axios.get<GetResponse>(`${apiUrl}/login`, {
+        const response = await axios.get<GetResponse>(`${apiUrl}/user/login`, {
           withCredentials: true,
           headers: {
             "Content-Type": "application/json",
@@ -54,6 +77,9 @@ const AuthPage = () => {
           router.push(`/signup?id=${response.data.data.userId}`);
         } else {
           setLocalStorage();
+          console.log("setLocalStorage");
+          handleFirebaseToken();
+          console.log("handleFirebaseToken");
           router.push("/");
         }
       } catch (error) {

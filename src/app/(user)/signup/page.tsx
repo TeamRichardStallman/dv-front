@@ -5,13 +5,57 @@ import { useRouter } from "next/navigation";
 import { setLocalStorage } from "@/utils/setLocalStorage";
 import axios from "axios";
 import { setUrl } from "@/utils/setUrl";
+import { setFcmKey } from "@/utils/setFcmKey";
 import { GetResponse, GetUserProps } from "../auth/page";
+import { getToken, isSupported } from "firebase/messaging";
+import { messaging } from "@/utils/firebaseConfig";
 
 const apiUrl = `${setUrl}`;
+const fcmKey = `${setFcmKey}`;
 
 const SignupPage = () => {
   const router = useRouter();
   const [user, setUser] = useState<GetUserProps>();
+
+  const handleFirebaseToken = async () => {
+    if (typeof window === "undefined") {
+      console.warn("Firebase Messaging can only be used in the browser.");
+      return;
+    }
+    try {
+      const supported = await isSupported();
+      if (!supported) {
+        console.warn("Firebase Messaging is not supported in this browser.");
+        return;
+      }
+      if (!messaging) {
+        console.error("Messaging is not initialized.");
+        return;
+      }
+      const token = await getToken(messaging, {
+        vapidKey: fcmKey,
+      });
+
+      console.log("FCM Token:", token);
+
+      if (token) {
+        await axios.post(
+          `${apiUrl}/fcm/token`,
+          { token },
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+
+      console.log("FCM 토큰 전송 성공");
+    } catch (error) {
+      console.error("FCM 토큰 처리 중 에러:", error);
+    }
+  };
 
   const handleFormSubmit = async (formData: formDataType) => {
     try {
@@ -29,6 +73,7 @@ const SignupPage = () => {
       alert(response.data.data.name + "님, 환영합니다.");
       setUser(response.data.data);
       setLocalStorage();
+      handleFirebaseToken();
       router.push("/");
     } catch (error) {
       console.error("Signup failed:", error);
