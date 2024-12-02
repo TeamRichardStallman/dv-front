@@ -25,10 +25,9 @@ const MethodStep = ({ onPrev, onNext }: StepProps) => {
         />
         <SettingBtn
           label="음성"
-          description="COMING SOON!"
+          description="직접 말하며 음성 면접을 진행합니다."
           selected={selectedMethod === "VOICE"}
           onClick={() => setSelectedMethod("VOICE")}
-          disabled={true}
         />
         <SettingBtn
           label="영상"
