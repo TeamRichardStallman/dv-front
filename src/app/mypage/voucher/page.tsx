@@ -42,6 +42,23 @@ export interface GetTicketTransactionDetail {
   generatedAt: Date;
 }
 
+interface CouponUseResponse {
+  code: number;
+  message: string;
+  data: {
+    usedCouponInfo: {
+      couponId: number;
+      chargeAmount: number;
+    };
+    chargedTicketTransactionInfo: {
+      ticketTransactionDetail: {
+        amount: number;
+        description: string;
+      };
+    };
+  };
+}
+
 interface OwnedTicket {
   label: string;
   count: number | null | undefined;
@@ -58,7 +75,7 @@ const VoucherPage = () => {
     GetTicketTransactionDetail[] | []
   >([]);
   const [selectedCoupon, setSelectedCoupon] = useState<string | null>(null);
-  const [, setSelectedCouponId] = useState<number>(0);
+  const [selectedCouponId, setSelectedCouponId] = useState<number>(0);
   const [selectedQuantity, setSelectedQuantity] = useState<number>(1);
   const [coupons, setCoupons] = useState<GetSimpleCouponProps[] | []>([]);
 
@@ -68,85 +85,73 @@ const VoucherPage = () => {
       selectedVoucher
   );
 
-  useEffect(() => {
-    const getTicketInfo = async () => {
-      try {
-        const response = await axios.get<GetTicketResponse>(
-          `${apiUrl}/ticket/user`,
-          {
-            withCredentials: true,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const transformedTicketTransactions =
-          response.data.data.ticketTransactionDetails.length === 0
-            ? []
-            : response.data.data.ticketTransactionDetails.map(
-                (transaction) => ({
-                  ...transaction,
-                  generatedAt: new Date(transaction.generatedAt),
-                })
-              );
-        const ticketCounts = response.data.data.userCountInfo;
-        const ownedTicketResponse = {
-          generalChatBalance: ticketCounts.generalChatBalance,
-          generalVoiceBalance: ticketCounts.generalVoiceBalance,
-          realChatBalance: ticketCounts.realChatBalance,
-          realVoiceBalance: ticketCounts.realVoiceBalance,
-        };
-        setOwnedTickets([
-          { label: "모의 채팅", count: ownedTicketResponse.generalChatBalance },
-          {
-            label: "모의 음성",
-            count: ownedTicketResponse.generalVoiceBalance,
+  const getTicketInfo = async () => {
+    try {
+      const response = await axios.get<GetTicketResponse>(
+        `${apiUrl}/ticket/user`,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
           },
-          { label: "실전 채팅", count: ownedTicketResponse.realChatBalance },
-          { label: "실전 음성", count: ownedTicketResponse.realVoiceBalance },
-        ]);
-        setTicketTransactions(transformedTicketTransactions);
-      } catch (error) {
-        console.error("Error fetching Ticket Info: ", error);
-        throw error;
-      }
-    };
-    getTicketInfo();
-  }, [activeTab, showModal]);
-
-  const voucherPrices: Record<
-    "모의 채팅" | "모의 음성" | "실전 채팅" | "실전 음성",
-    number
-  > = {
-    "모의 채팅": 5000,
-    "모의 음성": 7000,
-    "실전 채팅": 10000,
-    "실전 음성": 12000,
+        }
+      );
+      const transformedTicketTransactions =
+        response.data.data.ticketTransactionDetails.length === 0
+          ? []
+          : response.data.data.ticketTransactionDetails.map((transaction) => ({
+              ...transaction,
+              generatedAt: new Date(transaction.generatedAt),
+            }));
+      const ticketCounts = response.data.data.userCountInfo;
+      const ownedTicketResponse = {
+        generalChatBalance: ticketCounts.generalChatBalance,
+        generalVoiceBalance: ticketCounts.generalVoiceBalance,
+        realChatBalance: ticketCounts.realChatBalance,
+        realVoiceBalance: ticketCounts.realVoiceBalance,
+      };
+      setOwnedTickets([
+        { label: "모의 채팅", count: ownedTicketResponse.generalChatBalance },
+        {
+          label: "모의 음성",
+          count: ownedTicketResponse.generalVoiceBalance,
+        },
+        { label: "실전 채팅", count: ownedTicketResponse.realChatBalance },
+        { label: "실전 음성", count: ownedTicketResponse.realVoiceBalance },
+      ]);
+      setTicketTransactions(transformedTicketTransactions);
+    } catch (error) {
+      console.error("Error fetching Ticket Info: ", error);
+    }
   };
 
   useEffect(() => {
-    const getPaymentCouponList = async () => {
-      try {
-        const response = await axios.get<GetSimpleCouponListResponse>(
-          `${apiUrl}/coupon/user/simple`,
-          {
-            withCredentials: true,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+    getTicketInfo();
+  }, [activeTab, showModal]);
 
-        const transformedCoupons = response.data.data.coupons.map((coupon) => ({
-          ...coupon,
-          expireAt: new Date(coupon.expireAt),
-        }));
-        setCoupons(transformedCoupons);
-      } catch (error) {
-        console.error("Error fetching Payment Coupon List: ", error);
-        throw error;
-      }
-    };
+  const getPaymentCouponList = async () => {
+    try {
+      const response = await axios.get<GetSimpleCouponListResponse>(
+        `${apiUrl}/coupon/user/simple`,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const transformedCoupons = response.data.data.coupons.map((coupon) => ({
+        ...coupon,
+        expireAt: new Date(coupon.expireAt),
+      }));
+      setCoupons(transformedCoupons);
+    } catch (error) {
+      console.error("Error fetching Payment Coupon List: ", error);
+    }
+  };
+
+  useEffect(() => {
     getPaymentCouponList();
   }, [activeTab, showModal]);
 
@@ -161,13 +166,37 @@ const VoucherPage = () => {
     setSelectedQuantity(1);
   };
 
-  const handleConfirmPurchase = () => {
-    alert(
-      `결제가 완료되었습니다. ${selectedVoucher} 이용권 ${selectedQuantity}장이 충전되었습니다. ${
-        selectedCoupon ? "(쿠폰 사용)" : ""
-      }`
-    );
-    handleCloseModal();
+  const handleConfirmPurchase = async () => {
+    if (!selectedCouponId) {
+      alert("쿠폰을 선택하세요.");
+      return;
+    }
+
+    try {
+      const response = await axios.post<CouponUseResponse>(
+        `${apiUrl}/coupon/use`,
+        { couponId: selectedCouponId },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.code === 200) {
+        alert(
+          `결제가 완료되었습니다. ${selectedVoucher} 이용권 ${response.data.data.chargedTicketTransactionInfo.ticketTransactionDetail.amount}장이 충전되었습니다.`
+        );
+        setShowModal(false);
+        await getTicketInfo();
+      } else {
+        alert("결제 실패: " + response.data.message);
+      }
+    } catch (error) {
+      console.error("Error using coupon:", error);
+      alert("쿠폰 사용에 실패했습니다.");
+    }
   };
 
   const calculatePrice = () => {
@@ -206,6 +235,16 @@ const VoucherPage = () => {
         voucherPrices[couponType] * chosenCoupon?.chargeAmount
       );
     }
+  };
+
+  const voucherPrices: Record<
+    "모의 채팅" | "모의 음성" | "실전 채팅" | "실전 음성",
+    number
+  > = {
+    "모의 채팅": 5000,
+    "모의 음성": 7000,
+    "실전 채팅": 10000,
+    "실전 음성": 12000,
   };
 
   const handleVoucherClick = (
@@ -276,7 +315,7 @@ const VoucherPage = () => {
                   </p>
                   <p className="mt-4 text-md font-medium text-red-500">
                     사용 일자: {voucher.generatedAt.getFullYear()}.
-                    {voucher.generatedAt.getMonth()}.
+                    {voucher.generatedAt.getMonth() + 1}.
                     {voucher.generatedAt.getDate()}
                   </p>
                 </div>
