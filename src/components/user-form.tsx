@@ -323,42 +323,45 @@ const UserForm = ({
           required
         />
       </div>
-      <div>
-        <label className="block font-semibold">Username</label>
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => handleUsernameChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="border p-2 rounded w-full h-10"
-            placeholder="Username을 입력하세요"
-            required
-          />
-          <button
-            type="button"
-            onClick={handleUsernameCheck}
-            className="h-10 px-6 min-w-[140px] bg-primary text-white rounded font-bold"
-            disabled={usernameChecking}
-          >
-            {usernameChecking ? "확인 중..." : "중복 검사"}
-          </button>
+      {!isEditPage && (
+        <div>
+          <label className="block font-semibold">Username</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => handleUsernameChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="border p-2 rounded w-full h-10"
+              placeholder="Username을 입력하세요"
+              required
+            />
+            <button
+              type="button"
+              onClick={handleUsernameCheck}
+              className="h-10 px-6 min-w-[140px] bg-primary text-white rounded font-bold"
+              disabled={usernameChecking}
+            >
+              {usernameChecking ? "확인 중..." : "중복 검사"}
+            </button>
+          </div>
+          {usernameError && (
+            <p className="text-red-600 text-sm">{usernameError}</p>
+          )}
+          {isUsernameAvailable !== null && (
+            <p
+              className={`text-sm mt-2 ${
+                isUsernameAvailable ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {isUsernameAvailable
+                ? "사용 가능한 Username입니다."
+                : "이미 사용 중인 Username입니다."}
+            </p>
+          )}
         </div>
-        {usernameError && (
-          <p className="text-red-600 text-sm">{usernameError}</p>
-        )}
-        {isUsernameAvailable !== null && (
-          <p
-            className={`text-sm mt-2 ${
-              isUsernameAvailable ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {isUsernameAvailable
-              ? "사용 가능한 Username입니다."
-              : "이미 사용 중인 Username입니다."}
-          </p>
-        )}
-      </div>
+      )}
+
       <div>
         <label className="block font-semibold">Nickname</label>
         <input
