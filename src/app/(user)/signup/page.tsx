@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserForm, { formDataType } from "@/components/user-form";
 import { useRouter } from "next/navigation";
 import { setLocalStorage } from "@/utils/setLocalStorage";
@@ -56,6 +56,23 @@ const SignupPage = () => {
       console.error("FCM 토큰 처리 중 에러:", error);
     }
   };
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await axios.get<GetResponse>(`${apiUrl}/user/info`, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      setUser(response.data.data);
+    };
+
+    try {
+      fetchUser();
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
 
   const handleFormSubmit = async (formData: formDataType) => {
     try {
@@ -79,6 +96,7 @@ const SignupPage = () => {
       console.error("Signup failed:", error);
     }
   };
+
   return (
     <div className="flex flex-col items-center justify-center">
       <h1 className="text-4xl font-bold mb-8">회원가입</h1>

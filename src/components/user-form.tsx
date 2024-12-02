@@ -10,6 +10,7 @@ import { setUrl } from "@/utils/setUrl";
 
 export type formDataType = {
   name: string;
+  userId?: number;
   username: string;
   nickname: string;
   birthdate: Date | string;
@@ -72,17 +73,15 @@ const UserForm = ({
     boolean | null
   >(null);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
-
-  const getUserIdFromUrl = () => {
-    const queryParams = new URLSearchParams(window.location.search);
-    return queryParams.get("id") || "unknown";
-  };
+  const [userId, setUserId] = useState<number | undefined>();
 
   useEffect(() => {
+    console.log(initUserData);
     if (initUserData) {
       setName((prev) => initUserData.name ?? prev);
       setUsername((prev) => initUserData.username ?? prev);
       setNickname((prev) => initUserData.nickname ?? prev);
+      setUserId((prev) => initUserData.userId ?? prev);
       setBirthdate((prev) =>
         initUserData.birthdate
           ? typeof initUserData.birthdate === "string"
@@ -168,8 +167,6 @@ const UserForm = ({
       return;
     }
 
-    const userId = getUserIdFromUrl();
-
     try {
       setUploading(true);
 
@@ -233,6 +230,7 @@ const UserForm = ({
 
     const formData: formDataType = {
       name,
+      userId,
       username,
       nickname,
       birthdate: new Date(birthdate).toISOString(),
