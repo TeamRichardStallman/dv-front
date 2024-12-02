@@ -1,16 +1,72 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import axios from "axios";
+import { setUrl } from "@/utils/setUrl";
 import SettingBtn from "@/components/settingbtn";
+import PaymentModal from "@/components/payment-modal";
 import useInterviewStore, { InterviewMode } from "@/stores/useInterviewStore";
+
+const apiUrl = `${setUrl}`;
+
+interface TicketResponse {
+  totalBalance: number;
+  realChatBalance: number;
+  realVoiceBalance: number;
+  generalChatBalance: number;
+  generalVoiceBalance: number;
+}
 
 const InterviewPage = () => {
   const [mode, setMode] = useState<InterviewMode>("REAL");
   const { updateInterviewField } = useInterviewStore();
+  const [showModal, setShowModal] = useState(false);
+  const [selectedVoucher, setSelectedVoucher] = useState<
+    "모의 채팅" | "모의 음성" | "실전 채팅" | "실전 음성"
+  >("실전 채팅");
 
-  const handleClick = () => {
-    if (mode) {
-      updateInterviewField("interviewMode", mode);
+  const fetchTicketInfo = async (): Promise<TicketResponse | null> => {
+    try {
+      const response = await axios.get<{ data: TicketResponse }>(
+        `${apiUrl}/ticket/user/count`,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error("Error fetching ticket info:", error);
+      return null;
+    }
+  };
+
+  const handleNextClick = async () => {
+    const data = await fetchTicketInfo();
+
+    if (!data) {
+      alert("티켓 정보를 불러오는 데 실패했습니다.");
+      return;
+    }
+
+    if (mode === "GENERAL") {
+      if (data.generalChatBalance > 0 || data.generalVoiceBalance > 0) {
+        updateInterviewField("interviewMode", mode);
+        window.location.href = `/interview/setup?type=${mode}`;
+      } else {
+        setSelectedVoucher("모의 채팅");
+        setShowModal(true);
+      }
+    } else if (mode === "REAL") {
+      if (data.realChatBalance > 0 || data.realVoiceBalance > 0) {
+        updateInterviewField("interviewMode", mode);
+        window.location.href = `/interview/setup?type=${mode}`;
+      } else {
+        setSelectedVoucher("실전 채팅");
+        setShowModal(true);
+      }
     }
   };
 
@@ -25,14 +81,19 @@ const InterviewPage = () => {
           label="모의면접"
           description="선택한 관심 직무를 기반으로 가상면접을 진행합니다."
           selected={mode === "GENERAL"}
-          onClick={() => setMode("GENERAL")}
-          disabled={true}
+          onClick={() => {
+            setMode("GENERAL");
+            setSelectedVoucher("모의 채팅");
+          }}
         />
         <SettingBtn
           label="실전면접"
           description="선택한 직무와 자소서, 이력서 등을 기반으로 개인 맞춤화 가상면접을 진행합니다."
           selected={mode === "REAL"}
-          onClick={() => setMode("REAL")}
+          onClick={() => {
+            setMode("REAL");
+            setSelectedVoucher("실전 채팅");
+          }}
         />
       </div>
 
@@ -42,29 +103,36 @@ const InterviewPage = () => {
             홈으로
           </button>
         </Link>
-        <div className="relative group">
-          <Link href={`/interview/setup?type=${mode}`}>
-            <button
-              className="bg-secondary w-24 py-2 px-6 rounded-md text-white"
-              // className={`w-24 py-2 px-6 rounded-md text-white ${
-              //   mode ? "bg-secondary" : "bg-gray-400 cursor-not-allowed"
-              // }`}
-              // disabled={!mode}
-              onClick={handleClick}
-            >
-              다음
-            </button>
-          </Link>
-          {/* {!mode && (
-            <div
-              className="absolute invisible group-hover:visible -top-10 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-200 text-gray-700 text-sm rounded-md shadow-md z-10"
-              style={{ whiteSpace: "nowrap" }}
-            >
-              버튼을 클릭해주세요
-            </div>
-          )} */}
-        </div>
+        <button
+          className="bg-secondary w-24 py-2 px-6 rounded-md text-white"
+          onClick={handleNextClick}
+        >
+          다음
+        </button>
       </div>
+
+      {showModal && (
+        <PaymentModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          onSuccess={async () => {
+            const updatedTicketInfo = await fetchTicketInfo();
+            if (
+              updatedTicketInfo &&
+              ((mode === "GENERAL" &&
+                (updatedTicketInfo.generalChatBalance > 0 ||
+                  updatedTicketInfo.generalVoiceBalance > 0)) ||
+                (mode === "REAL" &&
+                  (updatedTicketInfo.realChatBalance > 0 ||
+                    updatedTicketInfo.realVoiceBalance > 0)))
+            ) {
+              setShowModal(false);
+            }
+          }}
+          selectedVoucher={selectedVoucher}
+          setSelectedVoucher={setSelectedVoucher}
+        />
+      )}
     </div>
   );
 };
