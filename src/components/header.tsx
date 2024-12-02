@@ -3,6 +3,7 @@ import Image from "next/image";
 import { setLocalStorage } from "@/utils/setLocalStorage";
 import { setUrl } from "@/utils/setUrl";
 import axios from "axios";
+import { clearFcmToken } from "@/utils/requestFcmToken";
 
 const apiUrl = `${setUrl}`;
 
@@ -13,6 +14,7 @@ interface HeaderProps {
 export default function Header({ loggedIn }: HeaderProps) {
   const handleLogout = async () => {
     setLocalStorage("false");
+    clearFcmToken();
 
     await axios.post(
       `${apiUrl}/user/logout`,

@@ -6,18 +6,73 @@ import Header from "@/components/header";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { isLogined } from "@/utils/isLogined";
+import { getMessaging, isSupported, onMessage } from "firebase/messaging";
+import { firebaseApp } from "@/utils/firebaseConfig";
 
 export default function Home() {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
+    const initializeFirebaseMessaging = async () => {
+      if (typeof window === "undefined") {
+        console.warn(
+          "Firebase Messaging can only be initialized in the browser."
+        );
+        return;
+      }
+
+      const supported = await isSupported();
+      if (!supported) {
+        console.warn("Firebase Messaging is not supported in this browser.");
+        return;
+      }
+
+      try {
+        const messaging = getMessaging(firebaseApp);
+
+        onMessage(messaging, (payload) => {
+          console.log("[포그라운드 메시지 수신]:", payload);
+
+          if (payload.notification) {
+            const { title, body, icon } = payload.notification as {
+              title?: string;
+              body?: string;
+              icon?: string;
+            };
+            if (Notification.permission === "granted") {
+              new Notification(title ?? "알림", {
+                body: body ?? "메시지가 도착했습니다.",
+                icon: icon ?? "/logo.png",
+              });
+            }
+          } else {
+            console.warn("Notification payload is undefined:", payload);
+          }
+        });
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker
+            .register("/firebase-messaging-sw.js")
+            .then((registration) => {
+              console.log("Service Worker 등록 성공:", registration);
+            })
+            .catch((error) => {
+              console.error("Service Worker 등록 실패:", error);
+            });
+        } else {
+          console.warn("Service Worker is not supported in this browser.");
+        }
+      } catch (error) {
+        console.error("Firebase Messaging 초기화 중 에러:", error);
+      }
+    };
+    initializeFirebaseMessaging();
     setLoggedIn(isLogined());
   }, []);
 
   return (
     <div className="relative min-h-screen bg-gradient-to-r from-blue-100 to-purple-100 overflow-hidden">
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Header loggedIn={loggedIn}/>
+        <Header loggedIn={loggedIn} />
 
         <main className="flex-1 flex flex-col items-center justify-center text-center p-6">
           <motion.h1
