@@ -1,19 +1,21 @@
 import { initializeApp } from "firebase/app";
+import { getAnalytics, Analytics } from "firebase/analytics";
 import { getMessaging, isSupported, Messaging } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAA7NUuDJs768DT7SGB6OQmZHG-_-Ese7U",
-  authDomain: "ikdk-55b6f.firebaseapp.com",
-  projectId: "ikdk-55b6f",
-  storageBucket: "ikdk-55b6f.firebasestorage.app",
-  messagingSenderId: "802147604659",
-  appId: "1:802147604659:web:b2c41ad2a9d237f919b8c6",
-  measurementId: "G-RKMGTY2Y56",
+  apiKey: "AIzaSyAUxvDVVY9Jna9MKbqLC33qGz7PCx2eGbA",
+  authDomain: "ikdk-120f0.firebaseapp.com",
+  projectId: "ikdk-120f0",
+  storageBucket: "ikdk-120f0.firebasestorage.app",
+  messagingSenderId: "179784048652",
+  appId: "1:179784048652:web:5c245b16b9971685a4ce29",
+  measurementId: "G-XTJM1D4TF1",
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
 
 let messaging: Messaging | null = null;
+let analytics: Analytics | null = null;
 
 if (typeof window !== "undefined") {
   isSupported().then((supported) => {
@@ -23,6 +25,12 @@ if (typeof window !== "undefined") {
       console.warn("Firebase Messaging is not supported in this browser.");
     }
   });
+
+  try {
+    analytics = getAnalytics(firebaseApp);
+  } catch (error) {
+    console.error("Error initializing Firebase Analytics: ", error);
+  }
 }
 
-export { firebaseApp, messaging };
+export { firebaseApp, messaging, analytics };
