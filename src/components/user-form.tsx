@@ -111,8 +111,8 @@ const UserForm = ({
       setUsernameError("Username은 영어와 숫자만 사용할 수 있습니다.");
     } else {
       setUsernameError(null);
+      setUsername(value);
     }
-    setUsername(value);
     setIsUsernameAvailable(null);
   };
 
@@ -122,8 +122,21 @@ const UserForm = ({
       setNicknameError("Nickname은 영어와 숫자만 사용할 수 있습니다.");
     } else {
       setNicknameError(null);
+      setNickname(value);
     }
-    setNickname(value);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const allowedKeys = /^[a-zA-Z0-9]$/;
+    if (
+      !allowedKeys.test(event.key) &&
+      event.key !== "Backspace" &&
+      event.key !== "Delete" &&
+      event.key !== "ArrowLeft" &&
+      event.key !== "ArrowRight"
+    ) {
+      event.preventDefault();
+    }
   };
 
   const handleUsernameCheck = async () => {
@@ -317,6 +330,7 @@ const UserForm = ({
             type="text"
             value={username}
             onChange={(e) => handleUsernameChange(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="border p-2 rounded w-full h-10"
             placeholder="Username을 입력하세요"
             required
@@ -351,6 +365,7 @@ const UserForm = ({
           type="text"
           value={nickname}
           onChange={(e) => handleNicknameChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           className="border p-2 rounded w-full h-10"
           placeholder="Nickname을 입력하세요"
           required
