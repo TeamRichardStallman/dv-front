@@ -2,12 +2,7 @@
 import axios from "axios";
 import React, { use, useEffect, useState } from "react";
 import { setUrl } from "@/utils/setUrl";
-import {
-  EvaluationDetailType,
-  GetEvaluationResponse,
-} from "@/app/interview/feedback/[interviewId]/page";
 import InterviewFeedbackDetail from "@/components/interview/interview-feedback-detail";
-import { GetResponse, GetUserProps } from "@/app/(user)/auth/page";
 
 const apiUrl = `${setUrl}`;
 
@@ -26,10 +21,13 @@ const MyInterviewFeedbackDetailPage = ({
   useEffect(() => {
     if (!interviewId) return;
     const fetchUser = async () => {
-      const userResponse = await axios.get<GetResponse>(`${apiUrl}/user/info`, {
-        withCredentials: true,
-        headers: { "Content-Type": "application/json" },
-      });
+      const userResponse = await axios.get<GetUserResponse>(
+        `${apiUrl}/user/info`,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       setUser(userResponse.data.data);
     };
 

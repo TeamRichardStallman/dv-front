@@ -13,7 +13,8 @@ export interface QuestionRequestType {
   interviewType: string | undefined;
   interviewMethod: string | undefined;
   interviewMode: string | undefined;
-  files: InterviewFile[];
+  questionCount: number | undefined;
+  files: InterviewFile[] | undefined;
   jobId: number | undefined;
 }
 
@@ -37,6 +38,7 @@ const useQuestionRequest = create<InterviewStore>()(
         interviewMethod: undefined,
         interviewMode: undefined,
         jobId: undefined,
+        questionCount: undefined,
         files: [],
       },
       setQuestionRequest: (newData) => set({ questionRequest: newData }),

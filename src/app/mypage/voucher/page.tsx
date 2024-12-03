@@ -7,43 +7,6 @@ import NoContent from "@/components/no-content";
 
 const apiUrl = `${setUrl}`;
 
-export interface GetTicketResponse {
-  data: GetTicketUserInfo;
-}
-
-interface GetTicketUserInfo {
-  userCountInfo: GetTicketUserCountInfo;
-  ticketTransactionDetails: GetTicketTransactionDetail[];
-}
-
-interface GetTicketUserCountInfo {
-  totalBalance: number;
-  realChatBalance: number;
-  realVoiceBalance: number;
-  generalChatBalance: number;
-  generalVoiceBalance: number;
-}
-
-export interface GetTicketTransactionDetail {
-  ticketTransactionId: number;
-  amount: number;
-  ticketTransactionType: string;
-  ticketTransactionTypeKorean: string;
-  ticketTransactionMethod: string;
-  ticketTransactionMethodKorean: string;
-  interviewMode: string;
-  interviewModeKorean: string;
-  interviewAssetType: string;
-  interviewAssetTypeKorean: string;
-  description: string;
-  generatedAt: Date;
-}
-
-interface OwnedTicket {
-  label: string;
-  count: number | null | undefined;
-}
-
 const VoucherPage = () => {
   const [activeTab, setActiveTab] = useState("owned");
   const [showModal, setShowModal] = useState(false);

@@ -15,7 +15,6 @@ import {
   Legend,
 } from "chart.js";
 import "react-circular-progressbar/dist/styles.css";
-import { GetUserProps } from "@/app/(user)/auth/page";
 import { CircularProgressbar } from "react-circular-progressbar";
 import { AiOutlineDown, AiOutlineUp } from "react-icons/ai";
 import { calculateAge } from "@/utils/format";
@@ -29,71 +28,12 @@ ChartJS.register(
   Legend
 );
 
-interface JobDetails {
-  jobId: number;
-  jobName: string;
-  jobNameKorean: string;
-  jobDescription: string;
-}
-
-interface InterviewFile {
-  fileId: number;
-  type: string;
-  fileName: string;
-  s3FileUrl: string;
-}
-
-interface InterviewDetails {
-  interviewId: number;
-  interviewTitle: string;
-  interviewStatus: "INITIAL" | "IN_PROGRESS" | "FILE_UPLOAD";
-  interviewType: "TECHNICAL" | "PERSONAL";
-  interviewMethod: "CHAT" | "VIDEO" | "VOICE";
-  interviewMode: "REAL" | "GENERAL";
-  job: JobDetails;
-  files: InterviewFile[];
-}
-
-interface EvaluationCriteria {
-  evaluationCriteriaId: number;
-  evaluationCriteria: string;
-  feedbackText: string;
-  score: number;
-}
-
-interface AnswerEvaluationScore {
-  answerEvaluationScoreId: number;
-  answerEvaluationScoreName: string;
-  score: number;
-  rationale: string;
-}
-
-interface AnswerEvaluation {
-  answerEvaluationId: number;
-  questionText: string;
-  answerText: string;
-  answerFeedbackStrength: string;
-  answerFeedbackImprovement: string;
-  answerFeedbackSuggestion: string;
-  answerEvaluationScores: AnswerEvaluationScore[];
-}
-
-export interface EvaluationDetailType {
-  interview: InterviewDetails;
-  evaluationCriteria: EvaluationCriteria[];
-  answerEvaluations: AnswerEvaluation[];
-}
-
-export interface GetEvaluationResponse {
-  data: EvaluationDetailType;
-}
-
 export const interviewInfoMap: Record<string, { label: string }> = {
-  REAL: { label: "실전면접" },
-  TECHNICAL: { label: "기술면접" },
+  REAL: { label: "실전 면접" },
+  TECHNICAL: { label: "기술 면접" },
   CHAT: { label: "채팅" },
-  PERSONAL: { label: "인성면접" },
-  GENERAL: { label: "모의면접" },
+  PERSONAL: { label: "인성 면접" },
+  GENERAL: { label: "모의 면접" },
   VOICE: { label: "음성" },
   VIDEO: { label: "영상" },
 };

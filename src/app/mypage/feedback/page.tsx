@@ -3,18 +3,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { setUrl } from "@/utils/setUrl";
 import Link from "next/link";
-export interface EvaluationInfo {
-  interviewTitle: string;
-  interviewId: number;
-}
-
-export interface GetEvaluationListResponse {
-  code: number;
-  message: string;
-  data: {
-    interviews: EvaluationInfo[];
-  };
-}
 
 const apiUrl = `${setUrl}`;
 
@@ -44,7 +32,7 @@ const InterviewFeedbackListPage = () => {
     };
 
     fetchEvaluations();
-  }, [apiUrl]);
+  }, []);
 
   if (loading) return <p className="text-center text-gray-500">Loading...</p>;
 

@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { GetTicketResponse, GetTicketTransactionDetail } from "../voucher/page";
 import { setUrl } from "@/utils/setUrl";
 import axios from "axios";
 import NoContent from "@/components/no-content";

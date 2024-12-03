@@ -15,31 +15,6 @@ interface PaymentModalProps {
   >;
 }
 
-interface Coupon {
-  couponId: number;
-  couponName: string;
-  interviewModeKorean: string;
-  interviewAssetTypeKorean: string;
-  chargeAmount: number;
-}
-
-interface CouponUseResponse {
-  code: number;
-  message: string;
-  data: {
-    usedCouponInfo: {
-      couponId: number;
-      chargeAmount: number;
-    };
-    chargedTicketTransactionInfo: {
-      ticketTransactionDetail: {
-        amount: number;
-        description: string;
-      };
-    };
-  };
-}
-
 const PaymentModal: React.FC<PaymentModalProps> = ({
   isOpen,
   onClose,
