@@ -28,7 +28,7 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
   >("실전 채팅");
   const [showModal, setShowModal] = useState(false);
   const [possible, setPossible] = useState(false);
-  const [isQuestionCountSelected, setIsQuestionCountSelected] = useState(false);
+  const [, setIsQuestionCountSelected] = useState(false);
 
   useEffect(() => {
     let hasFetched = false;
@@ -219,22 +219,30 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
                 )
               : null}
             {possible ? (
-              <div>
-                <p className="font-bold text-lg mt-10">
-                  위 정보가 맞는지 확인해주세요.
-                </p>
-                <p className="text-gray-600">
-                  질문이 생성된 이후에는 이용권 환불이 불가합니다.
-                </p>
-                <p className="text-gray-600 mt-4">
-                  보유 이용권: {countTicket}장 | 필요 이용권:{" "}
-                  {interview.interviewMode === "GENERAL"
-                    ? selectedQuestionCount / 3
-                    : selectedQuestionCount / 5}
-                  장
-                </p>
-              </div>
-            ) : isQuestionCountSelected ? (
+              selectedQuestionCount !== 0 ? (
+                <div>
+                  <p className="font-bold text-lg mt-10">
+                    위 정보가 맞는지 확인해주세요.
+                  </p>
+                  <p className="text-gray-600">
+                    질문이 생성된 이후에는 이용권 환불이 불가합니다.
+                  </p>
+                  <p className="text-gray-600 mt-4">
+                    보유 이용권: {countTicket}장 | 필요 이용권:{" "}
+                    {interview.interviewMode === "GENERAL"
+                      ? selectedQuestionCount / 3
+                      : selectedQuestionCount / 5}
+                    장
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="font-bold text-lg mt-10">
+                    질문 개수를 선택해주세요.
+                  </p>
+                </div>
+              )
+            ) : selectedQuestionCount !== 0 ? (
               <div>
                 <p className="font-bold text-lg mt-10">
                   보유 이용권이 부족합니다. 결제 후 이용해주세요.

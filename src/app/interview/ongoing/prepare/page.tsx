@@ -50,7 +50,6 @@ const InterviewOngoingPreparePage = () => {
                 icon: icon ?? "/logo.png",
               });
             }
-            alert("why");
             if (
               confirm(
                 "면접 준비가 완료되었습니다. 확인을 누르면 면접이 시작됩니다."
