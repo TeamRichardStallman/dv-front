@@ -19,6 +19,10 @@ const InterviewOngoingPreparePage = () => {
   const [loading, setLoading] = useState(false);
   const [microphonePermission, setMicrophonePermission] = useState(false);
   const [volumeLevel, setVolumeLevel] = useState(0);
+  const [isMicrophoneChecked, setIsMicrophoneChecked] = useState(false);
+  const [isAudioChecked, setIsAudioChecked] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
 
   useEffect(() => {
     const initializeFirebaseMessaging = async () => {
@@ -119,6 +123,10 @@ const InterviewOngoingPreparePage = () => {
           const scaledVolume = Math.min(100, volume * 1.5);
           setVolumeLevel(Math.floor(scaledVolume));
 
+          if (scaledVolume > 20) {
+            setIsMicrophoneChecked(true);
+          }
+
           requestAnimationFrame(updateVolume);
         };
 
@@ -135,6 +143,37 @@ const InterviewOngoingPreparePage = () => {
     requestMicrophoneAccess();
   }, [questionRequest, router]);
 
+  const playTestSound = () => {
+    const audio = new Audio("/audiotest.mp3");
+    setIsPlaying(true);
+    setAudioProgress(0);
+
+    const interval = setInterval(() => {
+      if (audio.ended) {
+        clearInterval(interval);
+        setAudioProgress(100);
+        setIsPlaying(false);
+      } else {
+        setAudioProgress((audio.currentTime / audio.duration) * 100);
+      }
+    }, 100);
+
+    audio.play();
+
+    audio.onended = () => {
+      clearInterval(interval);
+      setAudioProgress(100);
+      setIsPlaying(false);
+    };
+
+    audio.onerror = () => {
+      clearInterval(interval);
+      setAudioProgress(0);
+      setIsPlaying(false);
+      alert("오디오 파일 재생에 실패했습니다.");
+    };
+  };
+
   return (
     <div>
       {interview.interviewMethod === "CHAT" ? (
@@ -145,7 +184,7 @@ const InterviewOngoingPreparePage = () => {
         )
       ) : (
         <div className="flex flex-col items-center">
-          <h2 className="text-2xl font-bold mb-4">음성 테스트</h2>
+          <h2 className="text-2xl font-bold mb-4">음성 및 오디오 테스트</h2>
           {!microphonePermission ? (
             <p className="text-red-500">
               마이크 접근 권한이 필요합니다. 설정을 확인해주세요.
@@ -167,21 +206,60 @@ const InterviewOngoingPreparePage = () => {
                   ></div>
                 ))}
               </div>
-              <p className="text-gray-700 font-semibold mt-2">
-                음성 입력 감지 중...
-              </p>
+              <button
+                className={`mt-4 px-4 py-2 rounded-lg text-white font-bold ${
+                  isMicrophoneChecked
+                    ? "bg-green-500"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+                disabled={!isMicrophoneChecked}
+              >
+                {isMicrophoneChecked ? "음성 인식 완료 ✓" : "테스트 완료"}
+              </button>
             </div>
           )}
+
+          <div className="mt-6">
+            <button
+              onClick={playTestSound}
+              className={`relative w-48 h-8 rounded-lg text-white font-bold ${
+                isPlaying ? "bg-blue-300" : "bg-blue-500 hover:bg-blue-600"
+              }`}
+              disabled={isPlaying}
+            >
+              {isPlaying ? (
+                <>
+                  <div
+                    className="absolute top-0 left-0 h-full bg-blue-500 rounded-lg"
+                    style={{ width: `${audioProgress}%` }}
+                  ></div>
+                  <span className="relative z-10">재생 중...</span>
+                </>
+              ) : (
+                "오디오 재생"
+              )}
+            </button>
+            <button
+              onClick={() => setIsAudioChecked(true)}
+              className={`mt-4 px-4 py-2 rounded-lg text-white font-bold ${
+                isAudioChecked ? "bg-green-500" : "bg-gray-400"
+              }`}
+              disabled={!isPlaying && !isAudioChecked}
+            >
+              {isAudioChecked ? "오디오 체크 완료 ✓" : "확인완료"}
+            </button>
+          </div>
+
           <button
             onClick={() => router.push(`/interview/ongoing`)}
-            className={`mt-4 px-4 py-2 rounded-lg bg-primary text-white font-bold ${
-              !microphonePermission || volumeLevel === 0
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:opacity-90"
+            className={`mt-6 px-4 py-2 rounded-lg text-white font-bold ${
+              isMicrophoneChecked && isAudioChecked
+                ? "bg-secondary"
+                : "bg-gray-400 cursor-not-allowed"
             }`}
-            disabled={!microphonePermission || volumeLevel === 0}
+            disabled={!isMicrophoneChecked || !isAudioChecked}
           >
-            테스트 완료
+            면접 시작
           </button>
         </div>
       )}
