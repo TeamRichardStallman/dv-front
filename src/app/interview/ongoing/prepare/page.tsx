@@ -22,7 +22,9 @@ const InterviewOngoingPreparePage = () => {
   const [isMicrophoneChecked, setIsMicrophoneChecked] = useState(false);
   const [isAudioChecked, setIsAudioChecked] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [audioProgress, setAudioProgress] = useState(0);
+  const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(
+    null
+  );
 
   useEffect(() => {
     const initializeFirebaseMessaging = async () => {
@@ -143,32 +145,24 @@ const InterviewOngoingPreparePage = () => {
     requestMicrophoneAccess();
   }, [questionRequest, router]);
 
-  const playTestSound = () => {
-    const audio = new Audio("/audiotest.mp3");
-    setIsPlaying(true);
-    setAudioProgress(0);
+  const togglePlayAudio = () => {
+    if (isPlaying && audioInstance) {
+      audioInstance.pause();
+      setIsPlaying(false);
+      return;
+    }
 
-    const interval = setInterval(() => {
-      if (audio.ended) {
-        clearInterval(interval);
-        setAudioProgress(100);
-        setIsPlaying(false);
-      } else {
-        setAudioProgress((audio.currentTime / audio.duration) * 100);
-      }
-    }, 100);
+    const audio = new Audio("/audiotest.mp3");
+    setAudioInstance(audio);
+    setIsPlaying(true);
 
     audio.play();
 
     audio.onended = () => {
-      clearInterval(interval);
-      setAudioProgress(100);
       setIsPlaying(false);
     };
 
     audio.onerror = () => {
-      clearInterval(interval);
-      setAudioProgress(0);
       setIsPlaying(false);
       alert("오디오 파일 재생에 실패했습니다.");
     };
@@ -221,11 +215,10 @@ const InterviewOngoingPreparePage = () => {
 
           <div className="flex flex-col items-center space-y-2 mt-4">
             <button
-              onClick={playTestSound}
-              className={`relative w-64 h-12 px-4 py-2 rounded-lg text-white font-bold`}
-              style={{
-                background: `linear-gradient(to right, #3b82f6 ${audioProgress}%, #e5e7eb ${audioProgress}%)`,
-              }}
+              onClick={togglePlayAudio}
+              className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
+                isPlaying ? "bg-blue-300" : "bg-blue-500 hover:bg-blue-600"
+              }`}
             >
               {isPlaying ? "재생 중..." : "오디오 재생"}
             </button>
