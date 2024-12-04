@@ -6,7 +6,6 @@ import { setLocalStorage } from "@/utils/setLocalStorage";
 import axios from "axios";
 import { setUrl } from "@/utils/setUrl";
 import { setFcmKey } from "@/utils/setFcmKey";
-import { GetResponse, GetUserProps } from "../auth/page";
 import { getToken, isSupported } from "firebase/messaging";
 import { messaging } from "@/utils/firebaseConfig";
 
@@ -58,7 +57,7 @@ const SignupPage = () => {
   };
   useEffect(() => {
     const fetchUser = async () => {
-      const response = await axios.get<GetResponse>(`${apiUrl}/user/info`, {
+      const response = await axios.get<GetUserResponse>(`${apiUrl}/user/info`, {
         withCredentials: true,
         headers: {
           "Content-Type": "application/json",
@@ -76,7 +75,7 @@ const SignupPage = () => {
 
   const handleFormSubmit = async (formData: formDataType) => {
     try {
-      const response = await axios.post<GetResponse>(
+      const response = await axios.post<GetUserResponse>(
         `${apiUrl}/user/info`,
         formData,
         {

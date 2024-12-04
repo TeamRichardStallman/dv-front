@@ -9,14 +9,6 @@ import useInterviewStore, { InterviewMode } from "@/stores/useInterviewStore";
 
 const apiUrl = `${setUrl}`;
 
-interface TicketResponse {
-  totalBalance: number;
-  realChatBalance: number;
-  realVoiceBalance: number;
-  generalChatBalance: number;
-  generalVoiceBalance: number;
-}
-
 const InterviewPage = () => {
   const [mode, setMode] = useState<InterviewMode>("REAL");
   const { updateInterviewField } = useInterviewStore();
@@ -25,9 +17,9 @@ const InterviewPage = () => {
     "모의 채팅" | "모의 음성" | "실전 채팅" | "실전 음성"
   >("실전 채팅");
 
-  const fetchTicketInfo = async (): Promise<TicketResponse | null> => {
+  const fetchTicketInfo = async (): Promise<TicketCountInfo | null> => {
     try {
-      const response = await axios.get<{ data: TicketResponse }>(
+      const response = await axios.get<{ data: TicketCountInfo }>(
         `${apiUrl}/ticket/user/count`,
         {
           withCredentials: true,

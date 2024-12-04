@@ -9,32 +9,6 @@ import { requestPermissionAndGetToken } from "@/utils/requestFcmToken";
 
 const apiUrl = `${setUrl}`;
 
-export interface GetResponse {
-  data: GetUserProps;
-}
-
-export interface GetUserProps {
-  type: string;
-  userId: number;
-  socialId: string;
-  email: string;
-  name: string;
-  nickname: string;
-  s3ProfileImageUrl: string;
-  leave: boolean;
-  gender: string;
-  birthdate: Date;
-}
-
-interface AxiosResponse<T = unknown> {
-  data: T;
-  status: number;
-  statusText: string;
-  headers: Record<string, string>;
-  config: unknown;
-  request?: unknown;
-}
-
 function isAxiosError(error: unknown): error is { response: AxiosResponse } {
   return (error as { response: AxiosResponse }).response !== undefined;
 }
@@ -67,12 +41,15 @@ const AuthPage = () => {
     };
     const handleKakaoLogin = async () => {
       try {
-        const response = await axios.get<GetResponse>(`${apiUrl}/user/login`, {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await axios.get<GetUserResponse>(
+          `${apiUrl}/user/login`,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
         if (response.data.data.type === "signup") {
           router.push(`/signup?id=${response.data.data.userId}`);
         } else {

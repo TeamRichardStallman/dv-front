@@ -19,26 +19,6 @@ const menuItems = [
   { name: "결제 내역", path: "/mypage/payment-history" },
 ];
 
-interface LicenseCounts {
-  mockChat: number;
-  mockVoice: number;
-  realChat: number;
-  realVoice: number;
-}
-
-interface UserInfo {
-  userId: number;
-  socialId: string;
-  email: string;
-  username: string;
-  name: string;
-  nickname: string;
-  s3ProfileImageUrl: string;
-  leave: boolean;
-  gender: string;
-  birthDate: Date;
-}
-
 const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [, setNickname] = useState("Loading...");
@@ -49,36 +29,6 @@ const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
     realVoice: 0,
   });
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-
-  interface GetMyPageResponse {
-    data: GetMyPageInfo;
-  }
-
-  interface GetMyPageInfo {
-    user: GetUserInfo;
-    ticketInfo: GetTicketUserCountInfo;
-  }
-
-  interface GetUserInfo {
-    userId: number;
-    socialId: string;
-    email: string;
-    username: string;
-    name: string;
-    nickname: string;
-    s3ProfileImageUrl: string;
-    leave: boolean;
-    gender: string;
-    birthDate: Date;
-  }
-
-  interface GetTicketUserCountInfo {
-    totalBalance: number;
-    realChatBalance: number;
-    realVoiceBalance: number;
-    generalChatBalance: number;
-    generalVoiceBalance: number;
-  }
 
   useEffect(() => {
     setLoggedIn(isLogined());

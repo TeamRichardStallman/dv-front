@@ -6,57 +6,6 @@ import NoContent from "@/components/no-content";
 
 const apiUrl = `${setUrl}/coupon`;
 
-export interface GetSimpleCouponListResponse {
-  data: GetSimpleCouponList;
-}
-
-export interface GetUsedCouponListResponse {
-  data: GetUsedCouponList;
-}
-
-export interface GetExpiredCouponListResponse {
-  data: GetExpiredCouponList;
-}
-
-interface GetSimpleCouponList {
-  coupons: GetSimpleCouponProps[];
-}
-
-interface GetUsedCouponList {
-  coupons: GetUsedCouponProps[];
-}
-
-interface GetExpiredCouponList {
-  coupons: GetExpiredCouponProps[];
-}
-
-export interface GetSimpleCouponProps {
-  couponId: number;
-  chargeAmount: number;
-  couponName: string;
-  interviewModeKorean: string;
-  interviewAssetTypeKorean: string;
-  expireAt: Date;
-}
-
-export interface GetUsedCouponProps {
-  couponId: number;
-  chargeAmount: number;
-  couponName: string;
-  interviewModeKorean: string;
-  interviewAssetTypeKorean: string;
-  usedAt: Date;
-}
-
-export interface GetExpiredCouponProps {
-  couponId: number;
-  chargeAmount: number;
-  couponName: string;
-  interviewModeKorean: string;
-  interviewAssetTypeKorean: string;
-  expireAt: Date;
-}
-
 const CouponPage = () => {
   const [activeTab, setActiveTab] = useState("owned");
   const [simpleCoupons, setSimpleCoupons] = useState<

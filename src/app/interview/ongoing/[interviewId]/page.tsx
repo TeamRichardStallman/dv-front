@@ -1,12 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useQuestionRequest from "@/stores/useQuestionRequest";
 import { setUrl } from "@/utils/setUrl";
 import axios from "axios";
 import Loading from "@/components/loading";
 import { formatTime, removeInterview } from "@/utils/format";
-import { GetResponse, GetUserProps } from "@/app/(user)/auth/page";
 import {
   interviewInfoMap,
   jobsMap,
@@ -15,51 +14,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const apiUrl = `${setUrl}`;
-
-interface JobDetails {
-  jobId: number;
-  jobName: string;
-  jobNameKorean: string;
-  jobDescription: string;
-}
-
-interface InterviewDetails {
-  interviewId: number;
-  interviewTitle: string;
-  interviewStatus: "IN_PROGRESS" | "FILE_UPLOADED" | "COMPLETED" | "CANCELLED";
-  interviewType: "TECHNICAL" | "PERSONAL";
-  interviewMethod: "CHAT" | "VIDEO" | "VOICE";
-  interviewMode: "GENERAL" | "REAL";
-  job: JobDetails;
-}
-
-interface Answer {
-  answerText: string;
-  s3AudioUrl: string;
-  s3VideoUrl: string;
-}
-
-interface InterviewAnswerRequest {
-  interviewId: number;
-  answerQuestionId: number;
-  nextQuestionId?: number;
-  answer: Answer;
-}
-
-interface QuestionResponseData {
-  interview: InterviewDetails;
-  currentQuestionId: number;
-  currentQuestionText: string;
-  nextQuestionId?: number;
-  nextQuestionText?: string;
-  hasNext: boolean;
-}
-
-interface QuestionResponse {
-  code: number;
-  message: string;
-  data: QuestionResponseData;
-}
 
 const MAX_TIME = 180;
 
@@ -83,7 +37,7 @@ const InterviewOngoingDetailPage = () => {
       if (!hasFetched) {
         hasFetched = true;
         setLoading(true);
-        const userResponse = await axios.get<GetResponse>(
+        const userResponse = await axios.get<GetUserResponse>(
           `${apiUrl}/user/info`,
           {
             withCredentials: true,
@@ -94,7 +48,7 @@ const InterviewOngoingDetailPage = () => {
         try {
           const response = await axios.post<QuestionResponse>(
             `${apiUrl}/question/initial-question`,
-            questionRequest,
+            { interviewId: questionRequest.interviewId },
             {
               withCredentials: true,
               headers: {
@@ -112,9 +66,9 @@ const InterviewOngoingDetailPage = () => {
     };
 
     sendInitialQuestion();
-  }, []);
+  }, [questionRequest.interviewId]);
 
-  const sendNextQuestion = async () => {
+  const sendNextQuestion = useCallback(async () => {
     if (
       questionRequest.interviewId &&
       questionResponse?.data.currentQuestionId !== undefined
@@ -160,7 +114,7 @@ const InterviewOngoingDetailPage = () => {
         setLoading(false);
       }
     }
-  };
+  }, [questionRequest.interviewId, questionResponse, answerText]);
 
   useEffect(() => {
     if (timeLeft === 1) {

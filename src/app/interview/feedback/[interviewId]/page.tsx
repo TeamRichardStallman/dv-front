@@ -1,113 +1,59 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
-import {
-  Chart as ChartJS,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { GetResponse, GetUserProps } from "@/app/(user)/auth/page";
 import Loading from "@/components/loading";
 import useQuestionRequest from "@/stores/useQuestionRequest";
 import { setUrl } from "@/utils/setUrl";
-import InterviewFeedbackDetail from "@/components/interview/interview-feedback-detail";
-
-ChartJS.register(
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend
-);
-
-interface JobDetails {
-  jobId: number;
-  jobName: string;
-  jobNameKorean: string;
-  jobDescription: string;
-}
-
-interface InterviewFile {
-  fileId: number;
-  type: string;
-  fileName: string;
-  s3FileUrl: string;
-}
-
-interface InterviewDetails {
-  interviewId: number;
-  interviewTitle: string;
-  interviewStatus: "INITIAL" | "IN_PROGRESS" | "FILE_UPLOAD";
-  interviewType: "TECHNICAL" | "PERSONAL";
-  interviewMethod: "CHAT" | "VIDEO" | "VOICE";
-  interviewMode: "REAL" | "GENERAL";
-  job: JobDetails;
-  files: InterviewFile[];
-}
-
-interface EvaluationCriteria {
-  evaluationCriteriaId: number;
-  evaluationCriteria: string;
-  feedbackText: string;
-  score: number;
-}
-
-interface AnswerEvaluationScore {
-  answerEvaluationScoreId: number;
-  answerEvaluationScoreName: string;
-  score: number;
-  rationale: string;
-}
-
-interface AnswerEvaluation {
-  answerEvaluationId: number;
-  questionText: string;
-  answerText: string;
-  answerFeedbackStrength: string;
-  answerFeedbackImprovement: string;
-  answerFeedbackSuggestion: string;
-  answerEvaluationScores: AnswerEvaluationScore[];
-}
-
-export interface EvaluationDetailType {
-  interview: InterviewDetails;
-  evaluationCriteria: EvaluationCriteria[];
-  answerEvaluations: AnswerEvaluation[];
-}
-
-export interface GetEvaluationResponse {
-  data: EvaluationDetailType;
-}
+import { getMessaging, isSupported, onMessage } from "firebase/messaging";
+import { firebaseApp } from "@/utils/firebaseConfig";
+import { useRouter } from "next/navigation";
 
 const apiUrl = `${setUrl}`;
 
 const InterviewFeedbackDetailPage = () => {
-  const { questionRequest, setQuestionRequest } = useQuestionRequest();
-  const [loading, setLoading] = useState(false);
-  const [evaluation, setEvaluation] = useState<EvaluationDetailType>();
-  const [user, setUser] = useState<GetUserProps>();
-
-  const hasFetched = useRef(false);
+  const { questionRequest } = useQuestionRequest();
+  const router = useRouter();
 
   useEffect(() => {
-    const sendInitialQuestion = async () => {
-      setLoading(true);
-      try {
-        const userResponse = await axios.get<GetResponse>(
-          `${apiUrl}/user/info`,
-          {
-            withCredentials: true,
-            headers: { "Content-Type": "application/json" },
-          }
+    const initializeFirebaseMessaging = async () => {
+      if (typeof window === "undefined") {
+        console.warn(
+          "Firebase Messaging can only be initialized in the browser."
         );
-        setUser(userResponse.data.data);
+        return;
+      }
+      const supported = await isSupported();
+      if (!supported) {
+        console.warn("Firebase Messaging is not supported in this browser.");
+        return;
+      }
+      try {
+        const messaging = getMessaging(firebaseApp);
 
-        const evalResponse = await axios.post<GetEvaluationResponse>(
+        onMessage(messaging, (payload) => {
+          console.log("[포그라운드 메시지 수신]:", payload);
+
+          if (payload.notification) {
+            const { title, body } = payload.notification as {
+              title?: string;
+              body?: string;
+            };
+            if (title === "평가가 완료되었습니다.") {
+              if (confirm(title + " 평가 조회로 이동합니다.")) {
+                router.push(`/mypage/feedback/${body}`);
+              } else {
+                router.push("/");
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Firebase Messaging 초기화 중 에러: ", error);
+      }
+    };
+    const sendEvaluation = async () => {
+      try {
+        const evalResponse = await axios.post(
           `${apiUrl}/evaluation`,
           { interviewId: questionRequest.interviewId },
           {
@@ -117,39 +63,17 @@ const InterviewFeedbackDetailPage = () => {
         );
 
         console.log(evalResponse);
-
-        setEvaluation(evalResponse.data.data);
-
-        setQuestionRequest({
-          interviewId: undefined,
-          interviewTitle: undefined,
-          interviewStatus: undefined,
-          interviewType: undefined,
-          interviewMethod: undefined,
-          interviewMode: undefined,
-          jobId: undefined,
-          files: [],
-        });
       } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error fetching data Evaluation:", error);
       }
     };
-
-    if (!hasFetched.current && questionRequest) {
-      hasFetched.current = true;
-      sendInitialQuestion();
-    }
-  }, [questionRequest, setQuestionRequest]);
+    initializeFirebaseMessaging();
+    sendEvaluation();
+  }, []);
 
   return (
     <div>
-      {!loading && user && evaluation ? (
-        <InterviewFeedbackDetail user={user} evaluation={evaluation} />
-      ) : (
-        <Loading title="피드백 준비중" description="고생하셨습니다." />
-      )}
+      <Loading title="피드백 준비중" description="고생하셨습니다." />
     </div>
   );
 };

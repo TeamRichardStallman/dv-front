@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import UserForm, { formDataType } from "@/components/user-form";
-import { GetResponse, GetUserProps } from "@/app/(user)/auth/page";
 import { setUrl } from "@/utils/setUrl";
 import axios from "axios";
 
@@ -13,12 +12,15 @@ const EditPage = () => {
   useEffect(() => {
     const getUserMe = async () => {
       try {
-        const response = await axios.get<GetResponse>(`${apiUrl}/user/info`, {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await axios.get<GetUserResponse>(
+          `${apiUrl}/user/info`,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
         setUser(response.data.data);
       } catch (error) {
         console.error("Signup failed:", error);
@@ -29,7 +31,7 @@ const EditPage = () => {
 
   const handleSubmit = async (formData: formDataType) => {
     try {
-      const response = await axios.put<GetResponse>(
+      const response = await axios.put<GetUserResponse>(
         `${apiUrl}/user/info`,
         formData,
         {

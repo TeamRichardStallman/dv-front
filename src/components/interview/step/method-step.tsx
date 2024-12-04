@@ -10,14 +10,6 @@ import { setUrl } from "@/utils/setUrl";
 
 const apiUrl = `${setUrl}`;
 
-interface TicketResponse {
-  totalBalance: number;
-  realChatBalance: number;
-  realVoiceBalance: number;
-  generalChatBalance: number;
-  generalVoiceBalance: number;
-}
-
 const MethodStep = ({ onPrev, onNext }: StepProps) => {
   const searchParams = useSearchParams();
   const urlType = searchParams.get("type") as InterviewMode;
@@ -39,9 +31,9 @@ const MethodStep = ({ onPrev, onNext }: StepProps) => {
     }
   }, [urlType, updateInterviewField]);
 
-  const fetchTicketInfo = async (): Promise<TicketResponse | null> => {
+  const fetchTicketInfo = async (): Promise<TicketCountInfo | null> => {
     try {
-      const response = await axios.get<{ data: TicketResponse }>(
+      const response = await axios.get<{ data: TicketCountInfo }>(
         `${apiUrl}/ticket/user/count`,
         {
           withCredentials: true,
