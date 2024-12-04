@@ -192,7 +192,7 @@ const InterviewOngoingPreparePage = () => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col items-center space-y-6">
       {interview.interviewMethod === "CHAT" ? (
         loading ? (
           <Loading title="질문 생성 중" description="잠시만 기다려주세요." />
@@ -200,72 +200,78 @@ const InterviewOngoingPreparePage = () => {
           <Loading title="면접 준비 중" description="잠시만 기다려주세요." />
         )
       ) : (
-        <div className="flex flex-col items-center space-y-4">
-          <h2 className="text-2xl font-bold mb-4">음성 및 오디오 테스트</h2>
-          {!microphonePermission ? (
-            <p className="text-red-500">
-              마이크 접근 권한이 필요합니다. 설정을 확인해주세요.
-            </p>
-          ) : (
-            <div className="flex flex-col items-center space-y-2">
-              <div className="flex flex-col-reverse items-center space-y-1 space-y-reverse">
-                {[...Array(10)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-2 rounded-md transition-all duration-300 ${
-                      volumeLevel >= (i + 1) * 10
-                        ? "bg-blue-500"
-                        : "bg-gray-300"
+        <div className="flex flex-col items-center">
+          <div className="flex w-full space-x-48">
+            <div className="w-1/2 flex flex-col items-center space-y-4">
+              <h2 className="text-xl font-bold">음성 테스트</h2>
+              {!microphonePermission ? (
+                <p className="text-red-500">
+                  마이크 접근 권한이 필요합니다. 설정을 확인해주세요.
+                </p>
+              ) : (
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="flex flex-col-reverse items-center space-y-1 space-y-reverse">
+                    {[...Array(10)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`h-2 rounded-md transition-all duration-300 ${
+                          volumeLevel >= (i + 1) * 10
+                            ? "bg-blue-500"
+                            : "bg-gray-300"
+                        }`}
+                        style={{ width: `${20 + i * 5}px` }}
+                      ></div>
+                    ))}
+                  </div>
+                  <p className="text-black font-semibold">음성 인식 중...</p>
+                  <button
+                    className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
+                      isMicrophoneChecked
+                        ? "bg-green-500"
+                        : "bg-gray-400 cursor-not-allowed"
                     }`}
-                    style={{
-                      width: `${20 + i * 5}px`,
-                    }}
-                  ></div>
-                ))}
-              </div>
-              <button
-                className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
-                  isMicrophoneChecked
-                    ? "bg-green-500"
-                    : "bg-gray-400 cursor-not-allowed"
-                }`}
-                disabled={!isMicrophoneChecked}
-              >
-                {isMicrophoneChecked ? "음성 인식 완료 ✓" : "테스트 완료"}
-              </button>
+                    disabled={!isMicrophoneChecked}
+                  >
+                    {isMicrophoneChecked ? "음성 인식 완료 ✓" : "테스트 완료"}
+                  </button>
+                </div>
+              )}
             </div>
-          )}
 
-          <div className="flex flex-col items-center space-y-2 mt-4">
-            <button
-              onClick={togglePlayAudio}
-              className={`relative w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
-                isPlaying ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
-              }`}
-              style={{
-                background: isPlaying
-                  ? `linear-gradient(to right, #3b82f6 ${audioProgress}%, #e5e7eb ${audioProgress}%)`
-                  : "",
-              }}
-            >
-              {isPlaying ? "재생 중..." : "오디오 재생"}
-            </button>
-            <button
-              onClick={() => setIsAudioChecked(true)}
-              className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
-                isAudioChecked ? "bg-green-500" : "bg-gray-400"
-              }`}
-              disabled={!isPlaying && !isAudioChecked}
-            >
-              {isAudioChecked ? "오디오 체크 완료 ✓" : "확인 완료"}
-            </button>
+            <div className="w-1/2 flex flex-col items-center space-y-4">
+              <h2 className="text-xl font-bold">오디오 테스트</h2>
+              <div className="flex flex-col items-center space-y-2">
+                <button
+                  onClick={togglePlayAudio}
+                  className={`relative w-64 h-[147px] px-4 py-2 rounded-lg text-white font-bold ${
+                    isPlaying ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
+                  }`}
+                  style={{
+                    background: isPlaying
+                      ? `linear-gradient(to right, #3b82f6 ${audioProgress}%, #e5e7eb ${audioProgress}%)`
+                      : "",
+                  }}
+                >
+                  {isPlaying ? "재생 중..." : "오디오 재생"}
+                </button>
+                <button
+                  onClick={() => setIsAudioChecked(true)}
+                  className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
+                    isAudioChecked ? "bg-green-500" : "bg-gray-400"
+                  }`}
+                  disabled={!isPlaying && !isAudioChecked}
+                >
+                  {isAudioChecked ? "오디오 체크 완료 ✓" : "확인 완료"}
+                </button>
+              </div>
+            </div>
           </div>
 
           <button
             onClick={() => router.push(`/interview/ongoing`)}
-            className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
+            className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold mt-24 ${
               isMicrophoneChecked && isAudioChecked
-                ? "bg-secondary"
+                ? "bg-primary"
                 : "bg-gray-400 cursor-not-allowed"
             }`}
             disabled={!isMicrophoneChecked || !isAudioChecked}
