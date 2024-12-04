@@ -115,7 +115,10 @@ const InterviewOngoingPreparePage = () => {
           analyser.getByteFrequencyData(dataArray);
           const volume =
             dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-          setVolumeLevel(volume);
+
+          const scaledVolume = Math.min(100, volume * 1.5);
+          setVolumeLevel(Math.floor(scaledVolume));
+
           requestAnimationFrame(updateVolume);
         };
 
@@ -141,34 +144,41 @@ const InterviewOngoingPreparePage = () => {
           <Loading title="면접 준비 중" description="잠시만 기다려주세요." />
         )
       ) : (
-        <div>
-          <h2>음성 테스트</h2>
+        <div className="flex flex-col items-center">
+          <h2 className="text-2xl font-bold mb-4">음성 테스트</h2>
           {!microphonePermission ? (
-            <p>마이크 접근 권한이 필요합니다. 설정을 확인해주세요.</p>
+            <p className="text-red-500">
+              마이크 접근 권한이 필요합니다. 설정을 확인해주세요.
+            </p>
           ) : (
-            <div>
-              <div
-                style={{
-                  width: "100%",
-                  height: "20px",
-                  backgroundColor: "#ccc",
-                  marginBottom: "10px",
-                  position: "relative",
-                }}
-              >
-                <div
-                  style={{
-                    width: `${volumeLevel}%`,
-                    height: "100%",
-                    backgroundColor: "green",
-                  }}
-                ></div>
+            <div className="flex flex-col items-center">
+              <div className="flex flex-col-reverse items-center space-y-1 space-y-reverse">
+                {[...Array(10)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-2 rounded-md transition-all duration-300 ${
+                      volumeLevel >= (i + 1) * 10
+                        ? "bg-blue-500"
+                        : "bg-gray-300"
+                    }`}
+                    style={{
+                      width: `${20 + i * 5}px`,
+                    }}
+                  ></div>
+                ))}
               </div>
-              <p>음성 입력 감지 중: {volumeLevel.toFixed(2)}</p>
+              <p className="text-gray-700 font-semibold mt-2">
+                음성 입력 감지 중...
+              </p>
             </div>
           )}
           <button
             onClick={() => router.push(`/interview/ongoing`)}
+            className={`mt-4 px-4 py-2 rounded-lg bg-primary text-white font-bold ${
+              !microphonePermission || volumeLevel === 0
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:opacity-90"
+            }`}
             disabled={!microphonePermission || volumeLevel === 0}
           >
             테스트 완료
