@@ -183,14 +183,14 @@ const InterviewOngoingPreparePage = () => {
           <Loading title="면접 준비 중" description="잠시만 기다려주세요." />
         )
       ) : (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center space-y-4">
           <h2 className="text-2xl font-bold mb-4">음성 및 오디오 테스트</h2>
           {!microphonePermission ? (
             <p className="text-red-500">
               마이크 접근 권한이 필요합니다. 설정을 확인해주세요.
             </p>
           ) : (
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center space-y-2">
               <div className="flex flex-col-reverse items-center space-y-1 space-y-reverse">
                 {[...Array(10)].map((_, i) => (
                   <div
@@ -207,7 +207,7 @@ const InterviewOngoingPreparePage = () => {
                 ))}
               </div>
               <button
-                className={`mt-4 px-4 py-2 rounded-lg text-white font-bold ${
+                className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
                   isMicrophoneChecked
                     ? "bg-green-500"
                     : "bg-gray-400 cursor-not-allowed"
@@ -219,40 +219,30 @@ const InterviewOngoingPreparePage = () => {
             </div>
           )}
 
-          <div className="mt-6">
+          <div className="flex flex-col items-center space-y-2 mt-4">
             <button
               onClick={playTestSound}
-              className={`relative w-48 h-8 rounded-lg text-white font-bold ${
-                isPlaying ? "bg-blue-300" : "bg-blue-500 hover:bg-blue-600"
-              }`}
-              disabled={isPlaying}
+              className={`relative w-64 h-12 px-4 py-2 rounded-lg text-white font-bold`}
+              style={{
+                background: `linear-gradient(to right, #3b82f6 ${audioProgress}%, #e5e7eb ${audioProgress}%)`,
+              }}
             >
-              {isPlaying ? (
-                <>
-                  <div
-                    className="absolute top-0 left-0 h-full bg-blue-500 rounded-lg"
-                    style={{ width: `${audioProgress}%` }}
-                  ></div>
-                  <span className="relative z-10">재생 중...</span>
-                </>
-              ) : (
-                "오디오 재생"
-              )}
+              {isPlaying ? "재생 중..." : "오디오 재생"}
             </button>
             <button
               onClick={() => setIsAudioChecked(true)}
-              className={`mt-4 px-4 py-2 rounded-lg text-white font-bold ${
+              className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
                 isAudioChecked ? "bg-green-500" : "bg-gray-400"
               }`}
               disabled={!isPlaying && !isAudioChecked}
             >
-              {isAudioChecked ? "오디오 체크 완료 ✓" : "확인완료"}
+              {isAudioChecked ? "오디오 체크 완료 ✓" : "확인 완료"}
             </button>
           </div>
 
           <button
             onClick={() => router.push(`/interview/ongoing`)}
-            className={`mt-6 px-4 py-2 rounded-lg text-white font-bold ${
+            className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
               isMicrophoneChecked && isAudioChecked
                 ? "bg-secondary"
                 : "bg-gray-400 cursor-not-allowed"
