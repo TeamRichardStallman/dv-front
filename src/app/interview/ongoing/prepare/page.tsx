@@ -25,6 +25,8 @@ const InterviewOngoingPreparePage = () => {
   const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(
     null
   );
+  const [audioProgress, setAudioProgress] = useState(0);
+  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const initializeFirebaseMessaging = async () => {
@@ -148,22 +150,43 @@ const InterviewOngoingPreparePage = () => {
   const togglePlayAudio = () => {
     if (isPlaying && audioInstance) {
       audioInstance.pause();
+      setAudioProgress(0);
       setIsPlaying(false);
+      setAudioInstance(null);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
       return;
     }
 
     const audio = new Audio("/audiotest.mp3");
     setAudioInstance(audio);
     setIsPlaying(true);
+    setAudioProgress(0);
 
     audio.play();
+    const newIntervalId = setInterval(() => {
+      if (audio.ended) {
+        clearInterval(newIntervalId);
+        setAudioProgress(100);
+        setIsPlaying(false);
+      } else {
+        setAudioProgress((audio.currentTime / audio.duration) * 100);
+      }
+    }, 100);
+
+    setIntervalId(newIntervalId);
 
     audio.onended = () => {
+      clearInterval(newIntervalId);
+      setAudioProgress(100);
       setIsPlaying(false);
+      setAudioInstance(null);
     };
 
     audio.onerror = () => {
       setIsPlaying(false);
+      setAudioProgress(0);
       alert("오디오 파일 재생에 실패했습니다.");
     };
   };
@@ -216,9 +239,14 @@ const InterviewOngoingPreparePage = () => {
           <div className="flex flex-col items-center space-y-2 mt-4">
             <button
               onClick={togglePlayAudio}
-              className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
-                isPlaying ? "bg-blue-300" : "bg-blue-500 hover:bg-blue-600"
+              className={`relative w-64 h-12 px-4 py-2 rounded-lg text-white font-bold ${
+                isPlaying ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
               }`}
+              style={{
+                background: isPlaying
+                  ? `linear-gradient(to right, #3b82f6 ${audioProgress}%, #e5e7eb ${audioProgress}%)`
+                  : "",
+              }}
             >
               {isPlaying ? "재생 중..." : "오디오 재생"}
             </button>
