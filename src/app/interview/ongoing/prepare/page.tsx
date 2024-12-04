@@ -17,6 +17,9 @@ const InterviewOngoingPreparePage = () => {
   const { questionRequest } = useQuestionRequest();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [microphonePermission, setMicrophonePermission] = useState(false);
+  const [volumeLevel, setVolumeLevel] = useState(0);
+
   useEffect(() => {
     const initializeFirebaseMessaging = async () => {
       if (typeof window === "undefined") {
@@ -91,8 +94,42 @@ const InterviewOngoingPreparePage = () => {
       }
       setLoading(false);
     };
+
+    const requestMicrophoneAccess = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        setMicrophonePermission(true);
+
+        const audioContext = new (window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext })
+            .webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+
+        analyser.fftSize = 256;
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        const updateVolume = () => {
+          analyser.getByteFrequencyData(dataArray);
+          const volume =
+            dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+          setVolumeLevel(volume);
+          requestAnimationFrame(updateVolume);
+        };
+
+        source.connect(analyser);
+        updateVolume();
+      } catch (error) {
+        console.error("마이크 접근 오류:", error);
+        setMicrophonePermission(false);
+      }
+    };
+
     initializeFirebaseMessaging();
     requestQuestionList();
+    requestMicrophoneAccess();
   }, [questionRequest, router]);
 
   return (
@@ -104,7 +141,39 @@ const InterviewOngoingPreparePage = () => {
           <Loading title="면접 준비 중" description="잠시만 기다려주세요." />
         )
       ) : (
-        <div>Comming soon...</div>
+        <div>
+          <h2>음성 테스트</h2>
+          {!microphonePermission ? (
+            <p>마이크 접근 권한이 필요합니다. 설정을 확인해주세요.</p>
+          ) : (
+            <div>
+              <div
+                style={{
+                  width: "100%",
+                  height: "20px",
+                  backgroundColor: "#ccc",
+                  marginBottom: "10px",
+                  position: "relative",
+                }}
+              >
+                <div
+                  style={{
+                    width: `${volumeLevel}%`,
+                    height: "100%",
+                    backgroundColor: "green",
+                  }}
+                ></div>
+              </div>
+              <p>음성 입력 감지 중: {volumeLevel.toFixed(2)}</p>
+            </div>
+          )}
+          <button
+            onClick={() => router.push(`/interview/ongoing`)}
+            disabled={!microphonePermission || volumeLevel === 0}
+          >
+            테스트 완료
+          </button>
+        </div>
       )}
     </div>
   );
