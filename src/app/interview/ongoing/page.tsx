@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { QUESTIONS } from "@/data/questions";
 import { formatTime } from "@/utils/format";
 import { useRouter } from "next/navigation";
@@ -28,18 +28,35 @@ const InterviewOngoingPage = () => {
     null
   );
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   const handleNextQuestion = useCallback(async () => {
     setTimeLeft(MAX_TIME);
 
-    if (isRecording) {
-      mediaRecorder?.stop();
-      setIsRecording(false);
-    }
+    const stopRecordingAsync = () => {
+      return new Promise<Blob | null>((resolve) => {
+        if (isRecording && mediaRecorder) {
+          mediaRecorder.onstop = () => {
+            const newAudioBlob = new Blob(chunksRef.current, {
+              type: "audio/webm",
+            });
+            setAudioBlob(newAudioBlob);
+            setIsRecording(false);
+            resolve(newAudioBlob);
+          };
+          mediaRecorder.stop();
+        } else {
+          resolve(null);
+        }
+      });
+    };
+
+    const newAudioBlob = await stopRecordingAsync();
 
     let audioUrl = "";
+    const blobToUpload = newAudioBlob || audioBlob;
 
-    if (audioBlob) {
+    if (blobToUpload) {
       try {
         toast.info("Presigned URL 요청 중...");
         const response = await fetch("/api/s3/uploadFiles", {
@@ -61,7 +78,7 @@ const InterviewOngoingPage = () => {
         await fetch(presignedUrl, {
           method: "PUT",
           headers: { "Content-Type": "audio/webm" },
-          body: audioBlob,
+          body: blobToUpload,
         });
 
         audioUrl = presignedUrl.split("?")[0];
@@ -127,10 +144,14 @@ const InterviewOngoingPage = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
 
-      const chunks: Blob[] = [];
-      recorder.ondataavailable = (e) => chunks.push(e.data);
-      recorder.onstop = () =>
-        setAudioBlob(new Blob(chunks, { type: "audio/webm" }));
+      chunksRef.current = [];
+      recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
+      recorder.onstop = () => {
+        const newAudioBlob = new Blob(chunksRef.current, {
+          type: "audio/webm",
+        });
+        setAudioBlob(newAudioBlob);
+      };
 
       recorder.start();
       setMediaRecorder(recorder);
@@ -143,17 +164,6 @@ const InterviewOngoingPage = () => {
       console.error("녹음 시작 실패:", error);
       toast.error("녹음을 시작할 수 없습니다. 마이크 권한을 확인하세요.");
     }
-  };
-
-  const stopRecording = () => {
-    if (!isRecording || !mediaRecorder) return;
-
-    mediaRecorder.stop();
-    setIsRecording(false);
-    toast.info("녹음이 종료되었습니다.", {
-      position: "bottom-right",
-      autoClose: 2000,
-    });
   };
 
   useEffect(() => {
@@ -214,12 +224,6 @@ const InterviewOngoingPage = () => {
             disabled={isRecording}
           >
             녹음 시작
-          </button>
-          <button
-            onClick={stopRecording}
-            className="px-6 py-3 bg-secondary text-white rounded font-semibold text-xl"
-          >
-            녹음 종료
           </button>
         </div>
         <div className="flex items-center gap-2 w-[100px] justify-center">
