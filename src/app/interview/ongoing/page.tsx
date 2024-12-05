@@ -212,44 +212,45 @@ const InterviewOngoingPage = () => {
         />
       </div>
 
-      <div className="flex w-full justify-between py-6 items-center gap-4">
-        <div className="flex gap-4">
+      <div className="flex w-full justify-between py-6 items-center">
+        <button
+          onClick={startRecording}
+          className={`px-6 py-3 rounded font-semibold text-xl ${
+            isRecording
+              ? "bg-gray-400 text-white cursor-not-allowed"
+              : "bg-primary text-white"
+          }`}
+          disabled={isRecording}
+        >
+          녹음 시작
+        </button>
+
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="36"
+              height="36"
+              fill={timeLeft <= 30 ? "#FF0000" : "#000000"}
+              viewBox="0 0 256 256"
+            >
+              <path d="M128,40a96,96,0,1,0,96,96A96.11,96.11,0,0,0,128,40Zm0,176a80,80,0,1,1,80-80A80.09,80.09,0,0,1,128,216ZM173.66,90.34a8,8,0,0,1,0,11.32l-40,40a8,8,0,0,1-11.32-11.32l40-40A8,8,0,0,1,173.66,90.34ZM96,16a8,8,0,0,1,8-8h48a8,8,0,0,1,0,16H104A8,8,0,0,1,96,16Z"></path>
+            </svg>
+            <span
+              className={`text-xl font-semibold ${
+                timeLeft <= 30 ? "text-red-500" : "text-black"
+              }`}
+            >
+              {formatTime(timeLeft)}
+            </span>
+          </div>
           <button
-            onClick={startRecording}
-            className={`px-6 py-3 rounded font-semibold text-xl ${
-              isRecording
-                ? "bg-gray-400 text-white cursor-not-allowed"
-                : "bg-primary text-white"
-            }`}
-            disabled={isRecording}
+            className="px-6 py-3 bg-secondary text-white rounded font-semibold text-xl"
+            onClick={handleNextQuestion}
           >
-            녹음 시작
+            {currentQuestionIndex === questions.length - 1 ? "제출" : "다음"}
           </button>
         </div>
-        <div className="flex items-center gap-2 w-[100px] justify-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="36"
-            height="36"
-            fill={timeLeft <= 30 ? "#FF0000" : "#000000"}
-            viewBox="0 0 256 256"
-          >
-            <path d="M128,40a96,96,0,1,0,96,96A96.11,96.11,0,0,0,128,40Zm0,176a80,80,0,1,1,80-80A80.09,80.09,0,0,1,128,216ZM173.66,90.34a8,8,0,0,1,0,11.32l-40,40a8,8,0,0,1-11.32-11.32l40-40A8,8,0,0,1,173.66,90.34ZM96,16a8,8,0,0,1,8-8h48a8,8,0,0,1,0,16H104A8,8,0,0,1,96,16Z"></path>
-          </svg>
-          <span
-            className={`text-xl w-[50px] font-semibold text-center ${
-              timeLeft <= 30 ? "text-red-500" : "text-black"
-            }`}
-          >
-            {formatTime(timeLeft)}
-          </span>
-        </div>
-        <button
-          className="px-6 py-3 bg-secondary text-white rounded font-semibold text-xl"
-          onClick={handleNextQuestion}
-        >
-          {currentQuestionIndex === questions.length - 1 ? "제출" : "다음"}
-        </button>
       </div>
     </div>
   );
