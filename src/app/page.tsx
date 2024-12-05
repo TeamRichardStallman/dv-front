@@ -8,9 +8,11 @@ import { useEffect, useState } from "react";
 import { isLogined } from "@/utils/isLogined";
 import { getMessaging, isSupported, onMessage } from "firebase/messaging";
 import { firebaseApp } from "@/utils/firebaseConfig";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [loggedIn, setLoggedIn] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const initializeFirebaseMessaging = async () => {
@@ -93,44 +95,51 @@ export default function Home() {
           </motion.p>
 
           <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{
-              repeat: Infinity,
-              repeatType: "reverse",
-              duration: 0.8,
-            }}
+              initial={{scale: 0.9}}
+              animate={{scale: 1}}
+              transition={{
+                repeat: Infinity,
+                repeatType: "reverse",
+                duration: 0.8,
+              }}
           >
-            <Link
-              href="/interview"
-              className="px-8 py-4 bg-blue-600 text-white text-xl font-semibold rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300"
+            <button
+                onClick={() => {
+                  if (!loggedIn) {
+                    alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+                    router.push("/login");
+                  } else {
+                    router.push("/interview");
+                  }
+                }}
+                className="px-8 py-4 bg-blue-600 text-white text-xl font-semibold rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300"
             >
               시작하기
-            </Link>
+            </button>
           </motion.div>
         </main>
 
-        <Footer />
+        <Footer/>
       </div>
 
       <motion.div
-        initial={{ opacity: 0, x: -100 }}
-        animate={{ opacity: 0.1, x: 100 }}
-        transition={{
-          repeat: Infinity,
-          duration: 10,
-          ease: "easeInOut",
-          repeatType: "mirror",
-        }}
-        className="absolute top-1/3 left-0 w-96 h-96 bg-blue-400 rounded-full opacity-10"
+          initial={{opacity: 0, x: -100}}
+          animate={{opacity: 0.1, x: 100}}
+          transition={{
+            repeat: Infinity,
+            duration: 10,
+            ease: "easeInOut",
+            repeatType: "mirror",
+          }}
+          className="absolute top-1/3 left-0 w-96 h-96 bg-blue-400 rounded-full opacity-10"
       />
       <motion.div
-        initial={{ opacity: 0, x: 100 }}
-        animate={{ opacity: 0.1, x: -100 }}
-        transition={{
-          repeat: Infinity,
-          duration: 12,
-          ease: "easeInOut",
+          initial={{opacity: 0, x: 100}}
+          animate={{opacity: 0.1, x: -100}}
+          transition={{
+            repeat: Infinity,
+            duration: 12,
+            ease: "easeInOut",
           repeatType: "mirror",
         }}
         className="absolute bottom-1/3 right-0 w-80 h-80 bg-purple-400 rounded-full opacity-10"
