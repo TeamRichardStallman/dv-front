@@ -16,15 +16,61 @@ const InterviewOngoingPage = () => {
       question_id: number;
       answer_text: string;
       answer_time: number;
+      audio_url?: string;
     }[]
   >([]);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answerText, setAnswerText] = useState("");
   const [timeLeft, setTimeLeft] = useState(MAX_TIME);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
+    null
+  );
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
-  const handleNextQuestion = useCallback(() => {
+  const handleNextQuestion = useCallback(async () => {
     setTimeLeft(MAX_TIME);
+
+    if (isRecording) {
+      mediaRecorder?.stop();
+      setIsRecording(false);
+    }
+
+    let audioUrl = "";
+
+    if (audioBlob) {
+      try {
+        toast.info("Presigned URL 요청 중...");
+        const response = await fetch("/api/s3/uploadFiles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileName: `audio_question_${questions[currentQuestionIndex].question_id}.webm`,
+            fileType: "audio/webm",
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Presigned URL 요청 실패");
+        }
+
+        const { presignedUrl } = await response.json();
+
+        toast.info("S3에 파일 업로드 중...");
+        await fetch(presignedUrl, {
+          method: "PUT",
+          headers: { "Content-Type": "audio/webm" },
+          body: audioBlob,
+        });
+
+        audioUrl = presignedUrl.split("?")[0];
+        toast.success("녹음 파일이 성공적으로 업로드되었습니다!");
+      } catch (error) {
+        console.error("S3 업로드 중 오류 발생:", error);
+        toast.error("녹음 파일 업로드에 실패했습니다.");
+      }
+    }
 
     if (currentQuestionIndex === questions.length - 1) {
       setAnswers((prevAnswers) => {
@@ -34,6 +80,7 @@ const InterviewOngoingPage = () => {
             question_id: questions[currentQuestionIndex].question_id,
             answer_text: answerText,
             answer_time: MAX_TIME - timeLeft,
+            audio_url: audioUrl,
           },
         ];
         console.log("Submit answers to backend:", newAnswers);
@@ -48,6 +95,7 @@ const InterviewOngoingPage = () => {
             question_id: questions[currentQuestionIndex].question_id,
             answer_text: answerText,
             answer_time: MAX_TIME - timeLeft,
+            audio_url: audioUrl,
           },
         ];
         console.log("Save answers:", newAnswers);
@@ -55,11 +103,57 @@ const InterviewOngoingPage = () => {
       });
       setCurrentQuestionIndex((prev) => prev + 1);
       setAnswerText("");
+      setAudioBlob(null);
     }
-  }, [questions, currentQuestionIndex, answerText, timeLeft, router]);
+  }, [
+    questions,
+    currentQuestionIndex,
+    answerText,
+    timeLeft,
+    router,
+    audioBlob,
+    mediaRecorder,
+    isRecording,
+  ]);
 
   const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAnswerText(e.target.value);
+  };
+
+  const startRecording = async () => {
+    if (isRecording) return;
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+
+      const chunks: Blob[] = [];
+      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.onstop = () =>
+        setAudioBlob(new Blob(chunks, { type: "audio/webm" }));
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+      toast.info("녹음이 시작되었습니다.", {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    } catch (error) {
+      console.error("녹음 시작 실패:", error);
+      toast.error("녹음을 시작할 수 없습니다. 마이크 권한을 확인하세요.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (!isRecording || !mediaRecorder) return;
+
+    mediaRecorder.stop();
+    setIsRecording(false);
+    toast.info("녹음이 종료되었습니다.", {
+      position: "bottom-right",
+      autoClose: 2000,
+    });
   };
 
   useEffect(() => {
@@ -67,11 +161,6 @@ const InterviewOngoingPage = () => {
       toast.info("시간이 초과되어 다음 질문으로 넘어갑니다.", {
         position: "bottom-right",
         autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        style: { fontWeight: "600", whiteSpace: "nowrap", width: "350px" },
       });
       handleNextQuestion();
     }
@@ -113,7 +202,26 @@ const InterviewOngoingPage = () => {
         />
       </div>
 
-      <div className="flex w-full justify-end py-6 items-center gap-4">
+      <div className="flex w-full justify-between py-6 items-center gap-4">
+        <div className="flex gap-4">
+          <button
+            onClick={startRecording}
+            className={`px-6 py-3 rounded font-semibold text-xl ${
+              isRecording
+                ? "bg-gray-400 text-white cursor-not-allowed"
+                : "bg-primary text-white"
+            }`}
+            disabled={isRecording}
+          >
+            녹음 시작
+          </button>
+          <button
+            onClick={stopRecording}
+            className="px-6 py-3 bg-secondary text-white rounded font-semibold text-xl"
+          >
+            녹음 종료
+          </button>
+        </div>
         <div className="flex items-center gap-2 w-[100px] justify-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -132,7 +240,6 @@ const InterviewOngoingPage = () => {
             {formatTime(timeLeft)}
           </span>
         </div>
-
         <button
           className="px-6 py-3 bg-secondary text-white rounded font-semibold text-xl"
           onClick={handleNextQuestion}
