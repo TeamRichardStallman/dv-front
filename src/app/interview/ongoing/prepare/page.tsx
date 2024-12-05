@@ -103,49 +103,52 @@ const InterviewOngoingPreparePage = () => {
       setLoading(false);
     };
 
-    const requestMicrophoneAccess = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        setMicrophonePermission(true);
+    if (interview.interviewMethod !== "CHAT") {
+      const requestMicrophoneAccess = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          setMicrophonePermission(true);
 
-        const audioContext = new (window.AudioContext ||
-          (window as unknown as { webkitAudioContext: typeof AudioContext })
-            .webkitAudioContext)();
-        const source = audioContext.createMediaStreamSource(stream);
-        const analyser = audioContext.createAnalyser();
+          const audioContext = new (window.AudioContext ||
+            (window as unknown as { webkitAudioContext: typeof AudioContext })
+              .webkitAudioContext)();
+          const source = audioContext.createMediaStreamSource(stream);
+          const analyser = audioContext.createAnalyser();
 
-        analyser.fftSize = 256;
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+          analyser.fftSize = 256;
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-        const updateVolume = () => {
-          analyser.getByteFrequencyData(dataArray);
-          const volume =
-            dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+          const updateVolume = () => {
+            analyser.getByteFrequencyData(dataArray);
+            const volume =
+              dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
 
-          const scaledVolume = Math.min(100, volume * 1.5);
-          setVolumeLevel(Math.floor(scaledVolume));
+            const scaledVolume = Math.min(100, volume * 1.5);
+            setVolumeLevel(Math.floor(scaledVolume));
 
-          if (scaledVolume > 20) {
-            setIsMicrophoneChecked(true);
-          }
+            if (scaledVolume > 20) {
+              setIsMicrophoneChecked(true);
+            }
 
-          requestAnimationFrame(updateVolume);
-        };
+            requestAnimationFrame(updateVolume);
+          };
 
-        source.connect(analyser);
-        updateVolume();
-      } catch (error) {
-        console.error("마이크 접근 오류:", error);
-        setMicrophonePermission(false);
-      }
-    };
+          source.connect(analyser);
+          updateVolume();
+        } catch (error) {
+          console.error("마이크 접근 오류:", error);
+          setMicrophonePermission(false);
+        }
+      };
+
+      requestMicrophoneAccess();
+    }
 
     initializeFirebaseMessaging();
     requestQuestionList();
-    requestMicrophoneAccess();
-  }, [questionRequest, router]);
+  }, [questionRequest, router, interview.interviewMethod]);
 
   const togglePlayAudio = () => {
     if (isPlaying && audioInstance) {
