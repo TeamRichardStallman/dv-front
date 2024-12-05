@@ -241,6 +241,16 @@ const UserForm = ({
       return;
     }
 
+    if (isUsernameAvailable === null) {
+      toast.error("Username 중복 검사를 진행해주세요.");
+      return;
+    }
+
+    if (!isUsernameAvailable) {
+      toast.error("이미 사용 중인 Username입니다. 다른 Username을 입력해주세요.");
+      return;
+    }
+
     const formData: formDataType = {
       name,
       userId,
