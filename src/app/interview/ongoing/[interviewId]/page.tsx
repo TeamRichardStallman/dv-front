@@ -12,6 +12,7 @@ import {
 } from "@/components/interview/interview-feedback-detail";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import MicRecorder from "mic-recorder-to-mp3";
 
 const apiUrl = `${setUrl}`;
 
@@ -29,6 +30,40 @@ const InterviewOngoingDetailPage = () => {
   const [count, setCount] = useState(1);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [user, setUser] = useState<GetUserProps>();
+  const [recorder, setRecorder] = useState<MicRecorder>(new MicRecorder());
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const mp3Recorder = new MicRecorder({ bitRate: 64 });
+
+  const startRecording = async () => {
+    try {
+      await mp3Recorder.start();
+      console.log("녹음 시작");
+      setRecorder(mp3Recorder);
+      console.log("녹음 중,.,");
+      setIsRecording(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      console.log("녹음 중지");
+      const [buffer, blob] = await recorder.stop().getMp3();
+      console.log("녹음 데이터: ", buffer, blob);
+      console.log("buffer length:", buffer.slice.length);
+      console.log("blob size:", blob.size);
+      console.log("blob type:", blob.type);
+      const newAudioUrl = URL.createObjectURL(blob);
+      setAudioUrl(newAudioUrl);
+      setIsRecording(false);
+      console.log("녹음 데이터 url: ", newAudioUrl);
+      return blob;
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     let hasFetched = false;
@@ -69,6 +104,56 @@ const InterviewOngoingDetailPage = () => {
   }, [questionRequest.interviewId]);
 
   const sendNextQuestion = useCallback(async () => {
+    setTimeLeft(MAX_TIME);
+    let newAudioBlob = null;
+    try {
+      newAudioBlob = await stopRecording();
+    } catch (error) {
+      console.error("Error in handleNextClick:", error);
+    }
+
+    const formData = new FormData();
+
+    if (newAudioBlob) {
+      formData.append(
+        "file",
+        newAudioBlob,
+        `audio_question_${questionResponse?.data.currentQuestionId}.mp3`
+      );
+    }
+    let audioUrl = "";
+    if (formData) {
+      try {
+        toast.info("Presigned URL 요청 중...");
+        const response = await fetch("/api/s3/uploadFiles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileName: `audio_question_${questionResponse?.data.currentQuestionId}.mp3`,
+            fileType: "audio/mp3",
+          }),
+        });
+        if (!response.ok) {
+          throw new Error("Presigned URL 요청 실패");
+        }
+
+        const { presignedUrl } = await response.json();
+
+        toast.info("S3에 파일 업로드 중...");
+        await fetch(presignedUrl, {
+          method: "PUT",
+          headers: { "Content-Type": "audio/mp3" },
+          body: formData,
+        });
+
+        audioUrl = presignedUrl.split("?")[0];
+        toast.success("녹음 파일이 성공적으로 업로드되었습니다!");
+      } catch (error) {
+        console.error("S3 업로드 중 오류 발생:", error);
+        toast.error("녹음 파일 업로드에 실패했습니다.");
+      }
+    }
+
     if (
       questionRequest.interviewId &&
       questionResponse?.data.currentQuestionId !== undefined
@@ -79,7 +164,7 @@ const InterviewOngoingDetailPage = () => {
         nextQuestionId: questionResponse?.data.nextQuestionId ?? undefined,
         answer: {
           answerText: answerText,
-          s3AudioUrl: "",
+          s3AudioUrl: audioUrl,
           s3VideoUrl: "",
         },
       };
@@ -102,6 +187,7 @@ const InterviewOngoingDetailPage = () => {
         setCount((prev) => prev + 1);
         setTimeLeft(MAX_TIME);
         setAnswerText("");
+        setAudioUrl(null);
 
         if (!response.data.data.hasNext) {
           setShouldRedirect(true);
@@ -114,7 +200,15 @@ const InterviewOngoingDetailPage = () => {
         setLoading(false);
       }
     }
-  }, [questionRequest.interviewId, questionResponse, answerText]);
+  }, [
+    questionRequest.interviewId,
+    questionResponse,
+    answerText,
+    audioUrl,
+    shouldRedirect,
+    stopRecording,
+    count,
+  ]);
 
   useEffect(() => {
     if (timeLeft === 1) {
@@ -193,6 +287,20 @@ const InterviewOngoingDetailPage = () => {
               value={answerText}
               onChange={handleAnswerChange}
             />
+          </div>
+
+          <div className="flex w-full justify-between py-6 items-center">
+            <button
+              onClick={startRecording}
+              className={`px-6 py-3 rounded font-semibold text-xl ${
+                isRecording
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : "bg-primary text-white"
+              }`}
+              disabled={isRecording}
+            >
+              녹음 시작
+            </button>
           </div>
 
           <div className="flex w-full justify-end py-6 items-center gap-4">

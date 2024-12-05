@@ -1,10 +1,11 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { QUESTIONS } from "@/data/questions";
 import { formatTime } from "@/utils/format";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import MicRecorder from "mic-recorder-to-mp3";
 
 const MAX_TIME = 180;
 
@@ -23,51 +24,67 @@ const InterviewOngoingPage = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answerText, setAnswerText] = useState("");
   const [timeLeft, setTimeLeft] = useState(MAX_TIME);
+  const [recorder, setRecorder] = useState<MicRecorder>(new MicRecorder());
   const [isRecording, setIsRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
-    null
-  );
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const mp3Recorder = new MicRecorder({ bitRate: 64 });
+
+  const startRecording = async () => {
+    try {
+      await mp3Recorder.start();
+      console.log("녹음 시작");
+      setRecorder(mp3Recorder);
+      console.log("녹음 중,.,");
+      setIsRecording(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      console.log("녹음 중지");
+      const [buffer, blob] = await recorder.stop().getMp3();
+      console.log("녹음 데이터: ", buffer, blob);
+      console.log("buffer length:", buffer.slice.length);
+      console.log("blob size:", blob.size);
+      console.log("blob type:", blob.type);
+      const newAudioUrl = URL.createObjectURL(blob);
+      setAudioUrl(newAudioUrl);
+      setIsRecording(false);
+      console.log("녹음 데이터 url: ", newAudioUrl);
+      return blob;
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleNextQuestion = useCallback(async () => {
     setTimeLeft(MAX_TIME);
+    const newAudioBlob = await stopRecording();
 
-    const stopRecordingAsync = () => {
-      return new Promise<Blob | null>((resolve) => {
-        if (isRecording && mediaRecorder) {
-          mediaRecorder.onstop = () => {
-            const newAudioBlob = new Blob(chunksRef.current, {
-              type: "audio/webm",
-            });
-            setAudioBlob(newAudioBlob);
-            setIsRecording(false);
-            resolve(newAudioBlob);
-          };
-          mediaRecorder.stop();
-        } else {
-          resolve(null);
-        }
-      });
-    };
+    const formData = new FormData();
 
-    const newAudioBlob = await stopRecordingAsync();
+    if (newAudioBlob) {
+      formData.append(
+        "file",
+        newAudioBlob,
+        `audio_question_${questions[currentQuestionIndex].question_id}.mp3`
+      );
+    }
 
     let audioUrl = "";
-    const blobToUpload = newAudioBlob || audioBlob;
-
-    if (blobToUpload) {
+    if (formData) {
       try {
         toast.info("Presigned URL 요청 중...");
         const response = await fetch("/api/s3/uploadFiles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            fileName: `audio_question_${questions[currentQuestionIndex].question_id}.webm`,
-            fileType: "audio/webm",
+            fileName: `audio_question_${questions[currentQuestionIndex].question_id}.mp3`,
+            fileType: "audio/mp3",
           }),
         });
-
         if (!response.ok) {
           throw new Error("Presigned URL 요청 실패");
         }
@@ -77,8 +94,8 @@ const InterviewOngoingPage = () => {
         toast.info("S3에 파일 업로드 중...");
         await fetch(presignedUrl, {
           method: "PUT",
-          headers: { "Content-Type": "audio/webm" },
-          body: blobToUpload,
+          headers: { "Content-Type": "audio/mp3" },
+          body: formData,
         });
 
         audioUrl = presignedUrl.split("?")[0];
@@ -120,7 +137,7 @@ const InterviewOngoingPage = () => {
       });
       setCurrentQuestionIndex((prev) => prev + 1);
       setAnswerText("");
-      setAudioBlob(null);
+      setAudioUrl(null);
     }
   }, [
     questions,
@@ -128,42 +145,12 @@ const InterviewOngoingPage = () => {
     answerText,
     timeLeft,
     router,
-    audioBlob,
-    mediaRecorder,
+    audioUrl,
     isRecording,
   ]);
 
   const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAnswerText(e.target.value);
-  };
-
-  const startRecording = async () => {
-    if (isRecording) return;
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-
-      chunksRef.current = [];
-      recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
-      recorder.onstop = () => {
-        const newAudioBlob = new Blob(chunksRef.current, {
-          type: "audio/webm",
-        });
-        setAudioBlob(newAudioBlob);
-      };
-
-      recorder.start();
-      setMediaRecorder(recorder);
-      setIsRecording(true);
-      toast.info("녹음이 시작되었습니다.", {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
-    } catch (error) {
-      console.error("녹음 시작 실패:", error);
-      toast.error("녹음을 시작할 수 없습니다. 마이크 권한을 확인하세요.");
-    }
   };
 
   useEffect(() => {

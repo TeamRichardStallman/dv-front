@@ -271,7 +271,9 @@ const InterviewOngoingPreparePage = () => {
           </div>
 
           <button
-            onClick={() => router.push(`/interview/ongoing`)}
+            onClick={() =>
+              router.push(`/interview/ongoing/${questionRequest.interviewId}`)
+            }
             className={`w-64 h-12 px-4 py-2 rounded-lg text-white font-bold mt-24 ${
               isMicrophoneChecked && isAudioChecked
                 ? "bg-primary"
