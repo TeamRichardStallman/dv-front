@@ -49,18 +49,24 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
           );
           const ticketData = response.data.data;
 
-          if (selectedQuestionCount > 0) {
-            if (interview.interviewMode === "GENERAL") {
+          if (interview.interviewMode === "GENERAL") {
+            if (interview.interviewMethod === "CHAT") {
               setSelectedVoucher("모의 채팅");
               setCountTicket(ticketData.generalChatBalance);
-              setPossible(countTicket >= 3);
-            } else if (interview.interviewMode === "REAL") {
+            } else if (interview.interviewMethod === "VOICE") {
+              setSelectedVoucher("모의 음성");
+              setCountTicket(ticketData.generalVoiceBalance);
+            }
+            setPossible(countTicket >= 1);
+          } else if (interview.interviewMode === "REAL") {
+            if (interview.interviewMethod === "CHAT") {
               setSelectedVoucher("실전 채팅");
               setCountTicket(ticketData.realChatBalance);
-              setPossible(countTicket >= selectedQuestionCount / 5);
+            } else if (interview.interviewMethod === "VOICE") {
+              setSelectedVoucher("실전 음성");
+              setCountTicket(ticketData.realVoiceBalance);
             }
-          } else {
-            setPossible(false);
+            setPossible(countTicket >= selectedQuestionCount / 5);
           }
 
           return ticketData;
