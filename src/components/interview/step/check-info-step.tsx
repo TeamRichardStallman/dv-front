@@ -79,7 +79,12 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
       }
     };
     getUserTicketInfo();
-  }, [selectedQuestionCount, countTicket]);
+  }, [
+    selectedQuestionCount,
+    countTicket,
+    interview.interviewMethod,
+    interview.interviewMode,
+  ]);
 
   const jobs = [
     { label: "프론트엔드", imageSrc: "/frontend.png", id: 2 },
