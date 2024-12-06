@@ -202,7 +202,7 @@ const InterviewOngoingPreparePage = () => {
         ) : (
           <Loading title="면접 준비 중" description="잠시만 기다려주세요." />
         )
-      ) : (
+      ) : interview.interviewMethod === "VOICE" ? (
         <div className="flex flex-col items-center">
           <div className="flex w-full space-x-48">
             <div className="w-1/2 flex flex-col items-center space-y-4">
@@ -284,6 +284,11 @@ const InterviewOngoingPreparePage = () => {
             면접 시작
           </button>
         </div>
+      ) : (
+        <Loading
+          title="알 수 없는 인터뷰 방식"
+          description="유효하지 않은 인터뷰 방식입니다."
+        />
       )}
     </div>
   );
