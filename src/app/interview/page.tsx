@@ -10,7 +10,7 @@ import useInterviewStore, { InterviewMode } from "@/stores/useInterviewStore";
 const apiUrl = `${setUrl}`;
 
 const InterviewPage = () => {
-  const [mode, setMode] = useState<InterviewMode>("REAL");
+  const [mode, setMode] = useState<InterviewMode>();
   const { updateInterviewField } = useInterviewStore();
   const [showModal, setShowModal] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState<
