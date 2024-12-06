@@ -329,11 +329,13 @@ const UserForm = ({
         <input
           type="text"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value.slice(0, 20))}
+          maxLength={20}
           className="border p-2 rounded w-full h-10"
           placeholder="이름을 입력하세요"
           required
         />
+        <p className="text-sm text-gray-500 mt-1">{name.length}/20 글자</p>
       </div>
       {!isEditPage && (
         <div>
@@ -342,8 +344,11 @@ const UserForm = ({
             <input
               type="text"
               value={username}
-              onChange={(e) => handleUsernameChange(e.target.value)}
+              onChange={(e) =>
+                handleUsernameChange(e.target.value.slice(0, 20))
+              }
               onKeyDown={handleKeyDown}
+              maxLength={20}
               className="border p-2 rounded w-full h-10"
               placeholder="Username을 입력하세요"
               required
@@ -371,6 +376,9 @@ const UserForm = ({
                 : "이미 사용 중인 Username입니다."}
             </p>
           )}
+          <p className="text-sm text-gray-500 mt-1">
+            {username.length}/20 글자
+          </p>
         </div>
       )}
 
@@ -379,8 +387,9 @@ const UserForm = ({
         <input
           type="text"
           value={nickname}
-          onChange={(e) => handleNicknameChange(e.target.value)}
+          onChange={(e) => handleNicknameChange(e.target.value.slice(0, 15))}
           onKeyDown={handleKeyDown}
+          maxLength={15}
           className="border p-2 rounded w-full h-10"
           placeholder="Nickname을 입력하세요"
           required
@@ -388,6 +397,7 @@ const UserForm = ({
         {nicknameError && (
           <p className="text-red-600 text-sm">{nicknameError}</p>
         )}
+        <p className="text-sm text-gray-500 mt-1">{nickname.length}/15 글자</p>
       </div>
       <div>
         <label className="block font-semibold">생년월일</label>
