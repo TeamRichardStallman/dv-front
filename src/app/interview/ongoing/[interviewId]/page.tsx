@@ -211,9 +211,19 @@ const InterviewOngoingDetailPage = () => {
         draggable: true,
         style: { fontWeight: "600", whiteSpace: "nowrap", width: "350px" },
       });
-      sendNextQuestion();
+      if (shouldRedirect) {
+        router.push(`/interview/feedback/${questionRequest.interviewId}`);
+      } else {
+        sendNextQuestion();
+      }
     }
-  }, [timeLeft, sendNextQuestion]);
+  }, [
+    timeLeft,
+    shouldRedirect,
+    questionRequest.interviewId,
+    sendNextQuestion,
+    router,
+  ]);
 
   useEffect(() => {
     const timer = setInterval(() => {
