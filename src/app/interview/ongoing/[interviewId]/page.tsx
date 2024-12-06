@@ -32,7 +32,7 @@ const InterviewOngoingDetailPage = () => {
   const [user, setUser] = useState<GetUserProps>();
   const [recorder, setRecorder] = useState<MicRecorder>(new MicRecorder());
   const [isRecording, setIsRecording] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  // const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mp3Recorder = new MicRecorder({ bitRate: 64 });
 
   const startRecording = async () => {
@@ -47,23 +47,15 @@ const InterviewOngoingDetailPage = () => {
     }
   };
 
-  const stopRecording = async () => {
+  const stopRecording = useCallback(async () => {
     try {
-      console.log("녹음 중지");
-      const [buffer, blob] = await recorder.stop().getMp3();
-      console.log("녹음 데이터: ", buffer, blob);
-      console.log("buffer length:", buffer.slice.length);
-      console.log("blob size:", blob.size);
-      console.log("blob type:", blob.type);
-      const newAudioUrl = URL.createObjectURL(blob);
-      setAudioUrl(newAudioUrl);
+      const [, blob] = await recorder.stop().getMp3();
       setIsRecording(false);
-      console.log("녹음 데이터 url: ", newAudioUrl);
       return blob;
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [recorder]);
 
   useEffect(() => {
     let hasFetched = false;
@@ -187,7 +179,6 @@ const InterviewOngoingDetailPage = () => {
         setCount((prev) => prev + 1);
         setTimeLeft(MAX_TIME);
         setAnswerText("");
-        setAudioUrl(null);
 
         if (!response.data.data.hasNext) {
           setShouldRedirect(true);
@@ -204,10 +195,8 @@ const InterviewOngoingDetailPage = () => {
     questionRequest.interviewId,
     questionResponse,
     answerText,
-    audioUrl,
     shouldRedirect,
     stopRecording,
-    count,
   ]);
 
   useEffect(() => {

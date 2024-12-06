@@ -69,7 +69,7 @@ const InterviewFeedbackDetailPage = () => {
     };
     initializeFirebaseMessaging();
     sendEvaluation();
-  }, []);
+  }, [questionRequest.interviewId, router]);
 
   return (
     <div>
