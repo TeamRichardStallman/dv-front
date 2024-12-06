@@ -406,6 +406,7 @@ const UserForm = ({
           value={birthdate}
           onChange={(e) => setBirthdate(e.target.value)}
           className="border p-2 rounded w-full"
+          max={new Date().toISOString().split("T")[0]}
           required
         />
       </div>
