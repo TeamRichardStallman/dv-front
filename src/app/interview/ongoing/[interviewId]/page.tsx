@@ -32,15 +32,14 @@ const InterviewOngoingDetailPage = () => {
   const [user, setUser] = useState<GetUserProps>();
   const [recorder, setRecorder] = useState<MicRecorder>(new MicRecorder());
   const [isRecording, setIsRecording] = useState(false);
-  // const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mp3Recorder = new MicRecorder({ bitRate: 64 });
 
   const startRecording = async () => {
+    if (questionRequest.interviewMethod !== "VOICE") return;
+
     try {
       await mp3Recorder.start();
-      console.log("녹음 시작");
       setRecorder(mp3Recorder);
-      console.log("녹음 중,.,");
       setIsRecording(true);
     } catch (error) {
       console.error(error);
@@ -97,52 +96,53 @@ const InterviewOngoingDetailPage = () => {
 
   const sendNextQuestion = useCallback(async () => {
     setTimeLeft(MAX_TIME);
-    let newAudioBlob = null;
-    try {
-      newAudioBlob = await stopRecording();
-    } catch (error) {
-      console.error("Error in handleNextClick:", error);
-    }
 
-    const formData = new FormData();
-
-    if (newAudioBlob) {
-      formData.append(
-        "file",
-        newAudioBlob,
-        `audio_question_${questionResponse?.data.currentQuestionId}.mp3`
-      );
-    }
     let audioUrl = "";
-    if (formData) {
+
+    if (questionRequest.interviewMethod === "VOICE") {
+      let newAudioBlob = null;
       try {
-        toast.info("Presigned URL 요청 중...");
-        const response = await fetch("/api/s3/uploadFiles", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fileName: `audio_question_${questionResponse?.data.currentQuestionId}.mp3`,
-            fileType: "audio/mp3",
-          }),
-        });
-        if (!response.ok) {
-          throw new Error("Presigned URL 요청 실패");
-        }
-
-        const { presignedUrl } = await response.json();
-
-        toast.info("S3에 파일 업로드 중...");
-        await fetch(presignedUrl, {
-          method: "PUT",
-          headers: { "Content-Type": "audio/mp3" },
-          body: formData,
-        });
-
-        audioUrl = presignedUrl.split("?")[0];
-        toast.success("녹음 파일이 성공적으로 업로드되었습니다!");
+        newAudioBlob = await stopRecording();
       } catch (error) {
-        console.error("S3 업로드 중 오류 발생:", error);
-        toast.error("녹음 파일 업로드에 실패했습니다.");
+        console.error("Error in handleNextClick:", error);
+      }
+
+      if (newAudioBlob) {
+        const formData = new FormData();
+        formData.append(
+          "file",
+          newAudioBlob,
+          `audio_question_${questionResponse?.data.currentQuestionId}.mp3`
+        );
+        try {
+          toast.info("Presigned URL 요청 중...");
+          const response = await fetch("/api/s3/uploadFiles", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              fileName: `audio_question_${questionResponse?.data.currentQuestionId}.mp3`,
+              fileType: "audio/mp3",
+            }),
+          });
+          if (!response.ok) {
+            throw new Error("Presigned URL 요청 실패");
+          }
+
+          const { presignedUrl } = await response.json();
+
+          toast.info("S3에 파일 업로드 중...");
+          await fetch(presignedUrl, {
+            method: "PUT",
+            headers: { "Content-Type": "audio/mp3" },
+            body: newAudioBlob,
+          });
+
+          audioUrl = presignedUrl.split("?")[0];
+          toast.success("녹음 파일이 성공적으로 업로드되었습니다!");
+        } catch (error) {
+          console.error("S3 업로드 중 오류 발생:", error);
+          toast.error("녹음 파일 업로드에 실패했습니다.");
+        }
       }
     }
 
@@ -193,6 +193,7 @@ const InterviewOngoingDetailPage = () => {
     }
   }, [
     questionRequest.interviewId,
+    questionRequest.interviewMethod,
     questionResponse,
     answerText,
     shouldRedirect,
