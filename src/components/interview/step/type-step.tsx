@@ -41,7 +41,11 @@ const TypeStep = ({ onPrev, onNext }: StepProps) => {
         />
         <SettingBtn
           label="인성면접"
-          description="지원자의 성격, 가치관, 대인관계 능력 등을 질문을 통해 직접 확인하고 평가하는 면접"
+          description={
+            interviewMode === "GENERAL"
+              ? "모의면접은 인성면접을 지원하지 않습니다."
+              : "지원자의 성격, 가치관, 대인관계 능력 등을 질문을 통해 직접 확인하고 평가하는 면접"
+          }
           selected={selectedType === "PERSONAL"}
           onClick={() => {
             if (interviewMode !== "GENERAL") {
