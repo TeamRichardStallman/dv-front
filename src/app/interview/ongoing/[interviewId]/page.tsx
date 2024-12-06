@@ -270,26 +270,31 @@ const InterviewOngoingDetailPage = () => {
             <div className="flex w-full bg-primary font-semibold text-white rounded-md items-center justify-center p-3 text-lg">
               Q{count}. {questionResponse?.data.currentQuestionText}
             </div>
-            <textarea
-              className="w-full h-72 border-2 font-medium rounded-md p-3"
-              placeholder="답변을 작성해주세요."
-              value={answerText}
-              onChange={handleAnswerChange}
-            />
-          </div>
 
-          <div className="flex w-full justify-between py-6 items-center">
-            <button
-              onClick={startRecording}
-              className={`px-6 py-3 rounded font-semibold text-xl ${
-                isRecording
-                  ? "bg-gray-400 text-white cursor-not-allowed"
-                  : "bg-primary text-white"
-              }`}
-              disabled={isRecording}
-            >
-              녹음 시작
-            </button>
+            {questionRequest.interviewMethod === "CHAT" && (
+              <textarea
+                className="w-full h-72 border-2 font-medium rounded-md p-3"
+                placeholder="답변을 작성해주세요."
+                value={answerText}
+                onChange={handleAnswerChange}
+              />
+            )}
+
+            {questionRequest.interviewMethod === "VOICE" && (
+              <div className="flex w-full justify-center">
+                <button
+                  onClick={startRecording}
+                  className={`px-6 py-3 rounded font-semibold text-xl ${
+                    isRecording
+                      ? "bg-gray-400 text-white cursor-not-allowed"
+                      : "bg-primary text-white"
+                  }`}
+                  disabled={isRecording}
+                >
+                  녹음 시작
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex w-full justify-end py-6 items-center gap-4">
