@@ -115,7 +115,6 @@ const InterviewOngoingDetailPage = () => {
           `audio_question_${questionResponse?.data.currentQuestionId}.mp3`
         );
         try {
-          toast.info("Presigned URL 요청 중...");
           const response = await fetch("/api/s3/uploadFiles", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -130,7 +129,7 @@ const InterviewOngoingDetailPage = () => {
 
           const { presignedUrl } = await response.json();
 
-          toast.info("S3에 파일 업로드 중...");
+          console.log("S3에 파일 업로드 중...");
           await fetch(presignedUrl, {
             method: "PUT",
             headers: { "Content-Type": "audio/mp3" },
@@ -138,10 +137,9 @@ const InterviewOngoingDetailPage = () => {
           });
 
           audioUrl = presignedUrl.split("?")[0];
-          toast.success("녹음 파일이 성공적으로 업로드되었습니다!");
+          console.log("녹음 파일이 성공적으로 업로드되었습니다!");
         } catch (error) {
           console.error("S3 업로드 중 오류 발생:", error);
-          toast.error("녹음 파일 업로드에 실패했습니다.");
         }
       }
     }
