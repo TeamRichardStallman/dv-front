@@ -104,6 +104,12 @@ const MicTest = ({ handleSetReady }: MicTestProps) => {
   };
 
   const handleClickStartButton = () => {
+    if (audioInstance) {
+      audioInstance.pause();
+      audioInstance.currentTime = 0;
+      setAudioInstance(null);
+    }
+
     handleSetReady(true);
   };
 

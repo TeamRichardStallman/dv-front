@@ -13,11 +13,13 @@ import MicTest from "@/components/mic-test";
 
 const apiUrl = `${setUrl}`;
 
+const TIMEOUT_DURATION = 180000;
 const InterviewOngoingPreparePage = () => {
   const { interview } = useInterviewStore();
   const { questionRequest } = useQuestionRequest();
   const router = useRouter();
   const [isReady, setIsReady] = useState(false);
+  const [isQuestionReceived, setIsQuestionReceived] = useState(false);
 
   useEffect(() => {
     let hasFetched = false;
@@ -38,6 +40,13 @@ const InterviewOngoingPreparePage = () => {
   }, [questionRequest]);
 
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (!isQuestionReceived) {
+        alert("질문 생성에 실패했습니다. 메인 화면으로 이동합니다.");
+        router.push("/");
+      }
+    }, TIMEOUT_DURATION);
+
     const initializeFirebaseMessaging = async () => {
       if (typeof window === "undefined") {
         console.warn(
@@ -57,6 +66,7 @@ const InterviewOngoingPreparePage = () => {
 
         onMessage(messaging, (payload) => {
           console.log("[포그라운드 메시지 수신]:", payload);
+          setIsQuestionReceived(true);
 
           if (payload.notification) {
             const { title, body, icon } = payload.notification as {
@@ -120,7 +130,9 @@ const InterviewOngoingPreparePage = () => {
       }
     };
     initializeFirebaseMessaging();
-  }, [router, interview.interviewMethod, isReady]);
+
+    return () => clearTimeout(timeoutId);
+  }, [router, interview.interviewMethod, isReady, isQuestionReceived]);
 
   const handleSetReady = (isReady: boolean) => {
     setIsReady(isReady);
