@@ -31,7 +31,7 @@ const CommunityPage = () => {
 
   return (
     <div className="bg-gray-200 min-h-screen w-full relative">
-      <div className="absolute top-8 left-4 z-50 bg-white shadow-md rounded-lg w-80 p-4">
+      <div className="absolute top-8 left-4 z-40 bg-white shadow-md rounded-lg w-80 p-4">
         <input
           type="text"
           value={searchQuery}
