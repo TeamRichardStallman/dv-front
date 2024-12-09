@@ -1,12 +1,28 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import NavButtons from "./nav-button";
 import SettingBtn from "@/components/settingbtn";
 import useInterviewStore, { InterviewType } from "@/stores/useInterviewStore";
+import { useSearchParams } from "next/navigation";
 
 const TypeStep = ({ onPrev, onNext }: StepProps) => {
-  const [selectedType, setSelectedType] = useState<InterviewType>();
+  const searchParams = useSearchParams();
+  const urlType = searchParams.get("type") || "GENERAL";
+  const [selectedType, setSelectedType] = useState<InterviewType>(() =>
+    urlType === "GENERAL" ? "TECHNICAL" : undefined
+  );
+  const [interviewMode, setInterviewMode] = useState<string>(urlType);
   const { updateInterviewField } = useInterviewStore();
+
+  useEffect(() => {
+    console.log("urlType:", urlType);
+    if (urlType === "REAL" || urlType === "GENERAL") {
+      setInterviewMode(urlType);
+      updateInterviewField("interviewMode", urlType);
+    } else {
+      console.error("Invalid or missing urlType:", urlType);
+    }
+  }, [urlType, updateInterviewField]);
 
   const handleClick = () => {
     if (selectedType) {
@@ -25,9 +41,18 @@ const TypeStep = ({ onPrev, onNext }: StepProps) => {
         />
         <SettingBtn
           label="인성면접"
-          description="지원자의 성격, 가치관, 대인관계 능력 등을 질문을 통해 직접 확인하고 평가하는 면접"
+          description={
+            interviewMode === "GENERAL"
+              ? "모의면접은 인성면접을 지원하지 않습니다."
+              : "지원자의 성격, 가치관, 대인관계 능력 등을 질문을 통해 직접 확인하고 평가하는 면접"
+          }
           selected={selectedType === "PERSONAL"}
-          onClick={() => setSelectedType("PERSONAL")}
+          onClick={() => {
+            if (interviewMode !== "GENERAL") {
+              setSelectedType("PERSONAL");
+            }
+          }}
+          disabled={interviewMode === "GENERAL"}
         />
       </div>
 

@@ -1,19 +1,14 @@
 "use client";
 import axios from "axios";
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { setUrl } from "@/utils/setUrl";
 import InterviewFeedbackDetail from "@/components/interview/interview-feedback-detail";
+import { useParams } from "next/navigation";
 
 const apiUrl = `${setUrl}`;
 
-interface MyInterviewFeedbackDetailPageProps {
-  params: Promise<{ interviewId: string }>;
-}
-
-const MyInterviewFeedbackDetailPage = ({
-  params,
-}: MyInterviewFeedbackDetailPageProps) => {
-  const { interviewId } = use(params);
+const MyInterviewFeedbackDetailPage = () => {
+  const { interviewId } = useParams();
   const [user, setUser] = useState<GetUserProps>();
   const [evaluation, setEvaluation] = useState<EvaluationDetailType>();
   const [loading, setLoading] = useState(true);
