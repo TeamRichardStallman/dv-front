@@ -45,7 +45,7 @@ const CommunityPage = () => {
             {recommendedChannels.map((channel, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center p-2 bg-gray-100 rounded-md mb-2"
+                className="flex justify-between items-center p-2 rounded-md mb-2"
               >
                 <span className="font-bold">{channel.name}</span>
                 <div className="flex items-center">
