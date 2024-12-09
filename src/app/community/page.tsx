@@ -1,13 +1,32 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
+import axios from "axios";
+import { setUrl } from "@/utils/setUrl";
 import { postData } from "@/data/postData";
 import PostModal from "@/components/post-modal";
+
+interface GetUserResponse {
+  data: {
+    userId: number;
+    socialId: string;
+    email: string;
+    username: string;
+    name: string;
+    nickname: string;
+    s3ProfileImageUrl: string;
+    leave: boolean;
+    gender: string;
+    birthdate: string;
+  };
+}
+const apiUrl = `${setUrl}`;
 
 const CommunityPage = () => {
   const posts = postData.data.posts;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [user, setUser] = useState<GetUserResponse["data"] | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [recommendedChannels, setRecommendedChannels] = useState([
     { name: "네이버", tag: "기업", isSubscribed: false },
@@ -31,16 +50,35 @@ const CommunityPage = () => {
     );
   };
 
-  const openModal = () => {
-    setIsModalOpen(true);
+  const openModal = async () => {
+    try {
+      const userResponse = await axios.get<GetUserResponse>(
+        `${apiUrl}/user/info`,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      setUser(userResponse.data.data);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("사용자 정보 불러오기 실패:", error);
+    }
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
-  const handlePostSubmit = (content: string) => {
-    console.log("작성된 게시글 내용:", content);
+  const handlePostSubmit = (postData: {
+    jobKoreanName: string;
+    content: string;
+    s3ImageUrl: string;
+    interviewId: number;
+    overallEvaluationId: number;
+    postType: string;
+  }) => {
+    console.log("작성된 게시글 데이터:", postData);
     closeModal();
   };
 
@@ -188,6 +226,7 @@ const CommunityPage = () => {
         isOpen={isModalOpen}
         onClose={closeModal}
         onSubmit={handlePostSubmit}
+        user={user}
       />
     </div>
   );
