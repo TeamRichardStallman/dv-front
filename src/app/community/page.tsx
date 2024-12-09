@@ -2,10 +2,12 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { postData } from "@/data/postData";
+import PostModal from "@/components/post-modal";
 
 const CommunityPage = () => {
   const posts = postData.data.posts;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [recommendedChannels, setRecommendedChannels] = useState([
     { name: "네이버", tag: "기업", isSubscribed: false },
@@ -27,6 +29,19 @@ const CommunityPage = () => {
           : channel
       )
     );
+  };
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handlePostSubmit = (content: string) => {
+    console.log("작성된 게시글 내용:", content);
+    closeModal();
   };
 
   return (
@@ -115,10 +130,14 @@ const CommunityPage = () => {
           ))}
         </div>
       </div>
+
       <div className="fixed bottom-8 right-8 flex flex-col items-end">
         {isMenuOpen && (
           <div className="flex flex-col items-end mb-4 space-y-3">
-            <div className="flex items-center">
+            <div
+              className="flex items-center cursor-pointer"
+              onClick={openModal}
+            >
               <span className="mr-3 text-black font-bold">글쓰기</span>
               <div className="relative w-12 h-12 flex items-center justify-center rounded-full bg-white">
                 <Image
@@ -165,6 +184,11 @@ const CommunityPage = () => {
           />
         </button>
       </div>
+      <PostModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onSubmit={handlePostSubmit}
+      />
     </div>
   );
 };
