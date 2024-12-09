@@ -31,7 +31,7 @@ const CommunityPage = () => {
 
   return (
     <div className="bg-gray-200 min-h-screen w-full relative">
-      <div className="absolute top-8 left-4 z-40 bg-white shadow-md rounded-lg w-80 p-4">
+      <div className="fixed top-24 left-4 z-40 bg-white shadow-md rounded-lg w-80 p-4">
         <input
           type="text"
           value={searchQuery}
@@ -41,7 +41,9 @@ const CommunityPage = () => {
         />
         {searchQuery === "" && (
           <div className="mt-4">
-            <h2 className="text-sm font-semibold mb-2">추천 채널</h2>
+            <p className="text-xs text-gray-500 font-semibold mb-2">
+              추천 채널
+            </p>
             {recommendedChannels.map((channel, index) => (
               <div
                 key={index}
@@ -118,9 +120,9 @@ const CommunityPage = () => {
           <div className="flex flex-col items-end mb-4 space-y-3">
             <div className="flex items-center">
               <span className="mr-3 text-black font-bold">글쓰기</span>
-              <div className="relative w-12 h-12 flex items-center justify-center rounded-full bg-gray-300">
+              <div className="relative w-12 h-12 flex items-center justify-center rounded-full bg-white">
                 <Image
-                  src="/icons/write-icon.png"
+                  src="/icons/write-icon.svg"
                   alt="글쓰기"
                   width={24}
                   height={24}
@@ -129,20 +131,20 @@ const CommunityPage = () => {
             </div>
             <div className="flex items-center">
               <span className="mr-3 text-black font-bold">면접 공유</span>
-              <div className="relative w-12 h-12 flex items-center justify-center rounded-full bg-gray-300">
+              <div className="relative w-12 h-12 flex items-center justify-center rounded-full bg-white">
                 <Image
-                  src="/icons/interview-share-icon.png"
+                  src="/icons/interview-share-icon.svg"
                   alt="면접 공유"
-                  width={24}
-                  height={24}
+                  width={36}
+                  height={36}
                 />
               </div>
             </div>
             <div className="flex items-center">
               <span className="mr-3 text-black font-bold">피드백 공유</span>
-              <div className="relative w-12 h-12 flex items-center justify-center rounded-full bg-gray-300">
+              <div className="relative w-12 h-12 flex items-center justify-center rounded-full bg-white">
                 <Image
-                  src="/icons/feedback-share-icon.png"
+                  src="/icons/feedback-share-icon.svg"
                   alt="피드백 공유"
                   width={24}
                   height={24}
@@ -156,7 +158,7 @@ const CommunityPage = () => {
           className="w-15 h-15 flex items-center justify-center rounded-full shadow-md"
         >
           <Image
-            src="/icons/icon-plus-circle.png"
+            src="/icons/icon-plus-circle.svg"
             alt={isMenuOpen ? "Close menu" : "Open menu"}
             width={55}
             height={55}
