@@ -36,6 +36,10 @@ const PostModal: FC<PostModalProps> = ({ isOpen, onClose, onSubmit, user }) => {
     }
   };
 
+  const removeUploadedImage = () => {
+    setUploadedImage(null);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -64,13 +68,11 @@ const PostModal: FC<PostModalProps> = ({ isOpen, onClose, onSubmit, user }) => {
             <option value="">직무를 선택하세요</option>
             <option value="백엔드">백엔드</option>
             <option value="프론트엔드">프론트엔드</option>
-            <option value="UX/UI">UX/UI</option>
+            <option value="클라우드">클라우드</option>
+            <option value="인공지능">인공지능</option>
           </select>
         </div>
         <div className="mb-4">
-          <label className="block text-gray-500 text-sm font-bold mb-2">
-            사진 업로드
-          </label>
           <input
             type="file"
             accept="image/*"
@@ -85,6 +87,12 @@ const PostModal: FC<PostModalProps> = ({ isOpen, onClose, onSubmit, user }) => {
                 layout="fill"
                 objectFit="cover"
               />
+              <button
+                onClick={removeUploadedImage}
+                className="absolute top-2 right-2 w-8 h-8 bg-black text-white flex items-center justify-center rounded-full shadow"
+              >
+                <span className="text-lg font-bold">&times;</span>
+              </button>
             </div>
           )}
         </div>
