@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     domains: [
       "k.kakaocdn.net",
       "ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com",
+      "via.placeholder.com",
     ],
   },
   reactStrictMode: false,
