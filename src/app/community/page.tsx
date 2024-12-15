@@ -20,6 +20,8 @@ interface GetUserResponse {
     birthdate: string;
   };
 }
+
+
 const apiUrl = `${setUrl}`;
 
 const CommunityPage = () => {
@@ -29,11 +31,10 @@ const CommunityPage = () => {
   const [user, setUser] = useState<GetUserResponse["data"] | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [recommendedChannels, setRecommendedChannels] = useState([
-    { name: "네이버", tag: "기업", isSubscribed: false },
-    { name: "카카오", tag: "기업", isSubscribed: false },
-    { name: "백엔드", tag: "직무", isSubscribed: false },
-    { name: "프론트엔드", tag: "직무", isSubscribed: false },
-    { name: "UX/UI", tag: "직무", isSubscribed: false },
+    { name: "백엔드", tag: "직무", isSubscribed: false, jobId: 1  },
+    { name: "프론트엔드", tag: "직무", isSubscribed: false, jobId: 2  },
+    { name: "인프라", tag: "직무", isSubscribed: false, jobId: 3 },
+    { name: "인공지능", tag: "직무", isSubscribed: false, jobId: 4 }
   ]);
 
   const toggleMenu = () => {
@@ -82,6 +83,57 @@ const CommunityPage = () => {
     closeModal();
   };
 
+  // 구독 생성
+  const createSubscription = async (jobId: number, index: number) => {
+    try {
+      await axios.post(
+          `${apiUrl}/subscription`,
+          { jobId },
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+      );
+      setRecommendedChannels((prev) =>
+          prev.map((channel, i) =>
+              i === index ? { ...channel, isSubscribed: true } : channel
+          )
+      );
+      alert("구독이 성공적으로 추가되었습니다!");
+    } catch (error) {
+      console.error("구독 생성 실패:", error);
+      alert("구독 생성에 실패했습니다.");
+    }
+  };
+
+  // 구독 취소
+  const deactivateSubscription = async (jobId: number, index: number) => {
+    try {
+      await axios.delete(`${apiUrl}/subscription/${jobId}`, {
+        withCredentials: true,
+      });
+      setRecommendedChannels((prev) =>
+          prev.map((channel, i) =>
+              i === index ? { ...channel, isSubscribed: false } : channel
+          )
+      );
+      alert("구독이 성공적으로 취소되었습니다!");
+    } catch (error) {
+      console.error("구독 취소 실패:", error);
+      alert("구독 취소에 실패했습니다.");
+    }
+  };
+
+  const handleSubscribeClick = (jobId: number, isSubscribed: boolean, index: number) => {
+    if (isSubscribed) {
+      deactivateSubscription(jobId, index);
+    } else {
+      createSubscription(jobId, index);
+    }
+  };
+
   return (
     <div className="bg-gray-200 min-h-screen w-full relative">
       <div className="fixed top-24 left-4 z-40 bg-white shadow-md rounded-lg w-80 p-4">
@@ -108,12 +160,14 @@ const CommunityPage = () => {
                     {channel.tag}
                   </span>
                   <button
-                    onClick={() => handleSubscribe(index)}
-                    className={`text-sm font-semibold rounded-md px-3 py-1 ${
-                      channel.isSubscribed
-                        ? "bg-gray-500 text-white"
-                        : "bg-secondary hover:bg-yellow-400 text-white"
-                    }`}
+                      onClick={() =>
+                          handleSubscribeClick(channel.jobId, channel.isSubscribed, index)
+                      }
+                      className={`text-sm font-semibold rounded-md px-3 py-1 ${
+                          channel.isSubscribed
+                              ? "bg-gray-500 text-white"
+                              : "bg-secondary hover:bg-yellow-400 text-white"
+                      }`}
                   >
                     {channel.isSubscribed ? "구독중" : "구독"}
                   </button>
@@ -127,11 +181,11 @@ const CommunityPage = () => {
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex flex-col gap-6">
           {posts.map((post) => (
-            <div
-              key={post.postId}
-              className="bg-white shadow-md rounded-lg overflow-hidden border"
-            >
-              <div className="flex items-center justify-between p-4">
+              <div
+                  key={post.postId}
+                  className="bg-white shadow-md rounded-lg overflow-hidden border"
+              >
+                <div className="flex items-center justify-between p-4">
                 <div className="flex items-center">
                   <div className="relative w-10 h-10 mr-3">
                     <Image
