@@ -13,6 +13,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import MicRecorder from "mic-recorder-to-mp3";
+import { audio } from "framer-motion/client";
 
 const apiUrl = `${setUrl}`;
 
@@ -98,6 +99,7 @@ const InterviewOngoingDetailPage = () => {
     setTimeLeft(MAX_TIME);
 
     let audioUrl = "";
+    let audioObjectKey = "";
 
     if (questionRequest.interviewMethod === "VOICE") {
       let newAudioBlob = null;
@@ -114,32 +116,42 @@ const InterviewOngoingDetailPage = () => {
           newAudioBlob,
           `audio_question_${questionResponse?.data.currentQuestionId}.mp3`
         );
+
         try {
-          const response = await fetch("/api/s3/uploadFiles", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              fileName: `audio_question_${questionResponse?.data.currentQuestionId}.mp3`,
-              fileType: "audio/mp3",
-            }),
-          });
-          if (!response.ok) {
-            throw new Error("Presigned URL 요청 실패");
+          toast.info("Presigned URL 요청 중...");
+          const presignedResponse = await axios.get<GetPreSignedUrlResponse>(
+            `${apiUrl}/file/audio/${questionRequest.interviewId}/${questionResponse?.data.currentQuestionId}/upload-url`,
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          const presignedUrl = presignedResponse.data?.data?.preSignedUrl;
+          const objectKey = presignedResponse.data?.data.objectKey;
+
+          if (presignedUrl) {
+            toast.info("S3에 파일 업로드 중...");
+            await fetch(presignedUrl, {
+              method: "PUT",
+              headers: { "Content-Type": "audio/mp3" },
+              body: formData.get("file"),
+            });
+
+            audioUrl = presignedUrl;
+            audioObjectKey = objectKey;
+            toast.success("녹음 파일이 성공적으로 업로드되었습니다!");
+          } else {
+            toast.warn("Presigned URL이 없습니다. 업로드 건너뜁니다.");
           }
-
-          const { presignedUrl } = await response.json();
-
-          console.log("S3에 파일 업로드 중...");
-          await fetch(presignedUrl, {
-            method: "PUT",
-            headers: { "Content-Type": "audio/mp3" },
-            body: newAudioBlob,
-          });
-
-          audioUrl = presignedUrl.split("?")[0];
-          console.log("녹음 파일이 성공적으로 업로드되었습니다!");
         } catch (error) {
-          console.error("S3 업로드 중 오류 발생:", error);
+          console.error(
+            "Presigned URL 요청 또는 S3 업로드 중 오류 발생:",
+            error
+          );
+          toast.error("녹음 파일 업로드에 실패했습니다.");
         }
       }
     }
@@ -154,7 +166,7 @@ const InterviewOngoingDetailPage = () => {
         nextQuestionId: questionResponse?.data.nextQuestionId ?? undefined,
         answer: {
           answerText: answerText,
-          s3AudioUrl: audioUrl,
+          s3AudioUrl: audioObjectKey,
           s3VideoUrl: "",
         },
       };
@@ -170,9 +182,8 @@ const InterviewOngoingDetailPage = () => {
             },
           }
         );
-        if (shouldRedirect) {
-          return;
-        }
+        if (shouldRedirect) return;
+
         setQuestionResponse(response.data);
         setCount((prev) => prev + 1);
         setTimeLeft(MAX_TIME);
