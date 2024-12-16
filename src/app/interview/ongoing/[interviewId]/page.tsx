@@ -13,6 +13,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import MicRecorder from "mic-recorder-to-mp3";
+import RecordingIndicator from "@/components/RecordingIndicator";
 // import { audio } from "framer-motion/client";
 
 const apiUrl = `${setUrl}`;
@@ -332,17 +333,7 @@ const InterviewOngoingDetailPage = () => {
 
             {questionRequest.interviewMethod === "VOICE" && (
               <div className="flex w-full justify-center">
-                <button
-                  onClick={startRecording}
-                  className={`px-6 py-3 rounded font-semibold text-xl ${
-                    isRecording
-                      ? "bg-gray-400 text-white cursor-not-allowed"
-                      : "bg-primary text-white"
-                  }`}
-                  disabled={isRecording}
-                >
-                  녹음 시작
-                </button>
+                <RecordingIndicator isRecording={isRecording} />
               </div>
             )}
           </div>
