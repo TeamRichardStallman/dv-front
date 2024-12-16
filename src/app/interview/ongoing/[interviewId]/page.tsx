@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import useQuestionRequest from "@/stores/useQuestionRequest";
 import { setUrl } from "@/utils/setUrl";
@@ -31,31 +31,30 @@ const InterviewOngoingDetailPage = () => {
   const [count, setCount] = useState(1);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [user, setUser] = useState<GetUserProps>();
-  const [recorder, setRecorder] = useState<MicRecorder>(new MicRecorder());
   const [isRecording, setIsRecording] = useState(false);
-  const mp3Recorder = new MicRecorder({ bitRate: 64 });
+  const recorder = useRef<MicRecorder>(new MicRecorder({ bitRate: 64 }));
+  const audioRef = useRef<InstanceType<typeof Audio> | null>(null);
 
-  const startRecording = async () => {
+  const startRecording = useCallback(async () => {
     if (questionRequest.interviewMethod !== "VOICE") return;
 
     try {
-      await mp3Recorder.start();
-      setRecorder(mp3Recorder);
+      await recorder.current.start();
       setIsRecording(true);
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [questionRequest.interviewMethod]);
 
   const stopRecording = useCallback(async () => {
     try {
-      const [, blob] = await recorder.stop().getMp3();
+      const [, blob] = await recorder.current.stop().getMp3();
       setIsRecording(false);
       return blob;
     } catch (error) {
       console.error(error);
     }
-  }, [recorder]);
+  }, []);
 
   useEffect(() => {
     let hasFetched = false;
@@ -249,18 +248,34 @@ const InterviewOngoingDetailPage = () => {
 
   useEffect(() => {
     if (questionResponse?.data.currentQuestionS3AudioUrl) {
-      console.log(questionResponse?.data.currentQuestionS3AudioUrl);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.onended = null;
+      }
+
+      const audio = new Audio(questionResponse.data.currentQuestionS3AudioUrl);
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        console.log("TTS 질문 오디오 재생 종료. 녹음 시작.");
+        startRecording();
+      };
+
       setTimeout(() => {
-        const audio = new Audio(
-          questionResponse.data.currentQuestionS3AudioUrl
-        );
         audio.play().catch((error) => {
           console.error("Audio playback error:", error);
           toast.warn("자동 재생이 지원되지 않습니다.");
         });
       }, 2000);
+
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.onended = null;
+        }
+      };
     }
-  }, [questionResponse?.data.currentQuestionS3AudioUrl]);
+  }, [questionResponse?.data.currentQuestionS3AudioUrl, startRecording]);
 
   const handleNextClick = () => {
     if (shouldRedirect) {
