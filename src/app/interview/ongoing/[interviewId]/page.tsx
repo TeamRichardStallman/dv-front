@@ -13,7 +13,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import MicRecorder from "mic-recorder-to-mp3";
-import { audio } from "framer-motion/client";
+// import { audio } from "framer-motion/client";
 
 const apiUrl = `${setUrl}`;
 
@@ -98,7 +98,7 @@ const InterviewOngoingDetailPage = () => {
   const sendNextQuestion = useCallback(async () => {
     setTimeLeft(MAX_TIME);
 
-    let audioUrl = "";
+    // let audioUrl = "";
     let audioObjectKey = "";
 
     if (questionRequest.interviewMethod === "VOICE") {
@@ -140,7 +140,7 @@ const InterviewOngoingDetailPage = () => {
               body: formData.get("file"),
             });
 
-            audioUrl = presignedUrl;
+            // audioUrl = presignedUrl;
             audioObjectKey = objectKey;
             toast.success("녹음 파일이 성공적으로 업로드되었습니다!");
           } else {
@@ -246,6 +246,21 @@ const InterviewOngoingDetailPage = () => {
 
     return () => clearInterval(timer);
   }, [questionResponse]);
+
+  useEffect(() => {
+    if (questionResponse?.data.currentQuestionS3AudioUrl) {
+      console.log(questionResponse?.data.currentQuestionS3AudioUrl);
+      setTimeout(() => {
+        const audio = new Audio(
+          questionResponse.data.currentQuestionS3AudioUrl
+        );
+        audio.play().catch((error) => {
+          console.error("Audio playback error:", error);
+          toast.warn("자동 재생이 지원되지 않습니다.");
+        });
+      }, 2000);
+    }
+  }, [questionResponse?.data.currentQuestionS3AudioUrl]);
 
   const handleNextClick = () => {
     if (shouldRedirect) {
