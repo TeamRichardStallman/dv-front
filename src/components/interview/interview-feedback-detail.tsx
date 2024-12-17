@@ -98,7 +98,7 @@ const InterviewFeedbackDetail = ({
     LOGICAL_FLOW: "논리적 흐름",
     KEY_TERMS: "핵심 단어",
     CONSISTENCY: "일관성",
-    GRAMMATICAL_ERRORS: "문법적 오류",
+    GRAMMATICAL_ERRORS: "문법 정확도",
   };
 
   return (
