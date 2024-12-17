@@ -15,6 +15,28 @@ import "react-circular-progressbar/dist/styles.css";
 import { CircularProgressbar } from "react-circular-progressbar";
 import { AiOutlineDown, AiOutlineUp } from "react-icons/ai";
 import { calculateAge } from "@/utils/format";
+import {
+  COMMON_LABELS,
+  TECHNICAL_CRITERIA,
+  PERSONAL_CRITERIA,
+} from "@/constants/evaluationLabels";
+
+const getLabelMapByType = (type: string) => {
+  switch (type) {
+    case "TECHNICAL":
+      return TECHNICAL_CRITERIA.reduce(
+        (map, key) => ({ ...map, [key]: COMMON_LABELS[key] }),
+        {}
+      );
+    case "PERSONAL":
+      return PERSONAL_CRITERIA.reduce(
+        (map, key) => ({ ...map, [key]: COMMON_LABELS[key] }),
+        {}
+      );
+    default:
+      return {};
+  }
+};
 
 ChartJS.register(
   RadialLinearScale,
@@ -91,14 +113,6 @@ const InterviewFeedbackDetail = ({
 
   const toggleExpand = () => {
     setIsExpanded((prev) => !prev);
-  };
-
-  const labelMap = {
-    APPROPRIATE_RESPONSE: "적절한 답변",
-    LOGICAL_FLOW: "논리적 흐름",
-    KEY_TERMS: "핵심 단어",
-    CONSISTENCY: "일관성",
-    GRAMMATICAL_ERRORS: "문법 정확도",
   };
 
   return (
@@ -292,7 +306,9 @@ const InterviewFeedbackDetail = ({
                 </h4>
                 <div className="flex items-start space-x-4">
                   <RadarChartWithDetail
-                    labelMap={labelMap}
+                    labelMap={getLabelMapByType(
+                      evaluation?.interview.interviewType || ""
+                    )}
                     evaluationScores={
                       selectedAnswerEvaluation?.answerEvaluationScores || []
                     }
