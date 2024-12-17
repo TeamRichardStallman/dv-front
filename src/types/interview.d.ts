@@ -114,3 +114,38 @@ interface ApiResponse {
   message: string;
   data: InterviewDetails;
 }
+
+interface InterviewAddFileResponse {
+  code: number;
+  message: string;
+  data: InterviewAddFileDetails;
+}
+
+interface InterviewAddFileDetails {
+  interviewId: number;
+  interviewTitle: string;
+  interviewStatus: "INITIAL" | "IN_PROGRESS" | "FILE_UPLOAD";
+  interviewType: "TECHNICAL" | "PERSONAL";
+  interviewMethod: "CHAT" | "VIDEO" | "VOICE";
+  interviewMode: "REAL" | "GENERAL";
+  job: JobDetails;
+  questionCount: number;
+  file: InterviewFile;
+}
+
+interface GetFileListResponse {
+  code: number;
+  message: string;
+  data: InterviewFileList;
+}
+
+interface InterviewFileList {
+  coverLetters: InterviewFileProps[];
+}
+
+interface InterviewFileProps {
+  fileId: number;
+  fileName: string;
+  type: string;
+  s3FileUrl: string | null;
+}

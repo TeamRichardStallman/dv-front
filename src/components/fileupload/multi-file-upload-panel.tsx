@@ -1,11 +1,14 @@
 "use client";
 import { MultiFileUploadPanelDataType } from "@/data/profileData";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AiOutlinePaperClip } from "react-icons/ai";
 import { ToastContainer, toast } from "react-toastify";
-import { v4 as uuidv4 } from "uuid";
 import mammoth from "mammoth";
 import "react-toastify/dist/ReactToastify.css";
+import { setUrl } from "@/utils/setUrl";
+import axios from "axios";
+
+const apiUrl = `${setUrl}`;
 
 const Modal = ({
   message,
@@ -38,6 +41,7 @@ const Modal = ({
 );
 
 export interface MultiFileUploadPanelProps {
+  interviewId: number;
   files: MultiFileUploadPanelDataType[];
   submitButtonText?: string;
   submitButtonColor?: string;
@@ -45,15 +49,11 @@ export interface MultiFileUploadPanelProps {
 }
 
 const MultiFileUploadPanel = ({
-  files,
   submitButtonText = "저장",
   submitButtonColor = "bg-primary",
   onSubmitButtonClick,
 }: MultiFileUploadPanelProps) => {
-  const [activeTab, setActiveTab] = useState<string>("coverLetter");
-  const [fileList, setFileList] = useState<
-    { id: string; name: string; type: string }[]
-  >([{ id: uuidv4(), name: "자기소개서_1.pdf", type: "coverLetter" }]);
+  const [fileList, setFileList] = useState<InterviewFileProps[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -65,20 +65,37 @@ const MultiFileUploadPanel = ({
     message: "",
   });
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [filePath, setFilePath] = useState("");
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    setSelectedFile(null);
-    setPdfUrl(null);
-    setIsManualInput(false);
-  };
+  useEffect(() => {
+    const getFileList = async () => {
+      try {
+        const response = await axios.get<GetFileListResponse>(
+          `${apiUrl}/file/cover-letter`,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.data.data?.coverLetters) {
+          setFileList(response.data.data.coverLetters);
+        }
+      } catch (error) {
+        console.error("GetFileList failed:", error);
+      }
+    };
+    getFileList();
+  }, []);
 
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const fileName = event.target.value;
     setSelectedFile(fileName);
     if (fileName) {
-      const selected = fileList.find((file) => file.name === fileName);
-      setPdfUrl(selected ? `/pdf/${selected.name}` : null);
+      const selected = fileList.find((file) => file.fileName === fileName);
+      setPdfUrl(selected ? `/pdf/${selected.fileName}` : null);
       setIsManualInput(false);
     } else {
       setPdfUrl(null);
@@ -101,14 +118,7 @@ const MultiFileUploadPanel = ({
   };
 
   const processFile = async (file: File) => {
-    const newFile = {
-      id: uuidv4(),
-      name: file.name,
-      type: activeTab,
-    };
-
-    setFileList((prev) => [...prev, newFile]);
-    setSelectedFile(newFile.name);
+    setSelectedFile(file.name);
     setPdfUrl(null);
     setIsManualInput(false);
 
@@ -187,31 +197,23 @@ const MultiFileUploadPanel = ({
     let savedFileName = "";
 
     if (isManualInput) {
-      const fileName = `자기소개서-${new Date()
-        .toISOString()
-        .slice(0, 10)}.txt`;
+      const fileName = `cover-letter.txt`;
       const textBlob = new Blob([manualText], { type: "text/plain" });
       const textFile = new File([textBlob], fileName);
-
-      setFileList((prev) => [
-        ...prev,
-        { id: uuidv4(), name: fileName, type: activeTab },
-      ]);
 
       await handleUpload(textFile);
 
       savedFileName = fileName;
-      toast.success(`${activeTab}에 텍스트 파일이 저장되었습니다.`);
+      toast.success(`파일이 저장되었습니다.`);
     } else {
-      const newFile = { id: uuidv4(), name: selectedFile!, type: activeTab };
-      setFileList((prev) => [...prev, newFile]);
+      alert("selectedFile:" + selectedFile);
       savedFileName = selectedFile!;
-      toast.success(`${activeTab}에 파일이 저장되었습니다.`);
+      toast.success(`파일이 저장되었습니다.`);
       await handleUpload(file!);
     }
 
     if (onSubmitButtonClick) {
-      onSubmitButtonClick([`cover-letters/${savedFileName}`]);
+      onSubmitButtonClick([`${filePath}/${savedFileName}`]);
     }
 
     setSelectedFile(null);
@@ -225,7 +227,7 @@ const MultiFileUploadPanel = ({
       if (isManualInput) {
         onSubmitButtonClick([manualText]);
       } else if (selectedFile) {
-        onSubmitButtonClick([`cover-letters/${selectedFile}`]);
+        onSubmitButtonClick([`${filePath}/${selectedFile}`]);
       }
     }
   };
@@ -239,26 +241,49 @@ const MultiFileUploadPanel = ({
     setUploading(true);
 
     try {
-      const response = await fetch("/api/s3/uploadFiles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: `cover-letters/${uploadFile.name}`,
-          fileType: uploadFile.type,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("서버에서 URL을 가져오지 못했습니다.");
-      }
-
-      const { presignedUrl } = await response.json();
-
-      await fetch(presignedUrl, {
-        method: "PUT",
-        headers: { "Content-Type": uploadFile.type },
-        body: uploadFile,
-      });
+      toast.info("Presigned URL 요청 중...");
+      axios
+        .get<GetPreSignedUrlResponse>(
+          `${apiUrl}/file/cover-letter/cover-letter.${
+            uploadFile.name.split(".")[1]
+          }/upload-url`,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .then((response) => {
+          const presignedUrl = response.data?.data?.preSignedUrl;
+          setFilePath(response.data.data.objectKey);
+          if (presignedUrl) {
+            toast.info("S3에 파일 업로드 중...");
+            fetch(presignedUrl, {
+              method: "PUT",
+              headers: { "Content-Type": uploadFile.type },
+              body: uploadFile,
+            }).then(() => {
+              alert("filePath:" + filePath);
+              axios.post(
+                `${apiUrl}/file/cover-letter`,
+                {
+                  type: "COVER_LETTER",
+                  filePath: filePath,
+                },
+                {
+                  withCredentials: true,
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+            });
+          } else {
+            toast.warn("S3 업로드를 건너뜁니다. Presigned URL이 없습니다.");
+            console.warn("Presigned URL이 없습니다.");
+          }
+        });
 
       toast.success("파일이 성공적으로 업로드되었습니다.");
     } catch {
@@ -277,95 +302,85 @@ const MultiFileUploadPanel = ({
           onCancel={() => setModalState({ show: false, message: "" })}
         />
       )}
-      <div className="flex items-center justify-between w-[900px] mb-4">
-        <div className="flex space-x-4 font-semibold">
-          {files.map((file, index) => (
+      <div>
+        <div className="flex items-center justify-between w-[900px] mb-4">
+          <select
+            className="ml-4 border rounded-lg p-2 w-1/3"
+            onChange={handleSelectChange}
+          >
+            <option value="">파일 선택</option>
+            {fileList ? (
+              fileList
+                // .filter((file) => file.type === activeTab)
+                .map((file) => (
+                  <option key={file.fileId} value={file.fileName}>
+                    {file.fileName}
+                  </option>
+                ))
+            ) : (
+              <option disabled>기존에 업로드한 파일이 없습니다.</option>
+            )}
+          </select>
+
+          <div className="flex items-center space-x-4">
+            <label className="flex items-center cursor-pointer">
+              <AiOutlinePaperClip className="text-primary text-4xl" />
+              <input
+                type="file"
+                onChange={handleFileChange}
+                className="hidden"
+                accept=".pdf,.docx,.txt,.md"
+                onClick={(e) => {
+                  e.currentTarget.value = "";
+                }}
+              />
+            </label>
+
             <button
-              key={index}
-              onClick={() => handleTabChange(file.type)}
-              className={`py-2 px-6 rounded-lg ${
-                activeTab === file.type
-                  ? "bg-primary text-white"
-                  : "bg-gray-200 hover:bg-secondary"
-              }`}
+              onClick={handleManualInput}
+              className="py-2 px-6 font-semibold text-white rounded-lg bg-primary"
             >
-              {file.name}
+              직접입력
             </button>
-          ))}
+
+            <button
+              onClick={handleSubmitButtonClick}
+              className={`py-2 px-6 font-semibold text-white rounded-lg whitespace-nowrap ${submitButtonColor}`}
+            >
+              {uploading ? "업로드 중..." : submitButtonText}
+            </button>
+          </div>
         </div>
 
-        <select
-          className="ml-4 border rounded-lg p-2 w-1/3"
-          onChange={handleSelectChange}
-        >
-          <option value="">파일 선택</option>
-          {fileList
-            .filter((file) => file.type === activeTab)
-            .map((file) => (
-              <option key={file.id} value={file.name}>
-                {file.name}
-              </option>
-            ))}
-        </select>
-
-        <div className="flex items-center space-x-4">
-          <label className="flex items-center cursor-pointer">
-            <AiOutlinePaperClip className="text-primary text-4xl" />
-            <input
-              type="file"
-              onChange={handleFileChange}
-              className="hidden"
-              accept=".pdf,.docx,.txt,.md"
-              onClick={(e) => {
-                e.currentTarget.value = "";
-              }}
+        <div className="w-[900px] h-[450px] border rounded-lg overflow-hidden mt-4 flex items-center justify-center">
+          {isManualInput ? (
+            <textarea
+              className="w-full h-full p-4 border-none focus:outline-none resize-none"
+              placeholder="텍스트를 입력하세요."
+              value={manualText}
+              onChange={(e) => setManualText(e.target.value)}
             />
-          </label>
-
-          <button
-            onClick={handleManualInput}
-            className="py-2 px-6 font-semibold text-white rounded-lg bg-primary"
-          >
-            직접입력
-          </button>
-
-          <button
-            onClick={handleSubmitButtonClick}
-            className={`py-2 px-6 font-semibold text-white rounded-lg whitespace-nowrap ${submitButtonColor}`}
-          >
-            {uploading ? "업로드 중..." : submitButtonText}
-          </button>
+          ) : pdfUrl ? (
+            <iframe
+              src={pdfUrl}
+              width="100%"
+              height="100%"
+              title="file-preview"
+            />
+          ) : (
+            <p className="text-gray-500">파일을 선택하거나 직접 입력하세요.</p>
+          )}
         </div>
-      </div>
-
-      <div className="w-[900px] h-[450px] border rounded-lg overflow-hidden mt-4 flex items-center justify-center">
-        {isManualInput ? (
-          <textarea
-            className="w-full h-full p-4 border-none focus:outline-none resize-none"
-            placeholder="텍스트를 입력하세요."
-            value={manualText}
-            onChange={(e) => setManualText(e.target.value)}
-          />
-        ) : pdfUrl ? (
-          <iframe
-            src={pdfUrl}
-            width="100%"
-            height="100%"
-            title="file-preview"
-          />
-        ) : (
-          <p className="text-gray-500">파일을 선택하거나 직접 입력하세요.</p>
+        {selectedFile && (
+          <div className="mt-2 text-gray-500 font-medium">
+            파일명: {selectedFile}
+          </div>
         )}
+        <ToastContainer
+          position="bottom-right"
+          toastStyle={{ fontWeight: "500" }}
+        />
       </div>
-      {selectedFile && (
-        <div className="mt-2 text-gray-500 font-medium">
-          파일명: {selectedFile}
-        </div>
-      )}
-      <ToastContainer
-        position="bottom-right"
-        toastStyle={{ fontWeight: "500" }}
-      />
     </div>
   );
 };
