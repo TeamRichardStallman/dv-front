@@ -1,14 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { Radar } from "react-chartjs-2";
+import RadarChartWithDetail from "@/components/radar-chart";
 import {
   Chart as ChartJS,
   RadialLinearScale,
   PointElement,
-  ActiveElement,
-  ChartEvent,
-  TooltipItem,
   LineElement,
   Filler,
   Tooltip,
@@ -56,11 +53,6 @@ const InterviewFeedbackDetail = ({
 }: InterviewFeedbackDetailProps) => {
   const [selectedQuestion, setSelectedQuestion] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedScoreDetail, setSelectedScoreDetail] = useState<{
-    name: string;
-    score: number;
-    rationale: string;
-  } | null>(null);
 
   const calculateTotalScore = () => {
     const totalScore = evaluation?.evaluationCriteria
@@ -107,76 +99,6 @@ const InterviewFeedbackDetail = ({
     KEY_TERMS: "핵심 단어",
     CONSISTENCY: "일관성",
     GRAMMATICAL_ERRORS: "문법적 오류",
-  };
-
-  const radarData = {
-    labels: Object.values(labelMap),
-    datasets: [
-      {
-        label: "평가 점수",
-        data: selectedAnswerEvaluation
-          ? selectedAnswerEvaluation.answerEvaluationScores.map(
-              (score) => score.score
-            )
-          : [0, 0, 0, 0, 0],
-        backgroundColor: "rgba(54, 162, 235, 0.2)",
-        borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const radarOptions = {
-    scales: {
-      r: {
-        beginAtZero: true,
-        max: 10,
-        pointLabels: {
-          font: {
-            family: "Pretendard",
-            size: 12,
-            weight: 600,
-          },
-        },
-        ticks: {
-          stepSize: 2,
-        },
-      },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (context: TooltipItem<"radar">) => {
-            const index = context.dataIndex;
-            const scoreDetail = selectedAnswerEvaluation
-              ? selectedAnswerEvaluation.answerEvaluationScores[index]
-              : null;
-            return scoreDetail ? `${scoreDetail.score}점` : "";
-          },
-        },
-      },
-    },
-    onClick: (event: ChartEvent, elements: ActiveElement[]) => {
-      if (elements.length > 0) {
-        const index = elements[0].index;
-        const scoreDetails = selectedAnswerEvaluation
-          ? selectedAnswerEvaluation.answerEvaluationScores[
-              index + 1 <= 4 ? index + 1 : 0
-            ]
-          : null;
-
-        setSelectedScoreDetail(
-          scoreDetails
-            ? {
-                name: radarData.labels[index],
-                score: scoreDetails.score,
-                rationale: scoreDetails.rationale,
-              }
-            : null
-        );
-      }
-    },
   };
 
   return (
@@ -360,26 +282,12 @@ const InterviewFeedbackDetail = ({
                   [평가 기준별 점수]
                 </h4>
                 <div className="flex items-start space-x-4">
-                  <div className="w-3/5">
-                    <Radar data={radarData} options={radarOptions} />
-                  </div>
-                  <div className="w-2/5 mt-4 p-4 border rounded-lg bg-gray-50 h-[300px] flex flex-col items-center justify-center">
-                    {selectedScoreDetail ? (
-                      <>
-                        <h4 className="text-lg text-primary font-bold mb-2">
-                          {selectedScoreDetail.name} (
-                          {selectedScoreDetail.score}/10)
-                        </h4>
-                        <p className="font-medium">
-                          {selectedScoreDetail.rationale}
-                        </p>
-                      </>
-                    ) : (
-                      <p className="font-bold text-gray-500">
-                        점수를 클릭해주세요.
-                      </p>
-                    )}
-                  </div>
+                  <RadarChartWithDetail
+                    labelMap={labelMap}
+                    evaluationScores={
+                      selectedAnswerEvaluation?.answerEvaluationScores || []
+                    }
+                  />
                 </div>
 
                 <h4 className="text-xl text-primary font-bold mb-2 mt-4">
