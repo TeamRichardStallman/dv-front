@@ -32,6 +32,7 @@ const InterviewOngoingDetailPage = () => {
   const [count, setCount] = useState(1);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [user, setUser] = useState<GetUserProps>();
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const recorder = useRef<MicRecorder>(new MicRecorder({ bitRate: 64 }));
   const audioRef = useRef<InstanceType<typeof Audio> | null>(null);
@@ -252,27 +253,36 @@ const InterviewOngoingDetailPage = () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.onended = null;
+        audioRef.current.onplay = null;
       }
 
       const audio = new Audio(questionResponse.data.currentQuestionS3AudioUrl);
       audioRef.current = audio;
-
-      audio.onended = () => {
-        console.log("TTS 질문 오디오 재생 종료. 녹음 시작.");
-        startRecording();
-      };
+      setIsPlaying(true);
 
       setTimeout(() => {
-        audio.play().catch((error) => {
-          console.error("Audio playback error:", error);
-          toast.warn("자동 재생이 지원되지 않습니다.");
-        });
+        audio
+          .play()
+          .then(() => {
+            audio.onplay = () => setIsPlaying(true);
+          })
+          .catch((error) => {
+            console.error("Audio playback error:", error);
+            toast.warn("자동 재생이 지원되지 않습니다.");
+            setIsPlaying(false);
+          });
+
+        audio.onended = () => {
+          setIsPlaying(false);
+          startRecording();
+        };
       }, 2000);
 
       return () => {
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.onended = null;
+          audioRef.current.onplay = null;
         }
       };
     }
@@ -359,8 +369,11 @@ const InterviewOngoingDetailPage = () => {
             </div>
 
             <button
-              className="px-6 py-3 bg-secondary text-white rounded font-semibold text-xl"
+              className={`px-6 py-3 ${
+                isPlaying ? "bg-gray-400 cursor-not-allowed" : "bg-secondary"
+              } text-white rounded font-semibold text-xl`}
               onClick={handleNextClick}
+              disabled={isPlaying}
             >
               {shouldRedirect ? "제출" : "다음"}
             </button>
