@@ -19,6 +19,7 @@ import {
   COMMON_LABELS,
   TECHNICAL_CRITERIA,
   PERSONAL_CRITERIA,
+  VOICE_CRITERIA,
 } from "@/constants/evaluationLabels";
 
 const getLabelMapByType = (type: string) => {
@@ -30,6 +31,11 @@ const getLabelMapByType = (type: string) => {
       );
     case "PERSONAL":
       return PERSONAL_CRITERIA.reduce(
+        (map, key) => ({ ...map, [key]: COMMON_LABELS[key] }),
+        {}
+      );
+    case "VOICE":
+      return VOICE_CRITERIA.reduce(
         (map, key) => ({ ...map, [key]: COMMON_LABELS[key] }),
         {}
       );
@@ -314,8 +320,27 @@ const InterviewFeedbackDetail = ({
                     }
                   />
                 </div>
-
-                <h4 className="text-xl text-primary font-bold mb-2 mt-4">
+                {evaluation?.interview.interviewMethod === "VOICE" && (
+                  <>
+                    <h4 className="text-xl text-primary font-bold mb-2">
+                      [음성 기준별 점수]
+                    </h4>
+                    <div className="flex items-start space-x-4 mt-8">
+                      <RadarChartWithDetail
+                        labelMap={getLabelMapByType("VOICE")}
+                        evaluationScores={
+                          selectedAnswerEvaluation?.answerEvaluationScores.filter(
+                            (score) =>
+                              ["STUTTER", "PRONUNCIATION", "WPM"].includes(
+                                score.answerEvaluationScoreName
+                              )
+                          ) || []
+                        }
+                      />
+                    </div>
+                  </>
+                )}
+                <h4 className="text-xl text-primary font-bold mb-2">
                   [피드백]
                 </h4>
                 <div className="flex flex-col justify-between mb-4">

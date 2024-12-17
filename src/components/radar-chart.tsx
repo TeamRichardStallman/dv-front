@@ -116,7 +116,7 @@ const RadarChartWithDetail = ({
         </div>
       </div>
 
-      <div className="w-2/5 mt-4 p-4 border rounded-lg bg-gray-50 h-[300px] flex flex-col items-center justify-center">
+      <div className="w-2/5 p-4 border rounded-lg bg-gray-50 h-[300px] flex flex-col items-center justify-center">
         {selectedScoreDetail ? (
           <>
             <h4 className="text-lg text-primary font-bold mb-2">
