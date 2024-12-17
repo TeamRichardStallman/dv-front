@@ -13,7 +13,6 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import MicRecorder from "mic-recorder-to-mp3";
-import { audio } from "framer-motion/client";
 
 const apiUrl = `${setUrl}`;
 
@@ -98,7 +97,6 @@ const InterviewOngoingDetailPage = () => {
   const sendNextQuestion = useCallback(async () => {
     setTimeLeft(MAX_TIME);
 
-    let audioUrl = "";
     let audioObjectKey = "";
 
     if (questionRequest.interviewMethod === "VOICE") {
@@ -140,7 +138,6 @@ const InterviewOngoingDetailPage = () => {
               body: formData.get("file"),
             });
 
-            audioUrl = presignedUrl;
             audioObjectKey = objectKey;
             toast.success("녹음 파일이 성공적으로 업로드되었습니다!");
           } else {

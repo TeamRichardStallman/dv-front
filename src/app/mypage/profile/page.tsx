@@ -1,8 +1,8 @@
-import MultiFileUploadPanel from "@/components/multi-file-upload-panel";
+import MultiFileUploadPanel from "@/components/fileupload/multi-file-upload-panel";
 import { FILES } from "@/data/profileData";
 
 const ProfilePage = () => {
-  return <MultiFileUploadPanel files={FILES} />;
+  return <MultiFileUploadPanel interviewId={0} isMypage={true} files={FILES} />;
 };
 
 export default ProfilePage;

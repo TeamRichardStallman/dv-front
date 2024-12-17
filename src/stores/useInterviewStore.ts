@@ -6,6 +6,7 @@ export type InterviewType = "TECHNICAL" | "PERSONAL" | undefined;
 export type InterviewMethod = "CHAT" | "VOICE" | "VIDEO" | undefined;
 
 export interface Interview {
+  interviewId: number | undefined;
   interviewMode: "GENERAL" | "REAL" | undefined;
   interviewType: "TECHNICAL" | "PERSONAL" | undefined;
   interviewMethod: "CHAT" | "VOICE" | "VIDEO" | undefined;
@@ -26,6 +27,7 @@ const useInterviewStore = create<InterviewStore>()(
   persist(
     (set) => ({
       interview: {
+        interviewId: undefined,
         interviewType: undefined,
         interviewMethod: undefined,
         interviewMode: undefined,

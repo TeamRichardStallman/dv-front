@@ -1,6 +1,9 @@
-import React from "react";
+import React, { ComponentPropsWithoutRef } from "react";
 
-interface NavButtonsProps extends StepProps, ButtonsProps {
+interface NavButtonsProps
+  extends StepProps,
+    ButtonsProps,
+    ComponentPropsWithoutRef<"button"> {
   disabled?: boolean;
   tooltipMessage?: string;
 }

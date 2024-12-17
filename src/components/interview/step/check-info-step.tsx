@@ -3,12 +3,14 @@ import React, { useEffect, useState } from "react";
 import NavButtons from "./nav-button";
 import useInterviewStore, { Interview } from "@/stores/useInterviewStore";
 import { setUrl } from "@/utils/setUrl";
+import { toast } from "react-toastify";
 import axios from "axios";
 import useQuestionRequest from "@/stores/useQuestionRequest";
 import { interviewInfoMap } from "../interview-feedback-detail";
 import { getFileName } from "@/utils/format";
 import Loading from "@/components/loading";
 import PaymentModal from "@/components/payment-modal";
+import useFileStore from "@/stores/useFileStore";
 
 const apiUrl = `${setUrl}`;
 interface StepSubmitProps extends StepProps {
@@ -29,6 +31,8 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
   const [showModal, setShowModal] = useState(false);
   const [possible, setPossible] = useState(false);
   const [, setIsQuestionCountSelected] = useState(false);
+  const { interviewFile } = useFileStore();
+  const [filePath, setFilePath] = useState("");
 
   useEffect(() => {
     let hasFetched = false;
@@ -115,15 +119,7 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
           interviewMode: interview.interviewMode,
           jobId: interview.jobId,
           questionCount: selectedQuestionCount,
-          files:
-            interview.interviewMode === "GENERAL"
-              ? null
-              : [
-                  {
-                    type: "COVER_LETTER",
-                    filePath: interview.files[0],
-                  },
-                ],
+          files: null,
         },
         {
           withCredentials: true,
@@ -132,8 +128,59 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
           },
         }
       );
+
       if (response.data && response.data.data) {
         const data = response.data;
+        if (interview.interviewMode === "REAL") {
+          const preSignedResponse = await axios.get<GetPreSignedUrlResponse>(
+            `${apiUrl}/file/cover-letter/${
+              response.data.data.interviewId
+            }/cover-letter.${
+              interviewFile.file?.name.split(".")[1]
+            }/upload-url`,
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (response.data.data && interviewFile.file) {
+            const temp = preSignedResponse.data.data.preSignedUrl;
+            setFilePath(preSignedResponse.data.data.objectKey);
+            if (temp) {
+              toast.info("S3에 파일 업로드 중...");
+              fetch(temp, {
+                method: "PUT",
+                headers: { "Content-Type": interviewFile.file?.type },
+                body: interviewFile.file,
+              });
+
+              await axios.put<InterviewAddFileResponse>(
+                `${apiUrl}/interview`,
+                {
+                  interviewId: data.data.interviewId,
+                  coverLetter: {
+                    type: "COVER_LETTER",
+                    filePath: preSignedResponse.data.data.objectKey,
+                  },
+                },
+                {
+                  withCredentials: true,
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+            } else {
+              toast.warn("S3 업로드를 건너뜁니다. Presigned URL이 없습니다.");
+              console.warn("Presigned URL이 없습니다.");
+            }
+            // }
+          }
+        }
+
         setQuestionRequest({
           interviewId: data.data.interviewId,
           interviewTitle: data.data.interviewTitle,
@@ -148,7 +195,7 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
               : [
                   {
                     type: "COVER_LETTER",
-                    filePath: data.data.files[0].s3FileUrl,
+                    filePath: filePath,
                   },
                 ],
           jobId: data.data.job.jobId,
