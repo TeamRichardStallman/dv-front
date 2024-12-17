@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import useQuestionRequest from "@/stores/useQuestionRequest";
 import { setUrl } from "@/utils/setUrl";
@@ -13,6 +13,8 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import MicRecorder from "mic-recorder-to-mp3";
+import RecordingIndicator from "@/components/RecordingIndicator";
+// import { audio } from "framer-motion/client";
 
 const apiUrl = `${setUrl}`;
 
@@ -30,31 +32,43 @@ const InterviewOngoingDetailPage = () => {
   const [count, setCount] = useState(1);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [user, setUser] = useState<GetUserProps>();
-  const [recorder, setRecorder] = useState<MicRecorder>(new MicRecorder());
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const mp3Recorder = new MicRecorder({ bitRate: 64 });
+  const recorder = useRef<MicRecorder>(new MicRecorder({ bitRate: 64 }));
+  const audioRef = useRef<InstanceType<typeof Audio> | null>(null);
 
-  const startRecording = async () => {
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  const startRecording = useCallback(async () => {
     if (questionRequest.interviewMethod !== "VOICE") return;
 
     try {
-      await mp3Recorder.start();
-      setRecorder(mp3Recorder);
+      await recorder.current.start();
       setIsRecording(true);
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [questionRequest.interviewMethod]);
 
   const stopRecording = useCallback(async () => {
     try {
-      const [, blob] = await recorder.stop().getMp3();
+      const [, blob] = await recorder.current.stop().getMp3();
       setIsRecording(false);
       return blob;
     } catch (error) {
       console.error(error);
     }
-  }, [recorder]);
+  }, []);
 
   useEffect(() => {
     let hasFetched = false;
@@ -97,6 +111,7 @@ const InterviewOngoingDetailPage = () => {
   const sendNextQuestion = useCallback(async () => {
     setTimeLeft(MAX_TIME);
 
+    // let audioUrl = "";
     let audioObjectKey = "";
 
     if (questionRequest.interviewMethod === "VOICE") {
@@ -116,7 +131,6 @@ const InterviewOngoingDetailPage = () => {
         );
 
         try {
-          toast.info("Presigned URL 요청 중...");
           const presignedResponse = await axios.get<GetPreSignedUrlResponse>(
             `${apiUrl}/file/audio/${questionRequest.interviewId}/${questionResponse?.data.currentQuestionId}/upload-url`,
             {
@@ -131,15 +145,14 @@ const InterviewOngoingDetailPage = () => {
           const objectKey = presignedResponse.data?.data.objectKey;
 
           if (presignedUrl) {
-            toast.info("S3에 파일 업로드 중...");
             await fetch(presignedUrl, {
               method: "PUT",
               headers: { "Content-Type": "audio/mp3" },
               body: formData.get("file"),
             });
 
+            // audioUrl = presignedUrl;
             audioObjectKey = objectKey;
-            toast.success("녹음 파일이 성공적으로 업로드되었습니다!");
           } else {
             toast.warn("Presigned URL이 없습니다. 업로드 건너뜁니다.");
           }
@@ -244,6 +257,46 @@ const InterviewOngoingDetailPage = () => {
     return () => clearInterval(timer);
   }, [questionResponse]);
 
+  useEffect(() => {
+    if (questionResponse?.data.currentQuestionS3AudioUrl) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.onended = null;
+        audioRef.current.onplay = null;
+      }
+
+      const audio = new Audio(questionResponse.data.currentQuestionS3AudioUrl);
+      audioRef.current = audio;
+      setIsPlaying(true);
+
+      setTimeout(() => {
+        audio
+          .play()
+          .then(() => {
+            audio.onplay = () => setIsPlaying(true);
+          })
+          .catch((error) => {
+            console.error("Audio playback error:", error);
+            toast.warn("자동 재생이 지원되지 않습니다.");
+            setIsPlaying(false);
+          });
+
+        audio.onended = () => {
+          setIsPlaying(false);
+          startRecording();
+        };
+      }, 2000);
+
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.onended = null;
+          audioRef.current.onplay = null;
+        }
+      };
+    }
+  }, [questionResponse?.data.currentQuestionS3AudioUrl, startRecording]);
+
   const handleNextClick = () => {
     if (shouldRedirect) {
       sendNextQuestion();
@@ -298,18 +351,8 @@ const InterviewOngoingDetailPage = () => {
             )}
 
             {questionRequest.interviewMethod === "VOICE" && (
-              <div className="flex w-full justify-center">
-                <button
-                  onClick={startRecording}
-                  className={`px-6 py-3 rounded font-semibold text-xl ${
-                    isRecording
-                      ? "bg-gray-400 text-white cursor-not-allowed"
-                      : "bg-primary text-white"
-                  }`}
-                  disabled={isRecording}
-                >
-                  녹음 시작
-                </button>
+              <div className="my-7 flex w-full justify-center">
+                <RecordingIndicator isRecording={isRecording} />
               </div>
             )}
           </div>
@@ -335,8 +378,11 @@ const InterviewOngoingDetailPage = () => {
             </div>
 
             <button
-              className="px-6 py-3 bg-secondary text-white rounded font-semibold text-xl"
+              className={`px-6 py-3 ${
+                isPlaying ? "bg-gray-400 cursor-not-allowed" : "bg-secondary"
+              } text-white rounded font-semibold text-xl`}
               onClick={handleNextClick}
+              disabled={isPlaying}
             >
               {shouldRedirect ? "제출" : "다음"}
             </button>

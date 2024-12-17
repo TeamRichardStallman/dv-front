@@ -17,8 +17,10 @@ const GuideLayout = ({ children }: GuideLayoutProps) => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header loggedIn={loggedIn} />
-      <main className="relative flex-1 flex flex-col items-center justify-center">
+      <div className="fixed bg-white top-0 left-0 w-full z-50">
+        <Header loggedIn={loggedIn} />
+      </div>
+      <main className="relative flex-1 flex flex-col items-center justify-center pt-[64px]">
         {children}
       </main>
       <Footer />

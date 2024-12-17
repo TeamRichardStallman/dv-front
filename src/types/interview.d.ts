@@ -83,7 +83,7 @@ interface QuestionResponseData {
   interview: InterviewDetails;
   currentQuestionId: number;
   currentQuestionText: string;
-  currendQuestionS3AudioUrl: string;
+  currentQuestionS3AudioUrl: string;
   nextQuestionId?: number;
   nextQuestionText?: string;
   nextQuestionS3AudioUrl: string;
