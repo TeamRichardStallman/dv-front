@@ -37,6 +37,18 @@ const InterviewOngoingDetailPage = () => {
   const recorder = useRef<MicRecorder>(new MicRecorder({ bitRate: 64 }));
   const audioRef = useRef<InstanceType<typeof Audio> | null>(null);
 
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   const startRecording = useCallback(async () => {
     if (questionRequest.interviewMethod !== "VOICE") return;
 
