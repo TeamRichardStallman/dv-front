@@ -332,7 +332,7 @@ const InterviewOngoingDetailPage = () => {
             )}
 
             {questionRequest.interviewMethod === "VOICE" && (
-              <div className="flex w-full justify-center">
+              <div className="my-7 flex w-full justify-center">
                 <RecordingIndicator isRecording={isRecording} />
               </div>
             )}
