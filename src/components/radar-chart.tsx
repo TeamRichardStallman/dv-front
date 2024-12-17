@@ -26,7 +26,11 @@ ChartJS.register(
 
 export type RadarChartWithDetailProps = {
   labelMap: Record<string, string>;
-  evaluationScores: { score: number; rationale: string }[];
+  evaluationScores: {
+    score: number;
+    rationale: string;
+    answerEvaluationScoreName: string;
+  }[];
 };
 
 const RadarChartWithDetail = ({
@@ -39,12 +43,19 @@ const RadarChartWithDetail = ({
     rationale: string;
   } | null>(null);
 
+  const sortedScores = Object.keys(labelMap).map((key) => {
+    const scoreDetail = evaluationScores.find(
+      (score) => score.answerEvaluationScoreName === key
+    );
+    return scoreDetail ? scoreDetail.score : 0;
+  });
+
   const radarData = {
     labels: Object.values(labelMap),
     datasets: [
       {
         label: "평가 점수",
-        data: evaluationScores.map((score) => score.score),
+        data: sortedScores,
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
         borderWidth: 1,
@@ -67,7 +78,10 @@ const RadarChartWithDetail = ({
         callbacks: {
           label: (context: TooltipItem<"radar">) => {
             const index = context.dataIndex;
-            const scoreDetail = evaluationScores[index];
+            const scoreDetail = evaluationScores.find(
+              (score) =>
+                score.answerEvaluationScoreName === Object.keys(labelMap)[index]
+            );
             return scoreDetail ? `${scoreDetail.score}점` : "";
           },
         },
@@ -76,12 +90,20 @@ const RadarChartWithDetail = ({
     onClick: (event: ChartEvent, elements: ActiveElement[]) => {
       if (elements.length > 0) {
         const index = elements[0].index;
-        const scoreDetail = evaluationScores[index];
-        setSelectedScoreDetail({
-          name: Object.values(labelMap)[index],
-          score: scoreDetail.score,
-          rationale: scoreDetail.rationale,
-        });
+        const scoreDetail = evaluationScores.find(
+          (score) =>
+            score.answerEvaluationScoreName === Object.keys(labelMap)[index]
+        );
+
+        setSelectedScoreDetail(
+          scoreDetail
+            ? {
+                name: labelMap[scoreDetail.answerEvaluationScoreName],
+                score: scoreDetail.score,
+                rationale: scoreDetail.rationale,
+              }
+            : null
+        );
       }
     },
   };
