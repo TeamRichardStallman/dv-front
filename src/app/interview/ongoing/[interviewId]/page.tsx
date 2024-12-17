@@ -131,7 +131,6 @@ const InterviewOngoingDetailPage = () => {
         );
 
         try {
-          toast.info("Presigned URL 요청 중...");
           const presignedResponse = await axios.get<GetPreSignedUrlResponse>(
             `${apiUrl}/file/audio/${questionRequest.interviewId}/${questionResponse?.data.currentQuestionId}/upload-url`,
             {
@@ -146,7 +145,6 @@ const InterviewOngoingDetailPage = () => {
           const objectKey = presignedResponse.data?.data.objectKey;
 
           if (presignedUrl) {
-            toast.info("S3에 파일 업로드 중...");
             await fetch(presignedUrl, {
               method: "PUT",
               headers: { "Content-Type": "audio/mp3" },
@@ -155,7 +153,6 @@ const InterviewOngoingDetailPage = () => {
 
             // audioUrl = presignedUrl;
             audioObjectKey = objectKey;
-            toast.success("녹음 파일이 성공적으로 업로드되었습니다!");
           } else {
             toast.warn("Presigned URL이 없습니다. 업로드 건너뜁니다.");
           }
