@@ -197,7 +197,7 @@ const UserForm = ({
       const uploadResponse = await axios.post<PresignedUrlResponse>(
         "/api/s3/uploadFiles",
         {
-          fileName: `profile-image/${userId}/${file.name}`,
+          fileName: `profile-image/${userId}/image.${file.name.split(".")[1]}`,
           fileType: file.type,
         }
       );
