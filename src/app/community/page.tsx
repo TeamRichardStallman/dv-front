@@ -41,16 +41,6 @@ const CommunityPage = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
-  const handleSubscribe = (index: number) => {
-    setRecommendedChannels((prevChannels) =>
-      prevChannels.map((channel, i) =>
-        i === index
-          ? { ...channel, isSubscribed: !channel.isSubscribed }
-          : channel
-      )
-    );
-  };
-
   const openModal = async () => {
     try {
       const userResponse = await axios.get<GetUserResponse>(
@@ -71,16 +61,19 @@ const CommunityPage = () => {
     setIsModalOpen(false);
   };
 
-  const handlePostSubmit = (postData: {
-    jobKoreanName: string;
-    content: string;
-    s3ImageUrl: string;
-    interviewId: number;
-    overallEvaluationId: number;
-    postType: string;
-  }) => {
-    console.log("작성된 게시글 데이터:", postData);
-    closeModal();
+// 게시글 생성
+  const handlePostSubmit = async (postData: any) => {
+    try {
+      await axios.post(
+          `${apiUrl}/post`,
+          postData,
+          { withCredentials: true, headers: { "Content-Type": "application/json" } }
+      );
+      alert("게시글 작성이 완료되었습니다.");
+    } catch (error) {
+      console.error("게시글 작성 실패:", error);
+      alert("게시글 작성 실패");
+    }
   };
 
   // 구독 생성
