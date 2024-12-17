@@ -150,16 +150,23 @@ const InterviewFeedbackDetail = ({
             </div>
 
             <div className="mt-4 w-full">
-              <h4 className="text-md text-gray-500 font-bold mb-2">
-                [입력한 자료]
-              </h4>
-              <ul className="border border-gray-300 rounded-lg p-3 bg-gray-50 space-y-2">
-                {(evaluation?.interview.files || []).map((file, index) => (
-                  <li key={index} className="text-sm font-medium text-gray-700">
-                    {file.fileName}
-                  </li>
-                ))}
-              </ul>
+              {evaluation?.interview.interviewMode !== "GENERAL" && (
+                <>
+                  <h4 className="text-md text-gray-500 font-bold mb-2">
+                    [입력한 자료]
+                  </h4>
+                  <ul className="border border-gray-300 rounded-lg p-3 bg-gray-50 space-y-2">
+                    {(evaluation?.interview.files || []).map((file, index) => (
+                      <li
+                        key={index}
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        {file.fileName}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </div>
           </div>
 
