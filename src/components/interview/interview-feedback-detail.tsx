@@ -102,12 +102,23 @@ const InterviewFeedbackDetail = ({
     WOMAN: { label: "여성" },
   };
 
-  const criteriaMap: Record<string, { label: string }> = {
+  const baseCriteriaMap: Record<string, { label: string }> = {
     GROWTH_POTENTIAL: { label: "성장 가능성" },
     JOB_FIT: { label: "문제 해결 능력" },
     WORK_ATTITUDE: { label: "협업 능력" },
     TECHNICAL_DEPTH: { label: "기술 이해도" },
   };
+
+  const voiceCriteriaMap: Record<string, { label: string }> = {
+    CLARITY: { label: "명확성" },
+    FLUENCY: { label: "유창성" },
+    WORD_REPETITION: { label: "단어 반복" },
+  };
+
+  const criteriaMap =
+    evaluation?.interview.interviewMethod === "VOICE"
+      ? { ...baseCriteriaMap, ...voiceCriteriaMap }
+      : baseCriteriaMap;
 
   const handleQuestionSelect = (questionId: number) => {
     setSelectedQuestion(questionId);
