@@ -59,3 +59,14 @@ interface OwnedTicket {
   label: string;
   count: number | null | undefined;
 }
+
+interface GetPreSignedUrlResponse {
+  code: number;
+  message: string;
+  data: PreSignedUrl;
+}
+
+interface PreSignedUrl {
+  preSignedUrl: string;
+  objectKey: string;
+}

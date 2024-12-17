@@ -83,7 +83,7 @@ interface QuestionResponseData {
   interview: InterviewDetails;
   currentQuestionId: number;
   currentQuestionText: string;
-  currendQuestionS3AudioUrl: string;
+  currentQuestionS3AudioUrl: string;
   nextQuestionId?: number;
   nextQuestionText?: string;
   nextQuestionS3AudioUrl: string;
@@ -113,4 +113,39 @@ interface ApiResponse {
   code: number;
   message: string;
   data: InterviewDetails;
+}
+
+interface InterviewAddFileResponse {
+  code: number;
+  message: string;
+  data: InterviewAddFileDetails;
+}
+
+interface InterviewAddFileDetails {
+  interviewId: number;
+  interviewTitle: string;
+  interviewStatus: "INITIAL" | "IN_PROGRESS" | "FILE_UPLOAD";
+  interviewType: "TECHNICAL" | "PERSONAL";
+  interviewMethod: "CHAT" | "VIDEO" | "VOICE";
+  interviewMode: "REAL" | "GENERAL";
+  job: JobDetails;
+  questionCount: number;
+  file: InterviewFile;
+}
+
+interface GetFileListResponse {
+  code: number;
+  message: string;
+  data: InterviewFileList;
+}
+
+interface InterviewFileList {
+  coverLetters: InterviewFileProps[];
+}
+
+interface InterviewFileProps {
+  fileId: number;
+  fileName: string;
+  type: string;
+  s3FileUrl: string | null;
 }
