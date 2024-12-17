@@ -3,12 +3,10 @@ import { MultiFileUploadPanelDataType } from "@/data/profileData";
 import React, { useEffect, useState } from "react";
 import { AiOutlinePaperClip } from "react-icons/ai";
 import { ToastContainer, toast } from "react-toastify";
-// import { v4 as uuidv4 } from "uuid";
 import mammoth from "mammoth";
 import "react-toastify/dist/ReactToastify.css";
 import { setUrl } from "@/utils/setUrl";
 import axios from "axios";
-// import useInterviewStore from "@/stores/useInterviewStore";
 import useFileStore from "@/stores/useFileStore";
 
 const apiUrl = `${setUrl}`;
@@ -54,9 +52,6 @@ export interface FileUploadPanelProps {
 }
 
 const FileUploadPanel = ({
-  // files,
-  // submitButtonText = "저장",
-  // submitButtonColor = "bg-primary",
   onSubmitButtonClick,
   setIsFileSelected,
   onNextButtonClick,
@@ -106,14 +101,12 @@ const FileUploadPanel = ({
   };
 
   const [activeTab] = useState<string>("COVER_LETTER");
-  // const [activeTab, setActiveTab] = useState<string>("COVER_LETTER");
   const [fileList, setFileList] = useState<InterviewFileProps[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [selectedFileId, setSelectedFileId] = useState<string | undefined>(
     undefined
   );
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  // const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File | undefined>(undefined);
   const [isManualInput, setIsManualInput] = useState<boolean>(false);
   const [manualText, setManualText] = useState<string>("");
@@ -122,8 +115,6 @@ const FileUploadPanel = ({
     message: "",
   });
   const [pendingFile, setPendingFile] = useState<File | null>(null);
-  // const { interview } = useInterviewStore();
-  // const [filePath, setFilePath] = useState("");
   const [filePath] = useState("");
   const { setInterviewFile } = useFileStore();
   const [showTooltip, setShowTooltip] = useState(false);
@@ -150,13 +141,6 @@ const FileUploadPanel = ({
     };
     getFileList();
   }, []);
-
-  // const handleTabChange = (tab: string) => {
-  //   setActiveTab(tab);
-  //   setSelectedFile(null);
-  //   setPdfUrl(null);
-  //   setIsManualInput(false);
-  // };
 
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const fileName = event.target.value;
@@ -279,12 +263,6 @@ const FileUploadPanel = ({
       savedFileName = fileName;
       toast.success(`${activeTab}에 텍스트 파일이 저장되었습니다.`);
     } else {
-      // const newFile = {
-      //   id: uuidv4(),
-      //   name: selectedFile!,
-      //   type: activeTab,
-      //   path: "",
-      // };
       savedFileName = selectedFile!;
       toast.success(`${activeTab}에 파일이 저장되었습니다.`);
       setFile(file);
@@ -298,17 +276,6 @@ const FileUploadPanel = ({
     setPdfUrl(null);
     setManualText("");
   };
-
-  // const handleSubmitButtonClick = () => {
-  //   handleSave();
-  //   if (onSubmitButtonClick) {
-  //     if (isManualInput) {
-  //       onSubmitButtonClick([manualText]);
-  //     } else if (selectedFile) {
-  //       onSubmitButtonClick([`${filePath}/${selectedFile}`]);
-  //     }
-  //   }
-  // };
 
   useEffect(() => {
     const getOptions = async () => {
