@@ -30,6 +30,7 @@ const CommunityPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState<GetUserResponse["data"] | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [recommendedChannels, setRecommendedChannels] = useState([
     { name: "백엔드", tag: "직무", isSubscribed: false, jobId: 1  },
     { name: "프론트엔드", tag: "직무", isSubscribed: false, jobId: 2  },
@@ -73,6 +74,31 @@ const CommunityPage = () => {
     } catch (error) {
       console.error("게시글 작성 실패:", error);
       alert("게시글 작성 실패");
+    }
+  };
+
+  // 검색 기능
+  const handleSearch = async () => {
+    if (searchQuery.trim() === "") return;
+
+    try {
+      const response = await axios.get(`${apiUrl}/post/search`, {
+        params: { keyword: searchQuery },
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+      });
+      const { data } = response.data;
+
+      setSearchResults(data.posts); // 검색된 게시글 상태에 저장
+    } catch (error) {
+      console.error("게시글 검색 실패:", error);
+      alert("게시글 검색에 실패했습니다.");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
     }
   };
 
@@ -131,21 +157,22 @@ const CommunityPage = () => {
     <div className="bg-gray-200 min-h-screen w-full relative">
       <div className="fixed top-24 left-4 z-40 bg-white shadow-md rounded-lg w-80 p-4">
         <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="검색어를 입력하세요."
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="검색어를 입력하세요."
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {searchQuery === "" && (
-          <div className="mt-4">
-            <p className="text-xs text-gray-500 font-semibold mb-2">
-              추천 채널
-            </p>
-            {recommendedChannels.map((channel, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center p-2 rounded-md mb-2"
+            <div className="mt-4">
+              <p className="text-xs text-gray-500 font-semibold mb-2">
+                추천 채널
+              </p>
+              {recommendedChannels.map((channel, index) => (
+                  <div
+                      key={index}
+                      className="flex justify-between items-center p-2 rounded-md mb-2"
               >
                 <span className="font-bold">{channel.name}</span>
                 <div className="flex items-center">
@@ -173,12 +200,12 @@ const CommunityPage = () => {
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex flex-col gap-6">
-          {posts.map((post) => (
+          {(searchResults.length > 0 ? searchResults : posts).map((post) => (
               <div
                   key={post.postId}
                   className="bg-white shadow-md rounded-lg overflow-hidden border"
               >
-                <div className="flex items-center justify-between p-4">
+              <div className="flex items-center justify-between p-4">
                 <div className="flex items-center">
                   <div className="relative w-10 h-10 mr-3">
                     <Image
