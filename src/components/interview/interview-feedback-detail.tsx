@@ -108,13 +108,15 @@ const InterviewFeedbackDetail = ({
           <div className="flex flex-col items-center w-1/3 p-4">
             <h3 className="text-lg font-bold mb-4">프로필 정보</h3>
             {user?.s3ProfileImageUrl && (
-              <Image
-                src={user?.s3ProfileImageUrl}
-                alt={`${user?.nickname}의 프로필`}
-                width={120}
-                height={120}
-                className="rounded-full mb-4"
-              />
+              <div className="w-36 h-36 mb-4 rounded-full overflow-hidden">
+                <Image
+                  src={user?.s3ProfileImageUrl}
+                  alt={`${user?.nickname}의 프로필`}
+                  width={120}
+                  height={120}
+                  className="object-cover w-full h-full"
+                />
+              </div>
             )}
             <p className="text-xl font-bold">{user?.name}</p>
             <p className="text-md text-gray-500 font-semibold">
