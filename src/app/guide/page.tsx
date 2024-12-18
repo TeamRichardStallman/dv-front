@@ -1,7 +1,8 @@
 import React from "react";
+import Guide from "@/components/guide/guide";
 
 const GuidePage = () => {
-  return <div className="text-4xl font-medium">Coming Soon!!</div>;
+  return <Guide file="index" />;
 };
 
 export default GuidePage;
