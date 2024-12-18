@@ -6,6 +6,28 @@ import Link from "next/link";
 
 const apiUrl = `${setUrl}`;
 
+const typeMap: Record<string, string> = {
+  TECHNICAL: "기술",
+  PERSONAL: "인성",
+};
+
+const methodMap: Record<string, string> = {
+  CHAT: "채팅",
+  VOICE: "음성",
+};
+
+const modeMap: Record<string, string> = {
+  GENERAL: "모의",
+  REAL: "실전",
+};
+
+const formatTitle = (title: string): string => {
+  const [date, type, method, mode] = title.split("_");
+  return `${modeMap[mode] || mode}/${typeMap[type] || type}/${
+    methodMap[method] || method
+  } 면접결과지 (${date})`;
+};
+
 const InterviewFeedbackListPage = () => {
   const [interviews, setInterviews] = useState<EvaluationInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +68,7 @@ const InterviewFeedbackListPage = () => {
           >
             <div className="border p-4 py-8 rounded-lg shadow-md bg-white hover:bg-gray-50 cursor-pointer">
               <h3 className="text-xl font-semibold">
-                {evaluation.interviewTitle}
+                {formatTitle(evaluation.interviewTitle)}
               </h3>
             </div>
           </Link>
