@@ -1,14 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { Radar } from "react-chartjs-2";
+import RadarChartWithDetail from "@/components/radar-chart";
 import {
   Chart as ChartJS,
   RadialLinearScale,
   PointElement,
-  ActiveElement,
-  ChartEvent,
-  TooltipItem,
   LineElement,
   Filler,
   Tooltip,
@@ -18,6 +15,34 @@ import "react-circular-progressbar/dist/styles.css";
 import { CircularProgressbar } from "react-circular-progressbar";
 import { AiOutlineDown, AiOutlineUp } from "react-icons/ai";
 import { calculateAge } from "@/utils/format";
+import {
+  COMMON_LABELS,
+  TECHNICAL_CRITERIA,
+  PERSONAL_CRITERIA,
+  VOICE_CRITERIA,
+} from "@/constants/evaluationLabels";
+
+const getLabelMapByType = (type: string) => {
+  switch (type) {
+    case "TECHNICAL":
+      return TECHNICAL_CRITERIA.reduce(
+        (map, key) => ({ ...map, [key]: COMMON_LABELS[key] }),
+        {}
+      );
+    case "PERSONAL":
+      return PERSONAL_CRITERIA.reduce(
+        (map, key) => ({ ...map, [key]: COMMON_LABELS[key] }),
+        {}
+      );
+    case "VOICE":
+      return VOICE_CRITERIA.reduce(
+        (map, key) => ({ ...map, [key]: COMMON_LABELS[key] }),
+        {}
+      );
+    default:
+      return {};
+  }
+};
 
 ChartJS.register(
   RadialLinearScale,
@@ -56,11 +81,6 @@ const InterviewFeedbackDetail = ({
 }: InterviewFeedbackDetailProps) => {
   const [selectedQuestion, setSelectedQuestion] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedScoreDetail, setSelectedScoreDetail] = useState<{
-    name: string;
-    score: number;
-    rationale: string;
-  } | null>(null);
 
   const calculateTotalScore = () => {
     const totalScore = evaluation?.evaluationCriteria
@@ -82,12 +102,23 @@ const InterviewFeedbackDetail = ({
     WOMAN: { label: "여성" },
   };
 
-  const criteriaMap: Record<string, { label: string }> = {
+  const baseCriteriaMap: Record<string, { label: string }> = {
     GROWTH_POTENTIAL: { label: "성장 가능성" },
     JOB_FIT: { label: "문제 해결 능력" },
     WORK_ATTITUDE: { label: "협업 능력" },
     TECHNICAL_DEPTH: { label: "기술 이해도" },
   };
+
+  const voiceCriteriaMap: Record<string, { label: string }> = {
+    CLARITY: { label: "명확성" },
+    FLUENCY: { label: "유창성" },
+    WORD_REPETITION: { label: "단어 반복" },
+  };
+
+  const criteriaMap =
+    evaluation?.interview.interviewMethod === "VOICE"
+      ? { ...baseCriteriaMap, ...voiceCriteriaMap }
+      : baseCriteriaMap;
 
   const handleQuestionSelect = (questionId: number) => {
     setSelectedQuestion(questionId);
@@ -101,84 +132,6 @@ const InterviewFeedbackDetail = ({
     setIsExpanded((prev) => !prev);
   };
 
-  const labelMap = {
-    APPROPRIATE_RESPONSE: "적절한 답변",
-    LOGICAL_FLOW: "논리적 흐름",
-    KEY_TERMS: "핵심 단어",
-    CONSISTENCY: "일관성",
-    GRAMMATICAL_ERRORS: "문법적 오류",
-  };
-
-  const radarData = {
-    labels: Object.values(labelMap),
-    datasets: [
-      {
-        label: "평가 점수",
-        data: selectedAnswerEvaluation
-          ? selectedAnswerEvaluation.answerEvaluationScores.map(
-              (score) => score.score
-            )
-          : [0, 0, 0, 0, 0],
-        backgroundColor: "rgba(54, 162, 235, 0.2)",
-        borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const radarOptions = {
-    scales: {
-      r: {
-        beginAtZero: true,
-        max: 10,
-        pointLabels: {
-          font: {
-            family: "Pretendard",
-            size: 12,
-            weight: 600,
-          },
-        },
-        ticks: {
-          stepSize: 2,
-        },
-      },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (context: TooltipItem<"radar">) => {
-            const index = context.dataIndex;
-            const scoreDetail = selectedAnswerEvaluation
-              ? selectedAnswerEvaluation.answerEvaluationScores[index]
-              : null;
-            return scoreDetail ? `${scoreDetail.score}점` : "";
-          },
-        },
-      },
-    },
-    onClick: (event: ChartEvent, elements: ActiveElement[]) => {
-      if (elements.length > 0) {
-        const index = elements[0].index;
-        const scoreDetails = selectedAnswerEvaluation
-          ? selectedAnswerEvaluation.answerEvaluationScores[
-              index + 1 <= 4 ? index + 1 : 0
-            ]
-          : null;
-
-        setSelectedScoreDetail(
-          scoreDetails
-            ? {
-                name: radarData.labels[index],
-                score: scoreDetails.score,
-                rationale: scoreDetails.rationale,
-              }
-            : null
-        );
-      }
-    },
-  };
-
   return (
     <div className="flex flex-col items-center p-8 min-h-screen">
       <div className="w-[900px]">
@@ -186,13 +139,15 @@ const InterviewFeedbackDetail = ({
           <div className="flex flex-col items-center w-1/3 p-4">
             <h3 className="text-lg font-bold mb-4">프로필 정보</h3>
             {user?.s3ProfileImageUrl && (
-              <Image
-                src={user?.s3ProfileImageUrl}
-                alt={`${user?.nickname}의 프로필`}
-                width={120}
-                height={120}
-                className="rounded-full mb-4"
-              />
+              <div className="w-36 h-36 mb-4 rounded-full overflow-hidden">
+                <Image
+                  src={user?.s3ProfileImageUrl}
+                  alt={`${user?.nickname}의 프로필`}
+                  width={120}
+                  height={120}
+                  className="object-cover w-full h-full"
+                />
+              </div>
             )}
             <p className="text-xl font-bold">{user?.name}</p>
             <p className="text-md text-gray-500 font-semibold">
@@ -228,16 +183,23 @@ const InterviewFeedbackDetail = ({
             </div>
 
             <div className="mt-4 w-full">
-              <h4 className="text-md text-gray-500 font-bold mb-2">
-                [입력한 자료]
-              </h4>
-              <ul className="border border-gray-300 rounded-lg p-3 bg-gray-50 space-y-2">
-                {(evaluation?.interview.files || []).map((file, index) => (
-                  <li key={index} className="text-sm font-medium text-gray-700">
-                    {file.fileName}
-                  </li>
-                ))}
-              </ul>
+              {evaluation?.interview.interviewMode !== "GENERAL" && (
+                <>
+                  <h4 className="text-md text-gray-500 font-bold mb-2">
+                    [입력한 자료]
+                  </h4>
+                  <ul className="border border-gray-300 rounded-lg p-3 bg-gray-50 space-y-2">
+                    {(evaluation?.interview.files || []).map((file, index) => (
+                      <li
+                        key={index}
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        {file.fileName}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </div>
           </div>
 
@@ -360,29 +322,36 @@ const InterviewFeedbackDetail = ({
                   [평가 기준별 점수]
                 </h4>
                 <div className="flex items-start space-x-4">
-                  <div className="w-3/5">
-                    <Radar data={radarData} options={radarOptions} />
-                  </div>
-                  <div className="w-2/5 mt-4 p-4 border rounded-lg bg-gray-50 h-[300px] flex flex-col items-center justify-center">
-                    {selectedScoreDetail ? (
-                      <>
-                        <h4 className="text-lg text-primary font-bold mb-2">
-                          {selectedScoreDetail.name} (
-                          {selectedScoreDetail.score}/10)
-                        </h4>
-                        <p className="font-medium">
-                          {selectedScoreDetail.rationale}
-                        </p>
-                      </>
-                    ) : (
-                      <p className="font-bold text-gray-500">
-                        점수를 클릭해주세요.
-                      </p>
+                  <RadarChartWithDetail
+                    labelMap={getLabelMapByType(
+                      evaluation?.interview.interviewType || ""
                     )}
-                  </div>
+                    evaluationScores={
+                      selectedAnswerEvaluation?.answerEvaluationScores || []
+                    }
+                  />
                 </div>
-
-                <h4 className="text-xl text-primary font-bold mb-2 mt-4">
+                {evaluation?.interview.interviewMethod === "VOICE" && (
+                  <>
+                    <h4 className="text-xl text-primary font-bold mb-2">
+                      [음성 기준별 점수]
+                    </h4>
+                    <div className="flex items-start space-x-4 mt-8">
+                      <RadarChartWithDetail
+                        labelMap={getLabelMapByType("VOICE")}
+                        evaluationScores={
+                          selectedAnswerEvaluation?.answerEvaluationScores.filter(
+                            (score) =>
+                              ["STUTTER", "PRONUNCIATION", "WPM"].includes(
+                                score.answerEvaluationScoreName
+                              )
+                          ) || []
+                        }
+                      />
+                    </div>
+                  </>
+                )}
+                <h4 className="text-xl text-primary font-bold mb-2">
                   [피드백]
                 </h4>
                 <div className="flex flex-col justify-between mb-4">
