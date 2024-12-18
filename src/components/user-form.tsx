@@ -49,6 +49,7 @@ const UserForm = ({
   const [nickname, setNickname] = useState<string>(
     initUserData?.nickname || ""
   );
+  const [nameError, setNameError] = useState<string | null>(null);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [birthdate, setBirthdate] = useState<string>(
@@ -104,6 +105,16 @@ const UserForm = ({
       );
     }
   }, [isEditPage, initUserData]);
+
+  const handleNameChange = (value: string) => {
+    const regex = /^[a-zA-Zㄱ-ㅎ가-힣ㅏ-ㅣ]*$/;
+    if (!regex.test(value)) {
+      setNameError("이름은 영어와 한글만 입력 가능합니다.");
+    } else {
+      setNameError(null);
+      setName(value.slice(0, 10));
+    }
+  };
 
   const handleUsernameChange = (value: string) => {
     const regex = /^[a-zA-Z0-9]*$/;
@@ -186,7 +197,7 @@ const UserForm = ({
       const uploadResponse = await axios.post<PresignedUrlResponse>(
         "/api/s3/uploadFiles",
         {
-          fileName: `profile-image/${userId}/${file.name}`,
+          fileName: `profile-image/${userId}/image.${file.name.split(".")[1]}`,
           fileType: file.type,
         }
       );
@@ -329,13 +340,14 @@ const UserForm = ({
         <input
           type="text"
           value={name}
-          onChange={(e) => setName(e.target.value.slice(0, 20))}
-          maxLength={20}
+          onChange={(e) => handleNameChange(e.target.value)}
+          maxLength={10}
           className="border p-2 rounded w-full h-10"
           placeholder="이름을 입력하세요"
           required
         />
-        <p className="text-sm text-gray-500 mt-1">{name.length}/20 글자</p>
+        {nameError && <p className="text-red-600 text-sm">{nameError}</p>}
+        <p className="text-sm text-gray-500 mt-1">{name.length}/10 글자</p>
       </div>
       {!isEditPage && (
         <div>
@@ -345,10 +357,10 @@ const UserForm = ({
               type="text"
               value={username}
               onChange={(e) =>
-                handleUsernameChange(e.target.value.slice(0, 20))
+                handleUsernameChange(e.target.value.slice(0, 15))
               }
               onKeyDown={handleKeyDown}
-              maxLength={20}
+              maxLength={15}
               className="border p-2 rounded w-full h-10"
               placeholder="Username을 입력하세요"
               required
@@ -377,7 +389,7 @@ const UserForm = ({
             </p>
           )}
           <p className="text-sm text-gray-500 mt-1">
-            {username.length}/20 글자
+            {username.length}/15 글자
           </p>
         </div>
       )}
