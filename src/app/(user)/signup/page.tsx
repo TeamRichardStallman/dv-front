@@ -9,6 +9,7 @@ import { setFcmKey } from "@/utils/setFcmKey";
 import { getToken, isSupported } from "firebase/messaging";
 import { messaging } from "@/utils/firebaseConfig";
 import CustomModal from "@/components/modal/custom-modal";
+import confetti from "canvas-confetti";
 
 const apiUrl = `${setUrl}`;
 const fcmKey = `${setFcmKey}`;
@@ -20,6 +21,29 @@ const SignupPage = () => {
   const [modalMessage, setModalMessage] = useState("");
   const [confirmModalMessage, setConfirmModalMessage] = useState("");
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+
+  const fireConfetti = () => {
+    confetti({
+      particleCount: 150,
+      spread: 80,
+      origin: { y: 0.6 },
+    });
+  };
+
+  const fireCouponConfetti = () => {
+    confetti({
+      particleCount: 100,
+      angle: 90,
+      spread: 120,
+      origin: { x: 0.1, y: 0.5 },
+    });
+    confetti({
+      particleCount: 100,
+      angle: 90,
+      spread: 120,
+      origin: { x: 0.9, y: 0.5 },
+    });
+  };
 
   const handleFirebaseToken = async () => {
     if (typeof window === "undefined") {
@@ -97,6 +121,7 @@ const SignupPage = () => {
       setUser(response.data.data);
       setLocalStorage();
       handleFirebaseToken();
+      fireConfetti();
     } catch (error) {
       console.error("Signup failed:", error);
     }
@@ -116,10 +141,12 @@ const SignupPage = () => {
         onClose={() => {
           setIsModalVisible(false);
           setIsConfirmModalVisible(true);
+          fireConfetti();
         }}
         onConfirm={() => {
           setIsModalVisible(false);
           setIsConfirmModalVisible(true);
+          fireCouponConfetti();
         }}
       />
       <CustomModal
