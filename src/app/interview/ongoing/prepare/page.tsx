@@ -23,7 +23,7 @@ const InterviewOngoingPreparePage = () => {
   const [isQuestionReceived] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [interviewId, setInterviewId] = useState("");
+  const [interviewId, setInterviewId] = useState<string | undefined>(undefined);
   const [confirmModalMessage, setConfirmModalMessage] = useState("");
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
@@ -39,8 +39,6 @@ const InterviewOngoingPreparePage = () => {
       };
     }
   };
-
-  useEffect(() => {});
 
   useEffect(() => {
     let hasFetched = false;
@@ -137,11 +135,11 @@ const InterviewOngoingPreparePage = () => {
   };
 
   useEffect(() => {
-    function readFromIndexedDB(
+    function readFromIndexedDB<T>(
       dbName: string,
       storeName: string,
       key: string
-    ): Promise<any> {
+    ): Promise<T | undefined> {
       return new Promise((resolve, reject) => {
         const request = indexedDB.open(dbName);
 
@@ -175,7 +173,7 @@ const InterviewOngoingPreparePage = () => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         console.log("탭 복귀 확인");
-        readFromIndexedDB("firebaseMessages", "messages", "latestData")
+        readFromIndexedDB<string>("firebaseMessages", "messages", "latestData")
           .then((data) => {
             console.log("Retrieved data from IndexedDB:", data);
             setInterviewId(data);

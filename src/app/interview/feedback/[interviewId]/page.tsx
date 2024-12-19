@@ -1,22 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Loading from "@/components/loading";
 import useQuestionRequest from "@/stores/useQuestionRequest";
-import { setUrl } from "@/utils/setUrl";
 import { getMessaging, isSupported, onMessage } from "firebase/messaging";
 import { firebaseApp } from "@/utils/firebaseConfig";
 import { useRouter } from "next/navigation";
 import CustomModal from "@/components/modal/custom-modal";
-
-const apiUrl = `${setUrl}`;
 
 const InterviewFeedbackDetailPage = () => {
   const { questionRequest } = useQuestionRequest();
   const router = useRouter();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [interviewId, setInterviewId] = useState("");
+  const [interviewId, setInterviewId] = useState<string | undefined>(undefined);
 
   const showNotification = (title: string, body: string, url: string) => {
     if (Notification.permission === "granted") {
@@ -70,26 +66,65 @@ const InterviewFeedbackDetailPage = () => {
         console.error("Firebase Messaging 초기화 중 에러: ", error);
       }
     };
-    const sendEvaluation = async () => {
-      try {
-        const evalResponse = await axios.post(
-          `${apiUrl}/evaluation`,
-          { interviewId: questionRequest.interviewId },
-          {
-            withCredentials: true,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-
-        console.log(evalResponse);
-      } catch (error) {
-        console.error("Error fetching data Evaluation:", error);
-      }
-    };
     initializeFirebaseMessaging();
-    sendEvaluation();
   }, [questionRequest.interviewId, router]);
 
+  useEffect(() => {
+    function readFromIndexedDB<T>(
+      dbName: string,
+      storeName: string,
+      key: string
+    ): Promise<T | undefined> {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName);
+
+        request.onerror = (event) => {
+          console.error("IndexedDB Error:", event);
+          reject(event);
+        };
+
+        request.onsuccess = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+
+          if (!db.objectStoreNames.contains(storeName)) {
+            reject(
+              new Error(
+                `Object Store "${storeName}" does not exist in the database.`
+              )
+            );
+            return;
+          }
+
+          const transaction = db.transaction(storeName, "readonly");
+          const store = transaction.objectStore(storeName);
+
+          const getRequest = store.get(key);
+          getRequest.onsuccess = () => resolve(getRequest.result?.value);
+          getRequest.onerror = (err) => reject(err);
+        };
+      });
+    }
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log("탭 복귀 확인");
+        readFromIndexedDB<string>("firebaseMessages", "messages", "latestData")
+          .then((data) => {
+            console.log("Retrieved data from IndexedDB:", data);
+            setInterviewId(data);
+            setModalMessage(
+              "면접 준비가 완료되었습니다. '면접 시작'을 누르면 면접이 시작됩니다."
+            );
+            setIsModalVisible(true);
+          })
+          .catch((err) => console.error("Error reading from IndexedDB:", err));
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
   return (
     <div>
       <Loading title="피드백 준비중" description="고생하셨습니다." />
