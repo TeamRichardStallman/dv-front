@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import RadarChartWithDetail from "@/components/radar-chart";
+import EvaluationCriteriaList from "@/components/EvaluationCriteriaList";
 import {
   Chart as ChartJS,
   RadialLinearScale,
@@ -220,41 +221,27 @@ const InterviewFeedbackDetail = ({
         </div>
 
         <div className="mt-4 border rounded-lg shadow-lg p-6">
-          <ul>
-            {evaluation?.evaluationCriteria.map((criteria) => {
-              const criteriaLabel =
-                criteriaMap[criteria.evaluationCriteria]?.label || "Unknown";
-              let color;
-              if (criteria.score >= 7) color = "#4CAF50";
-              else if (criteria.score >= 4) color = "#FFC107";
-              else color = "#F44336";
-
-              return (
-                <li
-                  key={criteria.evaluationCriteriaId}
-                  className="mt-6 mb-6 flex items-center"
-                >
-                  <div className="w-32 h-32 mr-4 font-semibold flex-shrink-0">
-                    <CircularProgressbar
-                      value={criteria.score}
-                      maxValue={10}
-                      text={`${criteria.score}/10`}
-                      styles={{
-                        path: { stroke: color },
-                        text: { fill: color },
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-extrabold text-primary mb-2">
-                      {criteriaLabel}
-                    </h4>
-                    <p className="font-semibold">{criteria.feedbackText}</p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          <EvaluationCriteriaList
+            criteriaList={evaluation?.evaluationCriteria.filter(
+              (criteria) =>
+                !["CLARITY", "FLUENCY", "WORD_REPETITION"].includes(
+                  criteria.evaluationCriteria
+                )
+            )}
+            criteriaMap={criteriaMap}
+            sectionTitle="[전반적인 평가]"
+          />
+          {evaluation?.interview.interviewMethod === "VOICE" && (
+            <EvaluationCriteriaList
+              criteriaList={evaluation?.evaluationCriteria.filter((criteria) =>
+                ["CLARITY", "FLUENCY", "WORD_REPETITION"].includes(
+                  criteria.evaluationCriteria
+                )
+              )}
+              criteriaMap={criteriaMap}
+              sectionTitle="[전체 음성 평가]"
+            />
+          )}
         </div>
 
         <div className="flex w-full mt-8 border rounded-lg shadow-lg p-6">
