@@ -11,6 +11,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.685.0",
     "@aws-sdk/s3-request-presigner": "^3.685.0",
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/face_detection": "^0.4.1646425229",
     "axios": "^1.7.7",
     "chart.js": "^4.4.6",
     "firebase": "^9.10.0",

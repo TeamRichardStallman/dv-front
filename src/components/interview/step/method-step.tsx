@@ -104,10 +104,9 @@ const MethodStep = ({ onPrev, onNext }: StepProps) => {
         />
         <SettingBtn
           label="영상"
-          description="COMING SOON!"
+          description="웹캠을 키고 영상 면접을 진행합니다."
           selected={selectedMethod === "VIDEO"}
           onClick={() => setSelectedMethod("VIDEO")}
-          disabled={true}
         />
       </div>
 

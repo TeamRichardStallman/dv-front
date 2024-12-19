@@ -115,7 +115,8 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
         {
           interviewTitle: getInterviewTitle(interview),
           interviewType: interview.interviewType,
-          interviewMethod: interview.interviewMethod,
+          interviewMethod:
+            interview.interviewMethod === "CHAT" ? "CHAT" : "VOICE",
           interviewMode: interview.interviewMode,
           jobId: interview.jobId,
           questionCount: selectedQuestionCount,
@@ -186,7 +187,8 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
           interviewTitle: data.data.interviewTitle,
           interviewStatus: data.data.interviewStatus,
           interviewType: data.data.interviewType,
-          interviewMethod: data.data.interviewMethod,
+          interviewMethod:
+            data.data.interviewMethod === "CHAT" ? "CHAT" : "VOICE",
           interviewMode: data.data.interviewMode,
           questionCount: data.data.questionCount,
           files:
