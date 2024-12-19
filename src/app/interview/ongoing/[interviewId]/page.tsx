@@ -330,7 +330,7 @@ const InterviewOngoingDetailPage = () => {
           <ToastContainer />
           <div className="flex gap-4 items-center mb-12 font-bold">
             <h1 className="text-3xl">
-              {user?.nickname}님의{" "}
+              {user?.name}님의{" "}
               {questionRequest.interviewMode &&
                 removeInterview(
                   interviewInfoMap[questionRequest.interviewMode].label

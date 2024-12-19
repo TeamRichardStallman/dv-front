@@ -207,6 +207,9 @@ const InterviewOngoingPreparePage = () => {
         cancelButton="취소"
         onClose={() => {
           setIsModalVisible(false);
+          setConfirmModalMessage(
+            "홈으로 이동하면 면접 서비스 이용이 취소되고 이용권 환불이 불가합니다. \n면접을 시작하려면 '면접 시작'을 눌러주세요."
+          );
           setIsConfirmModalVisible(true);
         }}
         onConfirm={() => router.push(`/interview/ongoing/${interviewId}`)}
