@@ -36,6 +36,7 @@ const InterviewOngoingDetailPage = () => {
   const [isRecording, setIsRecording] = useState(false);
   const recorder = useRef<MicRecorder>(new MicRecorder({ bitRate: 64 }));
   const audioRef = useRef<InstanceType<typeof Audio> | null>(null);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -97,6 +98,9 @@ const InterviewOngoingDetailPage = () => {
             }
           );
           setQuestionResponse(response.data);
+          if (questionRequest.interviewMethod === "CHAT") {
+            setIsTimerRunning(true);
+          }
         } catch (error) {
           console.error("Error:", error);
         } finally {
@@ -106,10 +110,11 @@ const InterviewOngoingDetailPage = () => {
     };
 
     sendInitialQuestion();
-  }, [questionRequest.interviewId]);
+  }, [questionRequest.interviewId, questionRequest.interviewMethod]);
 
   const sendNextQuestion = useCallback(async () => {
     setTimeLeft(MAX_TIME);
+    setIsTimerRunning(false);
 
     // let audioUrl = "";
     let audioObjectKey = "";
@@ -199,6 +204,10 @@ const InterviewOngoingDetailPage = () => {
         setTimeLeft(MAX_TIME);
         setAnswerText("");
 
+        if (questionRequest.interviewMethod === "CHAT") {
+          setIsTimerRunning(true);
+        }
+
         if (!response.data.data.hasNext) {
           setShouldRedirect(true);
         } else {
@@ -245,6 +254,7 @@ const InterviewOngoingDetailPage = () => {
   ]);
 
   useEffect(() => {
+    if (!isTimerRunning) return;
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
         if (prevTime === 1) {
@@ -255,7 +265,7 @@ const InterviewOngoingDetailPage = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [questionResponse]);
+  }, [isTimerRunning]);
 
   useEffect(() => {
     if (questionResponse?.data.currentQuestionS3AudioUrl) {
@@ -283,6 +293,7 @@ const InterviewOngoingDetailPage = () => {
 
         audio.onended = () => {
           setIsPlaying(false);
+          setIsTimerRunning(true);
           startRecording();
         };
       }, 2000);
