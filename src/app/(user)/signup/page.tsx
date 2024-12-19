@@ -8,6 +8,8 @@ import { setUrl } from "@/utils/setUrl";
 import { setFcmKey } from "@/utils/setFcmKey";
 import { getToken, isSupported } from "firebase/messaging";
 import { messaging } from "@/utils/firebaseConfig";
+import CustomModal from "@/components/modal/custom-modal";
+import confetti from "canvas-confetti";
 
 const apiUrl = `${setUrl}`;
 const fcmKey = `${setFcmKey}`;
@@ -15,6 +17,33 @@ const fcmKey = `${setFcmKey}`;
 const SignupPage = () => {
   const router = useRouter();
   const [user, setUser] = useState<GetUserProps>();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [confirmModalMessage, setConfirmModalMessage] = useState("");
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+
+  const fireConfetti = () => {
+    confetti({
+      particleCount: 150,
+      spread: 80,
+      origin: { y: 0.6 },
+    });
+  };
+
+  const fireCouponConfetti = () => {
+    confetti({
+      particleCount: 100,
+      angle: 90,
+      spread: 120,
+      origin: { x: 0.1, y: 0.5 },
+    });
+    confetti({
+      particleCount: 100,
+      angle: 90,
+      spread: 120,
+      origin: { x: 0.9, y: 0.5 },
+    });
+  };
 
   const handleFirebaseToken = async () => {
     if (typeof window === "undefined") {
@@ -86,11 +115,13 @@ const SignupPage = () => {
         }
       );
 
-      alert(response.data.data.name + "님, 환영합니다.");
+      setModalMessage(response.data.data.name + "님, 환영합니다.");
+      setConfirmModalMessage("웰컴 쿠폰이 발급 되었습니다! 확인해보세요!");
+      setIsModalVisible(true);
       setUser(response.data.data);
       setLocalStorage();
       handleFirebaseToken();
-      router.push("/");
+      fireConfetti();
     } catch (error) {
       console.error("Signup failed:", error);
     }
@@ -102,6 +133,33 @@ const SignupPage = () => {
       <div className="w-full min-w-[420px] max-w-2xl p-8 border rounded-lg shadow-md bg-white">
         <UserForm onSubmit={handleFormSubmit} initUserData={user} />
       </div>
+      <CustomModal
+        isVisible={isModalVisible}
+        message={modalMessage}
+        confirmButton="확인"
+        cancelButton="취소"
+        onClose={() => {
+          setIsModalVisible(false);
+          setIsConfirmModalVisible(true);
+          fireConfetti();
+        }}
+        onConfirm={() => {
+          setIsModalVisible(false);
+          setIsConfirmModalVisible(true);
+          fireCouponConfetti();
+        }}
+      />
+      <CustomModal
+        isVisible={isConfirmModalVisible}
+        message={confirmModalMessage}
+        confirmButton="웰컴쿠폰 확인하기"
+        cancelButton="홈으로"
+        onClose={() => {
+          setIsConfirmModalVisible(false);
+          router.push(`/`);
+        }}
+        onConfirm={() => router.push(`/mypage/coupon`)}
+      />
     </div>
   );
 };

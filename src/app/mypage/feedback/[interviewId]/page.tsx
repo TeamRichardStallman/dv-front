@@ -3,7 +3,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { setUrl } from "@/utils/setUrl";
 import InterviewFeedbackDetail from "@/components/interview/interview-feedback-detail";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 const apiUrl = `${setUrl}`;
 
@@ -12,18 +12,23 @@ const MyInterviewFeedbackDetailPage = () => {
   const [user, setUser] = useState<GetUserProps>();
   const [evaluation, setEvaluation] = useState<EvaluationDetailType>();
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     if (!interviewId) return;
     const fetchUser = async () => {
-      const userResponse = await axios.get<GetUserResponse>(
-        `${apiUrl}/user/info`,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      setUser(userResponse.data.data);
+      try {
+        const userResponse = await axios.get<GetUserResponse>(
+          `${apiUrl}/user/info`,
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        setUser(userResponse.data.data);
+      } catch {
+        router.push("/error");
+      }
     };
 
     const fetchEvaluationDetail = async () => {
@@ -38,6 +43,7 @@ const MyInterviewFeedbackDetailPage = () => {
         setEvaluation(response.data.data);
       } catch (error) {
         console.error("Failed to fetch evaluation details:", error);
+        router.push("/error");
       } finally {
         setLoading(false);
       }

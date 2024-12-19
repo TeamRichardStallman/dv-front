@@ -1,9 +1,12 @@
 "use client";
 import React, { useState } from "react";
+import CustomModal from "../modal/custom-modal";
 
 const FileUploadButton = () => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
@@ -11,7 +14,11 @@ const FileUploadButton = () => {
   };
 
   const handleUpload = async () => {
-    if (!file) return alert("파일을 선택하세요.");
+    if (!file) {
+      setModalMessage("파일을 선택하세요.");
+      setIsModalVisible(true);
+      return;
+    }
 
     setUploading(true);
 
@@ -37,10 +44,12 @@ const FileUploadButton = () => {
         body: file,
       });
 
-      alert("파일이 성공적으로 업로드되었습니다.");
+      setModalMessage("파일이 성공적으로 업로드되었습니다.");
+      setIsModalVisible(true);
     } catch (error) {
       console.error("Upload error:", error);
-      alert("파일 업로드에 실패했습니다.");
+      setModalMessage("파일 업로드에 실패했습니다. 개발팀에 문의해주세요.");
+      setIsModalVisible(true);
     } finally {
       setUploading(false);
     }
@@ -52,6 +61,18 @@ const FileUploadButton = () => {
       <button onClick={handleUpload} disabled={!file || uploading}>
         {uploading ? "업로드 중..." : "업로드"}
       </button>
+      <CustomModal
+        isVisible={isModalVisible}
+        message={modalMessage}
+        confirmButton="확인"
+        cancelButton="취소"
+        onClose={() => {
+          setIsModalVisible(false);
+        }}
+        onConfirm={() => {
+          setIsModalVisible(false);
+        }}
+      />
     </div>
   );
 };

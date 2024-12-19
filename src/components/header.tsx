@@ -1,3 +1,5 @@
+"use client";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { setLocalStorage } from "@/utils/setLocalStorage";
@@ -5,6 +7,7 @@ import { setUrl } from "@/utils/setUrl";
 import axios from "axios";
 import { clearFcmToken } from "@/utils/requestFcmToken";
 import { useRouter } from "next/navigation";
+import CustomModal from "./modal/custom-modal";
 
 const apiUrl = `${setUrl}`;
 
@@ -14,6 +17,8 @@ interface HeaderProps {
 
 export default function Header({ loggedIn }: HeaderProps) {
   const router = useRouter();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   const handleLogout = async () => {
     setLocalStorage("false");
     clearFcmToken();
@@ -34,8 +39,8 @@ export default function Header({ loggedIn }: HeaderProps) {
 
   const handleNavigation = (path: string) => {
     if (!loggedIn) {
-      alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
-      router.push("/login");
+      setModalMessage("로그인이 필요합니다. 로그인 후 이용해주세요.");
+      setIsModalVisible(true);
     } else {
       router.push(path);
     }
@@ -59,24 +64,24 @@ export default function Header({ loggedIn }: HeaderProps) {
         <ul className="flex gap-8">
           <li>
             <div
-                className="font-bold hover:text-primary hover:underline cursor-pointer"
-                onClick={() => handleNavigation("/interview")}
+              className="font-bold hover:text-primary hover:underline cursor-pointer"
+              onClick={() => handleNavigation("/interview")}
             >
               면접연습
             </div>
           </li>
           <li>
             <div
-                className="font-bold hover:text-primary hover:underline cursor-pointer"
-                onClick={() => handleNavigation("/community")}
+              className="font-bold hover:text-primary hover:underline cursor-pointer"
+              onClick={() => handleNavigation("/community")}
             >
               커뮤니티
             </div>
           </li>
           <li>
             <Link
-                href="/guide"
-                className="font-bold hover:text-primary hover:underline"
+              href="/guide"
+              className="font-bold hover:text-primary hover:underline"
             >
               가이드
             </Link>
@@ -112,6 +117,18 @@ export default function Header({ loggedIn }: HeaderProps) {
           </li>
         </ul>
       </div>
+      <CustomModal
+        isVisible={isModalVisible}
+        message={modalMessage}
+        confirmButton="로그인하기"
+        cancelButton="취소"
+        onClose={() => {
+          setIsModalVisible(false);
+        }}
+        onConfirm={() => {
+          router.push("/login");
+        }}
+      />
     </header>
   );
 }
