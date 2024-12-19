@@ -10,6 +10,7 @@ import { getMessaging, isSupported, onMessage } from "firebase/messaging";
 import { firebaseApp } from "@/utils/firebaseConfig";
 import useInterviewStore from "@/stores/useInterviewStore";
 import MicTest from "@/components/mic-test";
+import VideoTest from "@/components/video-test-2";
 
 const apiUrl = `${setUrl}`;
 
@@ -25,6 +26,7 @@ const InterviewOngoingPreparePage = () => {
     let hasFetched = false;
 
     const requestQuestionList = async () => {
+      console.log("questionRequest: ", questionRequest);
       if (!hasFetched) {
         hasFetched = true;
         await axios.post(`${apiUrl}/question`, questionRequest, {
@@ -140,12 +142,20 @@ const InterviewOngoingPreparePage = () => {
 
   return (
     <div className="flex flex-col items-center space-y-6">
-      {interview.interviewMethod === "CHAT" ? (
+      {interview.interviewMethod === "CHAT" && (
         <Loading title="질문 생성 중" description="잠시만 기다려주세요." />
-      ) : isReady ? (
+      )}
+      {interview.interviewMethod === "VOICE" && isReady && (
         <Loading title="질문 생성 중" description="잠시만 기다려주세요." />
-      ) : (
+      )}
+      {interview.interviewMethod === "VOICE" && !isReady && (
         <MicTest handleSetReady={handleSetReady} />
+      )}
+      {interview.interviewMethod === "VIDEO" && isReady && (
+        <Loading title="질문 생성 중" description="잠시만 기다려주세요." />
+      )}
+      {interview.interviewMethod === "VIDEO" && !isReady && (
+        <VideoTest handleSetReady={handleSetReady} />
       )}
     </div>
   );
