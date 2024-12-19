@@ -1,11 +1,12 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { setUrl } from "@/utils/setUrl";
 import { setLocalStorage } from "@/utils/setLocalStorage";
 import Loading from "@/components/loading";
 import { requestPermissionAndGetToken } from "@/utils/requestFcmToken";
+import CustomModal from "@/components/modal/custom-modal";
 
 const apiUrl = `${setUrl}`;
 
@@ -15,6 +16,8 @@ function isAxiosError(error: unknown): error is { response: AxiosResponse } {
 
 const AuthPage = () => {
   const router = useRouter();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   useEffect(() => {
     const handleFirebaseToken = async () => {
@@ -62,8 +65,8 @@ const AuthPage = () => {
       } catch (error) {
         if (isAxiosError(error)) {
           if (error.response?.status === 500) {
-            alert("비정상적인 접근입니다.");
-            router.push(`/`);
+            setModalMessage("비정상적인 접근입니다.");
+            setIsModalVisible(true);
           }
         }
         console.error("Error fetching user info:", error);
@@ -73,7 +76,24 @@ const AuthPage = () => {
 
     handleKakaoLogin();
   }, [router]);
-  return <Loading title="로그인 중..." />;
+  return (
+    <>
+      <Loading title="로그인 중..." />
+      <CustomModal
+        isVisible={isModalVisible}
+        message={modalMessage}
+        confirmButton="다시 로그인하기"
+        cancelButton="홈으로"
+        onClose={() => {
+          setIsModalVisible(false);
+          router.push("/");
+        }}
+        onConfirm={() => {
+          router.push("/login");
+        }}
+      />
+    </>
+  );
 };
 
 export default AuthPage;

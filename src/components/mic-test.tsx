@@ -99,7 +99,7 @@ const MicTest = ({ handleSetReady }: MicTestProps) => {
     audio.onerror = () => {
       setIsPlaying(false);
       setAudioProgress(0);
-      alert("오디오 파일 재생에 실패했습니다.");
+      console.error("오디오 파일 재생에 실패했습니다.");
     };
   };
 

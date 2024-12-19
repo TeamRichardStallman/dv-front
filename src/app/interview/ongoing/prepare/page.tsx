@@ -10,16 +10,37 @@ import { getMessaging, isSupported, onMessage } from "firebase/messaging";
 import { firebaseApp } from "@/utils/firebaseConfig";
 import useInterviewStore from "@/stores/useInterviewStore";
 import MicTest from "@/components/mic-test";
+import CustomModal from "@/components/modal/custom-modal";
 
 const apiUrl = `${setUrl}`;
-
 const TIMEOUT_DURATION = 180000;
+
 const InterviewOngoingPreparePage = () => {
   const { interview } = useInterviewStore();
   const { questionRequest } = useQuestionRequest();
   const router = useRouter();
   const [isReady, setIsReady] = useState(false);
-  const [isQuestionReceived, setIsQuestionReceived] = useState(false);
+  const [isQuestionReceived] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [interviewId, setInterviewId] = useState("");
+  const [confirmModalMessage, setConfirmModalMessage] = useState("");
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+
+  const showNotification = (title: string, body: string, url: string) => {
+    if (Notification.permission === "granted") {
+      const notification = new Notification(title, {
+        body,
+        icon: "/logo.png",
+      });
+      notification.onclick = () => {
+        window.focus();
+        router.push(url);
+      };
+    }
+  };
+
+  useEffect(() => {});
 
   useEffect(() => {
     let hasFetched = false;
@@ -57,7 +78,7 @@ const InterviewOngoingPreparePage = () => {
 
       const supported = await isSupported();
       if (!supported) {
-        console.warn("Firebase Messaging is not supported in this browser.");
+        console.warn("Firebase Messaging이 지원되지 않는 브라우저입니다.");
         return;
       }
 
@@ -66,53 +87,30 @@ const InterviewOngoingPreparePage = () => {
 
         onMessage(messaging, (payload) => {
           console.log("[포그라운드 메시지 수신]:", payload);
-          setIsQuestionReceived(true);
+          const { title, body } = payload.notification || {};
 
-          if (payload.notification) {
-            const { title, body, icon } = payload.notification as {
-              title?: string;
-              body?: string;
-              icon?: string;
-            };
-            if (Notification.permission === "granted") {
-              new Notification(title ?? "알림", {
-                body: body ?? "메시지가 도착했습니다.",
-                icon: icon ?? "/logo.png",
-              });
-            }
-
-            switch (interview.interviewMethod) {
-              case "CHAT":
-                if (
-                  confirm(
-                    "면접 준비가 완료되었습니다. 확인을 누르면 면접이 시작됩니다."
-                  )
-                ) {
-                  router.push(
-                    `/interview/ongoing/${payload.notification.body}`
-                  );
-                }
-                break;
-              case "VOICE":
-                if (isReady) {
-                  if (
-                    confirm(
-                      "면접 준비가 완료되었습니다. 확인을 누르면 면접이 시작됩니다."
-                    )
-                  ) {
-                    router.push(
-                      `/interview/ongoing/${payload.notification.body}`
-                    );
-                  }
-                }
-                break;
-              default:
-                break;
-            }
-          } else {
-            console.warn("Notification payload is undefined:", payload);
+          if (!body) {
+            console.warn("알림 메시지가 없습니다.");
+            return;
           }
+
+          setInterviewId(body);
+
+          showNotification(
+            title ?? "면접 준비 완료",
+            body ?? "면접이 시작됩니다.",
+            `/interview/ongoing/${body}`
+          );
+
+          setModalMessage(
+            "면접 준비가 완료되었습니다. '면접 시작'을 누르면 면접이 시작됩니다."
+          );
+          setConfirmModalMessage(
+            "홈으로 이동하면 면접 서비스 이용이 취소되고 이용권 환불이 불가합니다. \n면접을 시작하려면 '면접 시작'을 눌러주세요."
+          );
+          setIsModalVisible(true);
         });
+
         if ("serviceWorker" in navigator) {
           navigator.serviceWorker
             .register("/firebase-messaging-sw.js")
@@ -138,6 +136,63 @@ const InterviewOngoingPreparePage = () => {
     setIsReady(isReady);
   };
 
+  useEffect(() => {
+    function readFromIndexedDB(
+      dbName: string,
+      storeName: string,
+      key: string
+    ): Promise<any> {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName);
+
+        request.onerror = (event) => {
+          console.error("IndexedDB Error:", event);
+          reject(event);
+        };
+
+        request.onsuccess = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+
+          if (!db.objectStoreNames.contains(storeName)) {
+            reject(
+              new Error(
+                `Object Store "${storeName}" does not exist in the database.`
+              )
+            );
+            return;
+          }
+
+          const transaction = db.transaction(storeName, "readonly");
+          const store = transaction.objectStore(storeName);
+
+          const getRequest = store.get(key);
+          getRequest.onsuccess = () => resolve(getRequest.result?.value);
+          getRequest.onerror = (err) => reject(err);
+        };
+      });
+    }
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log("탭 복귀 확인");
+        readFromIndexedDB("firebaseMessages", "messages", "latestData")
+          .then((data) => {
+            console.log("Retrieved data from IndexedDB:", data);
+            setInterviewId(data);
+            setModalMessage(
+              "면접 준비가 완료되었습니다. '면접 시작'을 누르면 면접이 시작됩니다."
+            );
+            setIsModalVisible(true);
+          })
+          .catch((err) => console.error("Error reading from IndexedDB:", err));
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
   return (
     <div className="flex flex-col items-center space-y-6">
       {interview.interviewMethod === "CHAT" ? (
@@ -147,6 +202,28 @@ const InterviewOngoingPreparePage = () => {
       ) : (
         <MicTest handleSetReady={handleSetReady} />
       )}
+      <CustomModal
+        isVisible={isModalVisible}
+        message={modalMessage}
+        confirmButton="면접 시작"
+        cancelButton="취소"
+        onClose={() => {
+          setIsModalVisible(false);
+          setIsConfirmModalVisible(true);
+        }}
+        onConfirm={() => router.push(`/interview/ongoing/${interviewId}`)}
+      />
+      <CustomModal
+        isVisible={isConfirmModalVisible}
+        message={confirmModalMessage}
+        confirmButton="면접 시작"
+        cancelButton="홈으로"
+        onClose={() => {
+          setIsConfirmModalVisible(false);
+          router.push(`/`);
+        }}
+        onConfirm={() => router.push(`/interview/ongoing/${interviewId}`)}
+      />
     </div>
   );
 };

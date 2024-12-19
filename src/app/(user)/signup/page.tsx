@@ -8,6 +8,7 @@ import { setUrl } from "@/utils/setUrl";
 import { setFcmKey } from "@/utils/setFcmKey";
 import { getToken, isSupported } from "firebase/messaging";
 import { messaging } from "@/utils/firebaseConfig";
+import CustomModal from "@/components/modal/custom-modal";
 
 const apiUrl = `${setUrl}`;
 const fcmKey = `${setFcmKey}`;
@@ -15,6 +16,10 @@ const fcmKey = `${setFcmKey}`;
 const SignupPage = () => {
   const router = useRouter();
   const [user, setUser] = useState<GetUserProps>();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [confirmModalMessage, setConfirmModalMessage] = useState("");
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
   const handleFirebaseToken = async () => {
     if (typeof window === "undefined") {
@@ -86,11 +91,12 @@ const SignupPage = () => {
         }
       );
 
-      alert(response.data.data.name + "님, 환영합니다.");
+      setModalMessage(response.data.data.name + "님, 환영합니다.");
+      setConfirmModalMessage("웰컴 쿠폰이 발급 되었습니다! 확인해보세요!");
+      setIsModalVisible(true);
       setUser(response.data.data);
       setLocalStorage();
       handleFirebaseToken();
-      router.push("/");
     } catch (error) {
       console.error("Signup failed:", error);
     }
@@ -102,6 +108,31 @@ const SignupPage = () => {
       <div className="w-full min-w-[420px] max-w-2xl p-8 border rounded-lg shadow-md bg-white">
         <UserForm onSubmit={handleFormSubmit} initUserData={user} />
       </div>
+      <CustomModal
+        isVisible={isModalVisible}
+        message={modalMessage}
+        confirmButton="확인"
+        cancelButton="취소"
+        onClose={() => {
+          setIsModalVisible(false);
+          setIsConfirmModalVisible(true);
+        }}
+        onConfirm={() => {
+          setIsModalVisible(false);
+          setIsConfirmModalVisible(true);
+        }}
+      />
+      <CustomModal
+        isVisible={isConfirmModalVisible}
+        message={confirmModalMessage}
+        confirmButton="웰컴쿠폰 확인하기"
+        cancelButton="홈으로"
+        onClose={() => {
+          setIsConfirmModalVisible(false);
+          router.push(`/`);
+        }}
+        onConfirm={() => router.push(`/mypage/coupon`)}
+      />
     </div>
   );
 };
