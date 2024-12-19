@@ -214,7 +214,7 @@ export const termsAndPrivacyData = {
 회사는 개인정보 처리에 관한 업무를 총괄하는 개인정보 보호책임자를 지정하고 있습니다. 개인정보 관련 문의는 아래로 연락 주시기 바랍니다:
 
 - 책임자: Richard Stallman
-- 연락처: [[전화번호], [이메일 주소]](mailto:teamrichardstallman@gmail.com)
+- 이메일: teamrichardstallman@gmail.com
 
 제9조(개인정보처리방침 변경)
 
