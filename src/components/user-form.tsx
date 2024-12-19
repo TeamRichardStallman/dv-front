@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { removeBucketDomain } from "@/utils/format";
 import { setUrl } from "@/utils/setUrl";
+import PrivacyPolicyModal from "@/components/privacy-policy-modal";
 
 export type formDataType = {
   name: string;
@@ -73,8 +74,10 @@ const UserForm = ({
   const [isUsernameAvailable, setIsUsernameAvailable] = useState<
     boolean | null
   >(null);
-  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [userId, setUserId] = useState<number | undefined>();
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   useEffect(() => {
     console.log(initUserData);
@@ -455,11 +458,24 @@ const UserForm = ({
         <div className="flex items-center">
           <input
             type="checkbox"
-            checked={agreedToPrivacy}
-            onChange={(e) => setAgreedToPrivacy(e.target.checked)}
-            className="mr-2"
+            checked={agreedToTerms && agreedToPrivacy}
+            readOnly
+            className="mr-2 cursor-pointer"
+            onClick={() => setShowPrivacyModal(true)}
           />
-          <label className="text-sm">개인정보 처리 방침에 동의합니다.</label>
+          <span className="text-sm">개인정보 처리 방침에 동의합니다.</span>
+          {showPrivacyModal && (
+            <PrivacyPolicyModal
+              initialTermsAgree={agreedToTerms}
+              initialPrivacyAgree={agreedToPrivacy}
+              onConfirm={(termsAgree, privacyAgree) => {
+                setAgreedToTerms(termsAgree);
+                setAgreedToPrivacy(privacyAgree);
+                setShowPrivacyModal(false);
+              }}
+              onCancel={() => setShowPrivacyModal(false)}
+            />
+          )}
         </div>
       )}
       <button
