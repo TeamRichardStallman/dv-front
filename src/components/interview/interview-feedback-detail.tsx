@@ -84,15 +84,19 @@ const InterviewFeedbackDetail = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const calculateTotalScore = () => {
-    const totalScore = evaluation?.evaluationCriteria
+    if (!evaluation) return 0;
+
+    const isVoiceInterview = evaluation?.interview?.interviewMethod === "VOICE";
+
+    const maxScore = isVoiceInterview ? 70 : 40;
+
+    const totalScore = evaluation.evaluationCriteria
       ? evaluation.evaluationCriteria.reduce(
           (total, criteria) => total + criteria.score,
           0
         )
-      : 40;
-    const maxScore = evaluation?.evaluationCriteria
-      ? evaluation.evaluationCriteria.length * 10
-      : 40;
+      : 0;
+
     return (totalScore / maxScore) * 100;
   };
 
