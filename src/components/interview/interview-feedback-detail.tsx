@@ -282,6 +282,19 @@ const InterviewFeedbackDetail = ({
                   <h3 className="text-xl font-bold mb-2 text-primary">
                     Q. {selectedAnswerEvaluation.questionText}
                   </h3>
+
+                  {selectedAnswerEvaluation.answerS3PresignedUrl && (
+                    <div className="my-4">
+                      <audio
+                        controls
+                        className="w-full h-10"
+                        src={selectedAnswerEvaluation.answerS3PresignedUrl}
+                      >
+                        오디오를 불러오지 못했어요.
+                      </audio>
+                    </div>
+                  )}
+
                   <p className="text-md font-semibold">
                     A.{" "}
                     {selectedAnswerEvaluation.answerText.length > 180 &&

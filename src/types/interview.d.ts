@@ -50,6 +50,7 @@ interface AnswerEvaluation {
   answerEvaluationId: number;
   questionText: string;
   answerText: string;
+  answerS3PresignedUrl: string;
   answerFeedbackStrength: string;
   answerFeedbackImprovement: string;
   answerFeedbackSuggestion: string;
