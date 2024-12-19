@@ -1,0 +1,1 @@
+export const setFcmKey = process.env.NEXT_PUBLIC_FCM_VAPID_KEY;
