@@ -84,15 +84,19 @@ const InterviewFeedbackDetail = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const calculateTotalScore = () => {
-    const totalScore = evaluation?.evaluationCriteria
+    if (!evaluation) return 0;
+
+    const isVoiceInterview = evaluation?.interview?.interviewMethod === "VOICE";
+
+    const maxScore = isVoiceInterview ? 70 : 40;
+
+    const totalScore = evaluation.evaluationCriteria
       ? evaluation.evaluationCriteria.reduce(
           (total, criteria) => total + criteria.score,
           0
         )
-      : 40;
-    const maxScore = evaluation?.evaluationCriteria
-      ? evaluation.evaluationCriteria.length * 10
-      : 40;
+      : 0;
+
     return (totalScore / maxScore) * 100;
   };
 
@@ -278,6 +282,19 @@ const InterviewFeedbackDetail = ({
                   <h3 className="text-xl font-bold mb-2 text-primary">
                     Q. {selectedAnswerEvaluation.questionText}
                   </h3>
+
+                  {selectedAnswerEvaluation.answerS3PresignedUrl && (
+                    <div className="my-4">
+                      <audio
+                        controls
+                        className="w-full h-10"
+                        src={selectedAnswerEvaluation.answerS3PresignedUrl}
+                      >
+                        오디오를 불러오지 못했어요.
+                      </audio>
+                    </div>
+                  )}
+
                   <p className="text-md font-semibold">
                     A.{" "}
                     {selectedAnswerEvaluation.answerText.length > 180 &&
