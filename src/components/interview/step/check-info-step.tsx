@@ -11,6 +11,7 @@ import { getFileName } from "@/utils/format";
 import Loading from "@/components/loading";
 import PaymentModal from "@/components/payment-modal";
 import useFileStore from "@/stores/useFileStore";
+import CustomModal from "@/components/modal/custom-modal";
 
 const apiUrl = `${setUrl}`;
 interface StepSubmitProps extends StepProps {
@@ -33,6 +34,9 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
   const [, setIsQuestionCountSelected] = useState(false);
   const { interviewFile } = useFileStore();
   const [filePath, setFilePath] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [interviewId, setInterviewId] = useState(0);
 
   useEffect(() => {
     let hasFetched = false;
@@ -200,18 +204,17 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
                 ],
           jobId: data.data.job.jobId,
         });
-        if (
-          confirm(
-            "이용권 " +
-              (interview.interviewMode === "GENERAL"
-                ? selectedQuestionCount / 3
-                : selectedQuestionCount / 5) +
-              "장 사용 예정입니다. \n면접을 시작하시겠습니까?"
-          )
-        ) {
-          onNext();
-          onSubmit(data.data.interviewId);
-        }
+
+        setModalMessage(
+          "이용권 " +
+            (interview.interviewMode === "GENERAL"
+              ? selectedQuestionCount / 3
+              : selectedQuestionCount / 5) +
+            "장 사용 예정입니다. \n면접을 시작하시겠습니까?"
+        );
+
+        setInterviewId(data.data.interviewId);
+        setIsModalVisible(true);
       }
     } catch (error) {
       console.error("stepup data transfer failed:", error);
@@ -357,6 +360,19 @@ const CheckInfoStep = ({ onPrev, onNext, onSubmit }: StepSubmitProps) => {
           setSelectedVoucher={setSelectedVoucher}
         />
       )}
+      <CustomModal
+        isVisible={isModalVisible}
+        message={modalMessage}
+        confirmButton="면접 시작"
+        cancelButton="취소"
+        onClose={() => {
+          setIsModalVisible(false);
+        }}
+        onConfirm={() => {
+          onNext();
+          onSubmit(interviewId);
+        }}
+      />
     </>
   );
 };

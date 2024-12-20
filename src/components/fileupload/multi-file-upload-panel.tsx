@@ -206,7 +206,6 @@ const MultiFileUploadPanel = ({
       savedFileName = fileName;
       toast.success(`파일이 저장되었습니다.`);
     } else {
-      alert("selectedFile:" + selectedFile);
       savedFileName = selectedFile!;
       toast.success(`파일이 저장되었습니다.`);
       await handleUpload(file!);
@@ -264,7 +263,6 @@ const MultiFileUploadPanel = ({
               headers: { "Content-Type": uploadFile.type },
               body: uploadFile,
             }).then(() => {
-              alert("filePath:" + filePath);
               axios.post(
                 `${apiUrl}/file/cover-letter`,
                 {

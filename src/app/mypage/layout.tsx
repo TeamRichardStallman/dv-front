@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { isLogined } from "@/utils/isLogined";
@@ -29,6 +29,7 @@ const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
     realVoice: 0,
   });
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     setLoggedIn(isLogined());
@@ -53,7 +54,7 @@ const MyPageLayout = ({ children }: { children: React.ReactNode }) => {
         setUserInfo(response.data.data.user);
       } catch (error) {
         console.error("Error fetching Simple Coupon List: ", error);
-        throw error;
+        router.push("/error");
       }
     };
     getMyPageUserInfo();

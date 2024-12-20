@@ -6,6 +6,7 @@ import { setUrl } from "@/utils/setUrl";
 import SettingBtn from "@/components/settingbtn";
 import PaymentModal from "@/components/payment-modal";
 import useInterviewStore, { InterviewMode } from "@/stores/useInterviewStore";
+import CustomModal from "@/components/modal/custom-modal";
 
 const apiUrl = `${setUrl}`;
 
@@ -16,6 +17,8 @@ const InterviewPage = () => {
   const [selectedVoucher, setSelectedVoucher] = useState<
     "모의 채팅" | "모의 음성" | "실전 채팅" | "실전 음성"
   >("실전 채팅");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   const fetchTicketInfo = async (): Promise<TicketCountInfo | null> => {
     try {
@@ -39,7 +42,8 @@ const InterviewPage = () => {
     const data = await fetchTicketInfo();
 
     if (!data) {
-      alert("티켓 정보를 불러오는 데 실패했습니다.");
+      setModalMessage("티켓 정보를 불러오는 데 실패했습니다.");
+      setIsModalVisible(true);
       return;
     }
 
@@ -125,6 +129,18 @@ const InterviewPage = () => {
           setSelectedVoucher={setSelectedVoucher}
         />
       )}
+      <CustomModal
+        isVisible={isModalVisible}
+        message={modalMessage}
+        confirmButton="다시 시도"
+        cancelButton="취소"
+        onClose={() => {
+          setIsModalVisible(false);
+        }}
+        onConfirm={() => {
+          handleNextClick();
+        }}
+      />
     </div>
   );
 };
