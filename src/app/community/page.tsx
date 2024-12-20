@@ -20,34 +20,27 @@ interface GetUserResponse {
     birthdate: string;
   };
 }
+
+
 const apiUrl = `${setUrl}`;
 
 const CommunityPage = () => {
-  const posts = postData.data.posts;
+  const [posts, setPosts] = useState<any[]>(postData.data.posts);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState<GetUserResponse["data"] | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [recommendedChannels, setRecommendedChannels] = useState([
-    { name: "네이버", tag: "기업", isSubscribed: false },
-    { name: "카카오", tag: "기업", isSubscribed: false },
-    { name: "백엔드", tag: "직무", isSubscribed: false },
-    { name: "프론트엔드", tag: "직무", isSubscribed: false },
-    { name: "UX/UI", tag: "직무", isSubscribed: false },
+    { name: "백엔드", tag: "직무", isSubscribed: false, jobId: 1  },
+    { name: "프론트엔드", tag: "직무", isSubscribed: false, jobId: 2  },
+    { name: "인프라", tag: "직무", isSubscribed: false, jobId: 3 },
+    { name: "인공지능", tag: "직무", isSubscribed: false, jobId: 4 }
   ]);
+  const [activeFeed, setActiveFeed] = useState<"ALL" | "USER" | "SUBSCRIPTION">("ALL");
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
-  };
-
-  const handleSubscribe = (index: number) => {
-    setRecommendedChannels((prevChannels) =>
-      prevChannels.map((channel, i) =>
-        i === index
-          ? { ...channel, isSubscribed: !channel.isSubscribed }
-          : channel
-      )
-    );
   };
 
   const openModal = async () => {
@@ -70,67 +63,195 @@ const CommunityPage = () => {
     setIsModalOpen(false);
   };
 
-  const handlePostSubmit = (postData: {
-    jobKoreanName: string;
-    content: string;
-    s3ImageUrl: string;
-    interviewId: number;
-    overallEvaluationId: number;
-    postType: string;
-  }) => {
-    console.log("작성된 게시글 데이터:", postData);
-    closeModal();
+// 게시글 생성
+  const handlePostSubmit = async (postData: any) => {
+    try {
+      await axios.post(`${apiUrl}/post`, postData, {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+      });
+      alert("게시글 작성이 완료되었습니다.");
+      fetchMyPosts(); // 내 피드 새로고침
+    } catch (error) {
+      console.error("게시글 작성 실패:", error);
+      alert("게시글 작성 실패");
+    }
+  };
+
+
+  // 검색 기능
+  const handleSearch = async () => {
+    if (searchQuery.trim() === "") return;
+
+    try {
+      const response = await axios.get(`${apiUrl}/post/search`, {
+        params: { keyword: searchQuery },
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+      });
+      const { data } = response.data;
+
+      setSearchResults(data.posts); // 검색된 게시글 상태에 저장
+    } catch (error) {
+      console.error("게시글 검색 실패:", error);
+      alert("게시글 검색에 실패했습니다.");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const fetchMyPosts = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/post/user`, {
+        withCredentials: true,
+      });
+      setPosts(response.data.data.posts);
+      setSearchResults([]); // 검색 결과 초기화
+      setActiveFeed("USER");
+    } catch (error) {
+      console.error("내 피드 가져오기 실패:", error);
+    }
+  };
+
+  const fetchSubscriptionPosts = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/post/subscription`, {
+        withCredentials: true,
+        params: { page: 0 },
+      });
+      setPosts(response.data.data.posts);
+      setSearchResults([]); // 검색 결과 초기화
+      setActiveFeed("SUBSCRIPTION");
+    } catch (error) {
+      console.error("구독 피드 가져오기 실패:", error);
+    }
+  };
+
+  // 구독 생성
+  const createSubscription = async (jobId: number, index: number) => {
+    try {
+      await axios.post(
+          `${apiUrl}/subscription`,
+          { jobId },
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+      );
+      setRecommendedChannels((prev) =>
+          prev.map((channel, i) =>
+              i === index ? { ...channel, isSubscribed: true } : channel
+          )
+      );
+      alert("구독이 성공적으로 추가되었습니다!");
+    } catch (error) {
+      console.error("구독 생성 실패:", error);
+      alert("구독 생성에 실패했습니다.");
+    }
+  };
+
+  // 구독 취소
+  const deactivateSubscription = async (jobId: number, index: number) => {
+    try {
+      await axios.delete(`${apiUrl}/subscription/${jobId}`, {
+        withCredentials: true,
+      });
+      setRecommendedChannels((prev) =>
+          prev.map((channel, i) =>
+              i === index ? { ...channel, isSubscribed: false } : channel
+          )
+      );
+      alert("구독이 성공적으로 취소되었습니다!");
+    } catch (error) {
+      console.error("구독 취소 실패:", error);
+      alert("구독 취소에 실패했습니다.");
+    }
+  };
+
+  const handleSubscribeClick = (jobId: number, isSubscribed: boolean, index: number) => {
+    if (isSubscribed) {
+      deactivateSubscription(jobId, index);
+    } else {
+      createSubscription(jobId, index);
+    }
   };
 
   return (
     <div className="bg-gray-200 min-h-screen w-full relative">
       <div className="fixed top-24 left-4 z-40 bg-white shadow-md rounded-lg w-80 p-4">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="검색어를 입력하세요."
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        {searchQuery === "" && (
-          <div className="mt-4">
-            <p className="text-xs text-gray-500 font-semibold mb-2">
-              추천 채널
-            </p>
-            {recommendedChannels.map((channel, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center p-2 rounded-md mb-2"
-              >
-                <span className="font-bold">{channel.name}</span>
-                <div className="flex items-center">
+        <div className="flex gap-2 mb-4">
+          <button
+              onClick={fetchMyPosts}
+              className={`px-4 py-2 rounded-md font-bold ${
+                  activeFeed === "USER" ? "bg-blue-500 text-white" : "bg-gray-300"
+              }`}
+          >
+            내 피드
+          </button>
+          <button
+              onClick={fetchSubscriptionPosts}
+              className={`px-4 py-2 rounded-md font-bold ${
+                  activeFeed === "SUBSCRIPTION" ? "bg-blue-500 text-white" : "bg-gray-300"
+              }`}
+          >
+            구독 피드
+          </button>
+        </div>
+          <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="검색어를 입력하세요."
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {searchQuery === "" && (
+              <div className="mt-4">
+                <p className="text-xs text-gray-500 font-semibold mb-2">
+                  추천 채널
+                </p>
+                {recommendedChannels.map((channel, index) => (
+                    <div
+                        key={index}
+                        className="flex justify-between items-center p-2 rounded-md mb-2"
+                    >
+                      <span className="font-bold">{channel.name}</span>
+                      <div className="flex items-center">
                   <span className="text-sm font-semibold bg-primary text-white px-3 py-1 rounded-md mr-2">
                     {channel.tag}
                   </span>
-                  <button
-                    onClick={() => handleSubscribe(index)}
-                    className={`text-sm font-semibold rounded-md px-3 py-1 ${
-                      channel.isSubscribed
-                        ? "bg-gray-500 text-white"
-                        : "bg-secondary hover:bg-yellow-400 text-white"
-                    }`}
-                  >
-                    {channel.isSubscribed ? "구독중" : "구독"}
-                  </button>
-                </div>
+                        <button
+                            onClick={() =>
+                                handleSubscribeClick(channel.jobId, channel.isSubscribed, index)
+                            }
+                            className={`text-sm font-semibold rounded-md px-3 py-1 ${
+                                channel.isSubscribed
+                                    ? "bg-gray-500 text-white"
+                                    : "bg-secondary hover:bg-yellow-400 text-white"
+                            }`}
+                        >
+                          {channel.isSubscribed ? "구독중" : "구독"}
+                        </button>
+                      </div>
+                    </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="flex flex-col gap-6">
-          {posts.map((post) => (
-            <div
-              key={post.postId}
-              className="bg-white shadow-md rounded-lg overflow-hidden border"
-            >
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          <div className="flex flex-col gap-6">
+            {(searchResults.length > 0 ? searchResults : posts).map((post) => (
+                <div
+                    key={post.postId}
+                    className="bg-white shadow-md rounded-lg overflow-hidden border"
+              >
               <div className="flex items-center justify-between p-4">
                 <div className="flex items-center">
                   <div className="relative w-10 h-10 mr-3">
