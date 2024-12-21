@@ -34,10 +34,6 @@ interface PostCreateResponse {
   data: Post;
 }
 
-interface GetPostResponse {
-  data: PostResponse;
-}
-
 interface PostList {
   posts: Post[];
 }
@@ -69,7 +65,7 @@ const CommunityPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState<GetUserResponse["data"] | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Post[]>([]);
   const [recommendedChannels, setRecommendedChannels] = useState([
     { name: "백엔드", tag: "직무", isSubscribed: false, jobId: 1 },
     { name: "프론트엔드", tag: "직무", isSubscribed: false, jobId: 2 },
@@ -189,20 +185,6 @@ const CommunityPage = () => {
             }).catch((error) => {
               console.error(error);
             });
-
-            const updatedPost = await axios.put<PostCreateResponse>(
-              `${apiUrl}/post/image`,
-              {
-                imageUrl: preSignedResponse.data.data.objectKey,
-                postId: data.postId,
-              },
-              {
-                withCredentials: true,
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
-            );
           }
         }
       }
