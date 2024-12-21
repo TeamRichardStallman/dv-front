@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { setUrl } from "@/utils/setUrl";
@@ -7,6 +7,7 @@ import SettingBtn from "@/components/settingbtn";
 import PaymentModal from "@/components/payment-modal";
 import useInterviewStore, { InterviewMode } from "@/stores/useInterviewStore";
 import CustomModal from "@/components/modal/custom-modal";
+import { useRouter } from "next/navigation";
 
 const apiUrl = `${setUrl}`;
 
@@ -19,6 +20,24 @@ const InterviewPage = () => {
   >("실전 채팅");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [isPermissionModalVisible, setIsPermissionModalVisible] =
+    useState(false);
+  const [PermissionModalMessage, setPermissionModalMessage] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    const permission = Notification.requestPermission();
+    async function permissionGrant() {
+      if ((await permission) !== "granted") {
+        setPermissionModalMessage(
+          "면접 서비스를 이용하시러면 브라우저 알림 권한을 허용해주세요. 방법은 가이드를 참고해주세요."
+        );
+        setIsPermissionModalVisible(true);
+        return;
+      }
+    }
+    permissionGrant();
+  }, []);
 
   const fetchTicketInfo = async (): Promise<TicketCountInfo | null> => {
     try {
@@ -139,6 +158,20 @@ const InterviewPage = () => {
         }}
         onConfirm={() => {
           handleNextClick();
+        }}
+      />
+      <CustomModal
+        isVisible={isPermissionModalVisible}
+        message={PermissionModalMessage}
+        confirmButton="가이드 보러 가기"
+        cancelButton="홈으로"
+        onClose={() => {
+          router.push("/");
+        }}
+        onConfirm={() => {
+          router.push(
+            "/guide#%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80-%EC%95%8C%EB%A6%BC-%EC%84%A4%EC%A0%95-%EB%B0%A9%EB%B2%95"
+          );
         }}
       />
     </div>

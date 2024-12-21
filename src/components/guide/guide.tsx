@@ -54,6 +54,11 @@ const Guide: React.FC<GuideProps> = ({ file }) => {
             <li>
               <a href="#3-주의-사항">3. 주의 사항</a>
             </li>
+            <ul>
+              <li>
+                <a href="#브라우저-알림-설정-방법">- 브라우저 알림 설정 방법</a>
+              </li>
+            </ul>
             <li>
               <a href="#4-자주-묻는-질문-faq">4. 자주 묻는 질문 (FAQ)</a>
             </li>
