@@ -58,7 +58,7 @@ const PaymentHistoryPage = () => {
               >
                 <p className="text-md font-semibold text-primary mb-2">
                   {payment.generatedAt.getFullYear()}.
-                  {payment.generatedAt.getMonth()}.
+                  {payment.generatedAt.getMonth() + 1}.
                   {payment.generatedAt.getDate()}
                 </p>
                 <p className="text-xl font-bold">
