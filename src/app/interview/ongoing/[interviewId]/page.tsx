@@ -335,7 +335,7 @@ const InterviewOngoingDetailPage = () => {
                 removeInterview(
                   interviewInfoMap[questionRequest.interviewMode].label
                 )}
-              /
+              /{" "}
               {questionRequest.interviewType &&
                 removeInterview(
                   interviewInfoMap[questionRequest.interviewType].label
