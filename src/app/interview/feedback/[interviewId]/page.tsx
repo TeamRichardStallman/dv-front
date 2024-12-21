@@ -74,7 +74,7 @@ const InterviewFeedbackDetailPage = () => {
       dbName: string,
       storeName: string,
       key: string
-    ): Promise<T | undefined> {
+    ): Promise<T | null> {
       return new Promise((resolve, reject) => {
         const request = indexedDB.open(dbName);
 
@@ -87,11 +87,8 @@ const InterviewFeedbackDetailPage = () => {
           const db = (event.target as IDBOpenDBRequest).result;
 
           if (!db.objectStoreNames.contains(storeName)) {
-            reject(
-              new Error(
-                `Object Store "${storeName}" does not exist in the database.`
-              )
-            );
+            console.warn(`Object Store "${storeName}" does not exist.`);
+            resolve(null);
             return;
           }
 
@@ -99,8 +96,20 @@ const InterviewFeedbackDetailPage = () => {
           const store = transaction.objectStore(storeName);
 
           const getRequest = store.get(key);
-          getRequest.onsuccess = () => resolve(getRequest.result?.value);
-          getRequest.onerror = (err) => reject(err);
+          getRequest.onsuccess = () => {
+            if (getRequest.result) {
+              resolve(getRequest.result.value);
+            } else {
+              console.warn(
+                `No data found for key "${key}" in store "${storeName}".`
+              );
+              resolve(null);
+            }
+          };
+          getRequest.onerror = () => {
+            console.warn(`Failed to read data for key "${key}".`);
+            resolve(null);
+          };
         };
       });
     }
@@ -110,14 +119,18 @@ const InterviewFeedbackDetailPage = () => {
         console.log("탭 복귀 확인");
         readFromIndexedDB<string>("firebaseMessages", "messages", "latestData")
           .then((data) => {
-            console.log("Retrieved data from IndexedDB:", data);
-            setInterviewId(data);
-            setModalMessage(
-              "면접 준비가 완료되었습니다. '면접 시작'을 누르면 면접이 시작됩니다."
-            );
-            setIsModalVisible(true);
+            if (data) {
+              console.log("Retrieved data from IndexedDB:", data);
+              setInterviewId(data);
+              setModalMessage(
+                "면접 준비가 완료되었습니다. '면접 시작'을 누르면 면접이 시작됩니다."
+              );
+              setIsModalVisible(true);
+            } else {
+              console.log("IndexedDB에 데이터가 없습니다.");
+            }
           })
-          .catch((err) => console.error("Error reading from IndexedDB:", err));
+          .catch((err) => console.error("Unexpected error:", err));
       }
     };
 
