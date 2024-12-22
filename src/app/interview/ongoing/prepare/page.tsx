@@ -139,7 +139,7 @@ const InterviewOngoingPreparePage = () => {
       dbName: string,
       storeName: string,
       key: string
-    ): Promise<T | undefined> {
+    ): Promise<T | null> {
       return new Promise((resolve, reject) => {
         const request = indexedDB.open(dbName);
 
@@ -152,11 +152,8 @@ const InterviewOngoingPreparePage = () => {
           const db = (event.target as IDBOpenDBRequest).result;
 
           if (!db.objectStoreNames.contains(storeName)) {
-            reject(
-              new Error(
-                `Object Store "${storeName}" does not exist in the database.`
-              )
-            );
+            console.warn(`Object Store "${storeName}" does not exist.`);
+            resolve(null);
             return;
           }
 
@@ -164,8 +161,58 @@ const InterviewOngoingPreparePage = () => {
           const store = transaction.objectStore(storeName);
 
           const getRequest = store.get(key);
-          getRequest.onsuccess = () => resolve(getRequest.result?.value);
-          getRequest.onerror = (err) => reject(err);
+          getRequest.onsuccess = () => {
+            if (getRequest.result) {
+              resolve(getRequest.result.value);
+            } else {
+              console.warn(
+                `No data found for key "${key}" in store "${storeName}".`
+              );
+              resolve(null);
+            }
+          };
+          getRequest.onerror = () => {
+            console.warn(`Failed to read data for key "${key}".`);
+            resolve(null);
+          };
+        };
+      });
+    }
+
+    function deleteFromIndexedDB(
+      dbName: string,
+      storeName: string,
+      key: string
+    ) {
+      return new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open(dbName);
+
+        request.onerror = (event) => {
+          console.error("IndexedDB Error:", event);
+          reject(event);
+        };
+
+        request.onsuccess = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+
+          if (!db.objectStoreNames.contains(storeName)) {
+            console.warn(`Object Store "${storeName}" does not exist.`);
+            resolve();
+            return;
+          }
+
+          const transaction = db.transaction(storeName, "readwrite");
+          const store = transaction.objectStore(storeName);
+
+          const deleteRequest = store.delete(key);
+          deleteRequest.onsuccess = () => {
+            console.log(`Data with key "${key}" deleted successfully.`);
+            resolve();
+          };
+          deleteRequest.onerror = () => {
+            console.warn(`Failed to delete data for key "${key}".`);
+            reject(deleteRequest.error);
+          };
         };
       });
     }
@@ -175,14 +222,23 @@ const InterviewOngoingPreparePage = () => {
         console.log("탭 복귀 확인");
         readFromIndexedDB<string>("firebaseMessages", "messages", "latestData")
           .then((data) => {
-            console.log("Retrieved data from IndexedDB:", data);
-            setInterviewId(data);
-            setModalMessage(
-              "면접 준비가 완료되었습니다. '면접 시작'을 누르면 면접이 시작됩니다."
-            );
-            setIsModalVisible(true);
+            if (data) {
+              console.log("Retrieved data from IndexedDB:", data);
+              setInterviewId(data);
+              setModalMessage(
+                "면접 준비가 완료되었습니다. '면접 시작'을 누르면 면접이 시작됩니다."
+              );
+              setIsModalVisible(true);
+              deleteFromIndexedDB("firebaseMessages", "messages", "latestData")
+                .then(() => console.log("IndexedDB 데이터 삭제 완료"))
+                .catch((err) =>
+                  console.error("IndexedDB 데이터 삭제 중 오류:", err)
+                );
+            } else {
+              console.log("IndexedDB에 데이터가 없습니다.");
+            }
           })
-          .catch((err) => console.error("Error reading from IndexedDB:", err));
+          .catch((err) => console.error("Unexpected error:", err));
       }
     };
 
@@ -192,7 +248,7 @@ const InterviewOngoingPreparePage = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center space-y-6">
+    <div className="flex flex-col items-center">
       {interview.interviewMethod === "CHAT" ? (
         <Loading title="질문 생성 중" description="잠시만 기다려주세요." />
       ) : isReady ? (
