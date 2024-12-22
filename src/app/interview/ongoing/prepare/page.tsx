@@ -179,6 +179,44 @@ const InterviewOngoingPreparePage = () => {
       });
     }
 
+    function deleteFromIndexedDB(
+      dbName: string,
+      storeName: string,
+      key: string
+    ) {
+      return new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open(dbName);
+
+        request.onerror = (event) => {
+          console.error("IndexedDB Error:", event);
+          reject(event);
+        };
+
+        request.onsuccess = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+
+          if (!db.objectStoreNames.contains(storeName)) {
+            console.warn(`Object Store "${storeName}" does not exist.`);
+            resolve();
+            return;
+          }
+
+          const transaction = db.transaction(storeName, "readwrite");
+          const store = transaction.objectStore(storeName);
+
+          const deleteRequest = store.delete(key);
+          deleteRequest.onsuccess = () => {
+            console.log(`Data with key "${key}" deleted successfully.`);
+            resolve();
+          };
+          deleteRequest.onerror = () => {
+            console.warn(`Failed to delete data for key "${key}".`);
+            reject(deleteRequest.error);
+          };
+        };
+      });
+    }
+
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         console.log("탭 복귀 확인");
@@ -191,6 +229,11 @@ const InterviewOngoingPreparePage = () => {
                 "면접 준비가 완료되었습니다. '면접 시작'을 누르면 면접이 시작됩니다."
               );
               setIsModalVisible(true);
+              deleteFromIndexedDB("firebaseMessages", "messages", "latestData")
+                .then(() => console.log("IndexedDB 데이터 삭제 완료"))
+                .catch((err) =>
+                  console.error("IndexedDB 데이터 삭제 중 오류:", err)
+                );
             } else {
               console.log("IndexedDB에 데이터가 없습니다.");
             }
