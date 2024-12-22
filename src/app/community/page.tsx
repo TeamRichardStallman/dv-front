@@ -185,6 +185,19 @@ const CommunityPage = () => {
             }).catch((error) => {
               console.error(error);
             });
+            await axios.put<PostCreateResponse>(
+              `${apiUrl}/post/image`,
+              {
+                imageUrl: preSignedResponse.data.data.objectKey,
+                postId: data.postId,
+              },
+              {
+                withCredentials: true,
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
           }
         }
       }
