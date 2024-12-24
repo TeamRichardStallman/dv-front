@@ -396,7 +396,7 @@ const CommunityPage = () => {
                         <Image
                           src={
                             post.authorProfileUrl
-                              ? `https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/${post.authorProfileUrl}`
+                              ? post.authorProfileUrl
                               : "/profile-img.png"
                           }
                           alt={`${post.authorNickname}'s profile`}
@@ -445,7 +445,7 @@ const CommunityPage = () => {
                         <Image
                           src={
                             post.authorProfileUrl
-                              ? `https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/${post.authorProfileUrl}`
+                              ? post.authorProfileUrl
                               : "/profile-img.png"
                           }
                           alt={`${post.authorNickname}'s profile`}
