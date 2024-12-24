@@ -107,12 +107,20 @@ const InterviewFeedbackDetail = ({
     WOMAN: { label: "여성" },
   };
 
-  const baseCriteriaMap: Record<string, { label: string }> = {
-    GROWTH_POTENTIAL: { label: "성장 가능성" },
-    JOB_FIT: { label: "문제 해결 능력" },
-    WORK_ATTITUDE: { label: "협업 능력" },
-    TECHNICAL_DEPTH: { label: "기술 이해도" },
-  };
+  const baseCriteriaMap: Record<string, { label: string }> =
+    evaluation?.interview.interviewType === "PERSONAL"
+      ? {
+          COMPANY_FIT: { label: "조직 적합성" },
+          ADAPTABILITY: { label: "유연성" },
+          INTERPERSONAL_SKILLS: { label: "대인관계 능력" },
+          GROWTH_ATTITUDE: { label: "성장 마인드" },
+        }
+      : {
+          GROWTH_POTENTIAL: { label: "성장 가능성" },
+          JOB_FIT: { label: "문제 해결 능력" },
+          WORK_ATTITUDE: { label: "협업 능력" },
+          TECHNICAL_DEPTH: { label: "기술 이해도" },
+        };
 
   const voiceCriteriaMap: Record<string, { label: string }> = {
     CLARITY: { label: "명확성" },
