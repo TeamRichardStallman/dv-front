@@ -51,8 +51,11 @@ export function removeInterview(text: string): string {
 }
 
 export const removeBucketDomain = (url: string): string => {
-  const bucketDomain =
-    "https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/";
+  const bucketDomain = process.env.NEXT_PUBLIC_S3_BUCKET_DOMAIN;
+
+  if (!bucketDomain) {
+    throw new Error("NEXT_PUBLIC_S3_BUCKET_DOMAIN is not set");
+  }
 
   if (url.startsWith(bucketDomain)) {
     return url.replace(bucketDomain, "");
