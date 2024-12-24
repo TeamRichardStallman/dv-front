@@ -9,6 +9,8 @@ import { removeBucketDomain } from "@/utils/format";
 import { setUrl } from "@/utils/setUrl";
 import PrivacyPolicyModal from "@/components/privacy-policy-modal";
 
+const bucketDomain = process.env.NEXT_PUBLIC_S3_BUCKET_DOMAIN;
+
 export type formDataType = {
   name: string;
   userId?: number;
@@ -63,7 +65,7 @@ const UserForm = ({
   const [gender, setGender] = useState<string>(initUserData?.gender || "MAN");
   const [profileImageUrl, setProfileImageUrl] = useState<string>(
     initUserData?.s3ProfileImageObjectKey
-      ? `https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/${initUserData.s3ProfileImageObjectKey}`
+      ? `https://${bucketDomain}/${initUserData.s3ProfileImageObjectKey}`
       : "/profile-img.png"
   );
   const [s3ProfileImageObjectKey, setS3ProfileImageObjectKey] = useState<
@@ -99,7 +101,7 @@ const UserForm = ({
       } else {
         setProfileImageUrl((prev) =>
           initUserData?.s3ProfileImageObjectKey
-            ? `https://ktb-8-dev-bucket.s3.ap-northeast-2.amazonaws.com/${initUserData.s3ProfileImageObjectKey}`
+            ? `https://${bucketDomain}/${initUserData.s3ProfileImageObjectKey}`
             : prev
         );
       }
@@ -222,7 +224,7 @@ const UserForm = ({
       const fetchResponse = await axios.post<PresignedUrlResponse>(
         "/api/s3/getFile",
         {
-          bucketName: "ktb-8-dev-bucket",
+          bucketName: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
           objectKey,
         }
       );
