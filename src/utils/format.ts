@@ -51,7 +51,7 @@ export function removeInterview(text: string): string {
 }
 
 export const removeBucketDomain = (url: string): string => {
-  const bucketDomain = process.env.NEXT_PUBLIC_S3_BUCKET_DOMAIN;
+  const bucketDomain = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_DOMAIN}`;
 
   if (!bucketDomain) {
     throw new Error("NEXT_PUBLIC_S3_BUCKET_DOMAIN is not set");
