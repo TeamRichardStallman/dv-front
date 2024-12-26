@@ -267,7 +267,7 @@ const MultiFileUploadPanel = ({
                 `${apiUrl}/file/cover-letter`,
                 {
                   type: "COVER_LETTER",
-                  filePath: filePath,
+                  filePath: response.data.data.objectKey,
                 },
                 {
                   withCredentials: true,
